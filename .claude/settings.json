@@ -1,0 +1,59 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cd frontend*)",
+      "Bash(npm run *)",
+      "Bash(npx prettier*)",
+      "Bash(npx shadcn*)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git push*)",
+      "Bash(git status*)",
+      "Bash(git diff*)",
+      "Bash(git log*)",
+      "Bash(lsof *)",
+      "Read(*)",
+      "Write(*)",
+      "Edit(*)",
+      "Glob(*)",
+      "Grep(*)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/protect-files.sh",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/format-code.sh",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "Check if the assistant just made code changes (Edit or Write tools). If yes, check: 1) Was `npm run build` run and did it succeed? 2) If the user mentioned any business rules/policies, were they documented in docs/policies/? If either is missing, respond {\"ok\": false, \"reason\": \"빌드 확인 또는 정책 문서화가 필요합니다\"}. If no code changes were made (just conversation), respond {\"ok\": true}.",
+            "timeout": 30
+          }
+        ]
+      }
+    ]
+  }
+}
