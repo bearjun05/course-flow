@@ -40,11 +40,11 @@ export function KanbanCard({ project, column, onClick }: KanbanCardProps) {
       {...listeners}
       onClick={() => onClick(project)}
       className={cn(
-        "cursor-grab rounded-xl border bg-card p-3.5 shadow-sm transition-all",
+        "cursor-grab rounded-xl border bg-card p-3.5 transition-all",
         isDragging
-          ? "z-50 rotate-1 border-primary/40 shadow-lg"
-          : "border-border hover:border-neutral-300 hover:shadow-md",
-        isOverdue && "border-l-2 border-l-red-400"
+          ? "z-50 rotate-1 border-primary/40 shadow-md"
+          : "border-border hover:border-neutral-300 hover:shadow-sm",
+        isOverdue && "border-l-2 border-l-red-400",
       )}
     >
       <p className="text-[13px] font-medium leading-snug text-foreground">
@@ -65,9 +65,7 @@ export function KanbanCard({ project, column, onClick }: KanbanCardProps) {
           {project.businessUnit}
           {project.trackName ? ` · ${project.trackName}` : ""}
         </Badge>
-        <p className={cn("text-xs", getDdayColor(dday))}>
-          {formatDday(dday)}
-        </p>
+        <p className={cn("text-xs", getDdayColor(dday))}>{formatDday(dday)}</p>
       </div>
     </div>
   );

@@ -13,7 +13,11 @@ import {
   type DragEndEvent,
 } from "@dnd-kit/core";
 import type { Project, KanbanColumn as KanbanColumnType } from "@/lib/types";
-import { KANBAN_COLUMNS, KANBAN_TO_STATUS, STATUS_TO_KANBAN } from "@/lib/constants";
+import {
+  KANBAN_COLUMNS,
+  KANBAN_TO_STATUS,
+  STATUS_TO_KANBAN,
+} from "@/lib/constants";
 import { isProjectActive } from "@/lib/utils";
 import { KanbanColumn } from "./kanban-column";
 import { Badge } from "@/components/ui/badge";
@@ -28,17 +32,17 @@ export function KanbanBoard({ projects, onStatusChange }: KanbanBoardProps) {
   const [activeProject, setActiveProject] = useState<Project | null>(null);
 
   const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
   );
 
   const kanbanProjects = projects.filter(
-    (p) => isProjectActive(p.status) && STATUS_TO_KANBAN[p.status]
+    (p) => isProjectActive(p.status) && STATUS_TO_KANBAN[p.status],
   );
 
   const getColumnProjects = useCallback(
     (columnId: KanbanColumnType) =>
       kanbanProjects.filter((p) => STATUS_TO_KANBAN[p.status] === columnId),
-    [kanbanProjects]
+    [kanbanProjects],
   );
 
   const handleDragStart = (event: DragStartEvent) => {
@@ -64,9 +68,7 @@ export function KanbanBoard({ projects, onStatusChange }: KanbanBoardProps) {
     }
 
     if (targetColumn) {
-      const activeProjectData = kanbanProjects.find(
-        (p) => p.id === active.id
-      );
+      const activeProjectData = kanbanProjects.find((p) => p.id === active.id);
       if (
         activeProjectData &&
         STATUS_TO_KANBAN[activeProjectData.status] !== targetColumn
@@ -83,7 +85,9 @@ export function KanbanBoard({ projects, onStatusChange }: KanbanBoardProps) {
   return (
     <div>
       <div className="mb-3 flex items-center gap-2">
-        <h2 className="text-sm font-semibold text-foreground">진행 중인 강의</h2>
+        <h2 className="text-sm font-semibold text-foreground">
+          진행 중인 강의
+        </h2>
         <Badge variant="secondary" className="text-[10px] font-normal">
           {kanbanProjects.length}
         </Badge>
@@ -108,7 +112,7 @@ export function KanbanBoard({ projects, onStatusChange }: KanbanBoardProps) {
 
         <DragOverlay>
           {activeProject && (
-            <div className="w-[220px] rotate-2 rounded-xl border border-primary/30 bg-card p-3.5 shadow-2xl">
+            <div className="w-[220px] rotate-2 rounded-xl border border-primary/30 bg-card p-3.5 shadow-md">
               <p className="text-[13px] font-medium text-foreground">
                 {activeProject.title}
               </p>
@@ -116,7 +120,6 @@ export function KanbanBoard({ projects, onStatusChange }: KanbanBoardProps) {
           )}
         </DragOverlay>
       </DndContext>
-
     </div>
   );
 }

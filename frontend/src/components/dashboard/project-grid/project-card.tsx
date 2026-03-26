@@ -58,7 +58,7 @@ export function ProjectCard({
   const trafficLight = getAutoTrafficLight(project);
 
   return (
-    <div className="group relative rounded-xl border border-border bg-card p-4 transition-all hover:border-neutral-300 hover:shadow-md">
+    <div className="group relative rounded-xl border border-border bg-card p-4 transition-all hover:border-neutral-300 hover:shadow-sm">
       <div className="absolute right-3 top-3">
         <DropdownMenu>
           <DropdownMenuTrigger className="flex h-7 w-7 items-center justify-center rounded-lg text-muted-foreground opacity-0 transition-opacity hover:bg-accent hover:text-foreground group-hover:opacity-100">
@@ -90,7 +90,7 @@ export function ProjectCard({
           <div
             className={cn(
               "mt-1 h-2.5 w-2.5 shrink-0 rounded-full",
-              TRAFFIC_LIGHT_COLORS[trafficLight].bg
+              TRAFFIC_LIGHT_COLORS[trafficLight].bg,
             )}
           />
           <div className="min-w-0">
@@ -158,7 +158,7 @@ export function ProjectCard({
           <SelectTrigger
             className={cn(
               "h-6 w-auto gap-1 rounded-md border-none px-2 text-[10px] font-medium shadow-none",
-              STATUS_BADGE_VARIANT[project.status]
+              STATUS_BADGE_VARIANT[project.status],
             )}
           >
             <SelectValue />
@@ -175,4 +175,3 @@ export function ProjectCard({
     </div>
   );
 }
-
