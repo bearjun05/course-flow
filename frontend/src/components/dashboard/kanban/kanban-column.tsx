@@ -13,17 +13,28 @@ interface KanbanColumnProps {
   column: { id: KanbanColumnType; label: string };
   projects: Project[];
   onCardClick: (project: Project) => void;
+  viewStyle?: "divider" | "bg";
+  bgColor?: string;
 }
 
 export function KanbanColumn({
   column,
   projects,
   onCardClick,
+  viewStyle = "divider",
+  bgColor,
 }: KanbanColumnProps) {
   const { setNodeRef, isOver } = useDroppable({ id: column.id });
+  const isDivider = viewStyle === "divider";
 
   return (
-    <div className="flex min-w-[220px] flex-1 flex-col">
+    <div
+      className={cn(
+        "flex min-w-[220px] flex-1 flex-col",
+        isDivider ? "px-4 first:pl-0 last:pr-0" : "",
+        !isDivider && bgColor && `${bgColor} rounded-xl p-3`,
+      )}
+    >
       <div className="mb-3 flex items-center gap-2 px-1">
         <h3 className="text-xs font-medium text-muted-foreground">
           {column.label}
@@ -38,7 +49,7 @@ export function KanbanColumn({
         className={cn(
           "flex flex-1 flex-col gap-2 rounded-xl border border-dashed border-transparent p-1 transition-colors",
           isOver && "border-primary/30 bg-primary/[0.03]",
-          projects.length === 0 && "min-h-[80px]"
+          projects.length === 0 && "min-h-[80px]",
         )}
       >
         <SortableContext

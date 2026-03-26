@@ -18,9 +18,18 @@ import {
   KANBAN_TO_STATUS,
   STATUS_TO_KANBAN,
 } from "@/lib/constants";
-import { isProjectActive } from "@/lib/utils";
+import { isProjectActive, cn } from "@/lib/utils";
 import { KanbanColumn } from "./kanban-column";
 import { Badge } from "@/components/ui/badge";
+
+type KanbanViewStyle = "divider" | "bg";
+
+const COLUMN_BG: Record<KanbanColumnType, string> = {
+  교안작성: "bg-slate-50",
+  리허설: "bg-violet-50/60",
+  제작: "bg-amber-50/60",
+  롤아웃: "bg-emerald-50/60",
+};
 
 interface KanbanBoardProps {
   projects: Project[];
@@ -30,6 +39,7 @@ interface KanbanBoardProps {
 export function KanbanBoard({ projects, onStatusChange }: KanbanBoardProps) {
   const router = useRouter();
   const [activeProject, setActiveProject] = useState<Project | null>(null);
+  const [viewStyle, setViewStyle] = useState<KanbanViewStyle>("divider");
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -84,13 +94,40 @@ export function KanbanBoard({ projects, onStatusChange }: KanbanBoardProps) {
 
   return (
     <div>
-      <div className="mb-3 flex items-center gap-2">
-        <h2 className="text-sm font-semibold text-foreground">
-          진행 중인 강의
-        </h2>
-        <Badge variant="secondary" className="text-[10px] font-normal">
-          {kanbanProjects.length}
-        </Badge>
+      <div className="mb-3 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <h2 className="text-sm font-semibold text-foreground">
+            진행 중인 강의
+          </h2>
+          <Badge variant="secondary" className="text-[10px] font-normal">
+            {kanbanProjects.length}
+          </Badge>
+        </div>
+        {/* A/B 스타일 토글 */}
+        <div className="flex items-center gap-0.5 rounded-md border border-border bg-card p-0.5">
+          <button
+            onClick={() => setViewStyle("divider")}
+            className={cn(
+              "rounded px-2.5 py-1 text-[11px] transition-colors",
+              viewStyle === "divider"
+                ? "bg-neutral-100 font-medium text-foreground"
+                : "text-muted-foreground hover:text-foreground",
+            )}
+          >
+            A · 세로선
+          </button>
+          <button
+            onClick={() => setViewStyle("bg")}
+            className={cn(
+              "rounded px-2.5 py-1 text-[11px] transition-colors",
+              viewStyle === "bg"
+                ? "bg-neutral-100 font-medium text-foreground"
+                : "text-muted-foreground hover:text-foreground",
+            )}
+          >
+            B · 배경색
+          </button>
+        </div>
       </div>
 
       <DndContext
@@ -99,13 +136,22 @@ export function KanbanBoard({ projects, onStatusChange }: KanbanBoardProps) {
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
       >
-        <div className="flex gap-4 overflow-x-auto pb-2">
+        <div
+          className={cn(
+            "overflow-x-auto pb-2",
+            viewStyle === "divider"
+              ? "flex divide-x divide-neutral-200/80"
+              : "flex gap-3",
+          )}
+        >
           {KANBAN_COLUMNS.map((col) => (
             <KanbanColumn
               key={col.id}
               column={col}
               projects={getColumnProjects(col.id)}
               onCardClick={handleCardClick}
+              viewStyle={viewStyle}
+              bgColor={COLUMN_BG[col.id]}
             />
           ))}
         </div>
