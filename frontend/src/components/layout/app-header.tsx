@@ -11,10 +11,15 @@ interface AppHeaderProps {
 
 export function AppHeader({ title, description }: AppHeaderProps) {
   return (
-    <header className="flex items-center justify-between border-b border-border bg-background px-6 py-3">
-      <h1 className="text-sm font-medium text-foreground">{title}</h1>
+    <header className="flex items-center justify-between border-b border-border bg-card/80 px-6 py-4 backdrop-blur-sm">
+      <h1 className="text-lg font-semibold tracking-tight text-foreground">
+        {title}
+      </h1>
       <Link href="/projects/new">
-        <Button size="sm" className="gap-1.5 text-xs font-medium">
+        <Button
+          size="sm"
+          className="gap-1.5 border border-neutral-200/80 bg-white/60 text-neutral-700 shadow-sm backdrop-blur-md hover:bg-white/80 hover:text-neutral-900"
+        >
           <Plus className="h-3.5 w-3.5" />
           강의 제작 요청
         </Button>
