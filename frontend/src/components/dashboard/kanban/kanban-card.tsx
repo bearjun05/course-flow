@@ -40,10 +40,10 @@ export function KanbanCard({ project, column, onClick }: KanbanCardProps) {
       {...listeners}
       onClick={() => onClick(project)}
       className={cn(
-        "cursor-grab rounded-2xl border-0 bg-card p-3.5 shadow-[0_2px_10px_rgba(120,100,80,0.08)] transition-all",
+        "cursor-grab rounded-2xl border-0 bg-card p-3.5 shadow-[0_2px_10px_rgba(120,100,80,0.08)] transition-all duration-300",
         isDragging
           ? "z-50 rotate-1 shadow-[0_8px_30px_rgba(120,100,80,0.18)]"
-          : "hover:shadow-[0_4px_18px_rgba(120,100,80,0.14)]",
+          : "hover:-translate-y-1 hover:shadow-[0_6px_22px_rgba(120,100,80,0.14)]",
         isOverdue && "border-l-2 border-l-red-400",
       )}
     >
