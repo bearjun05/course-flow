@@ -49,14 +49,14 @@ function MetricCard({
     >
       <div
         className={cn(
-          "flex items-center gap-3 px-4 py-3",
+          "flex items-center gap-3 px-6 py-3",
           expandable &&
             "cursor-pointer hover:bg-neutral-50/80 transition-colors",
         )}
         onClick={expandable ? onToggle : undefined}
       >
         <div className="min-w-0 flex-1">
-          <p className={cn("text-xs font-medium", labelColor)}>{label}</p>
+          <p className="text-xs font-medium text-foreground">{label}</p>
           <p className={cn("text-2xl font-black leading-tight", accentColor)}>
             {value}
             <span className="ml-0.5 text-2xl font-black">건</span>
