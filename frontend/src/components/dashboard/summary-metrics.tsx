@@ -55,17 +55,17 @@ function MetricCard({
         )}
         onClick={expandable ? onToggle : undefined}
       >
-        <Icon className={cn("h-5 w-5 shrink-0", accentColor)} />
+        <Icon className={cn("h-4 w-4 shrink-0", accentColor)} />
         <div className="min-w-0 flex-1">
-          <p className={cn("text-lg font-medium", labelColor)}>{label}</p>
-          <p className={cn("text-4xl font-black leading-tight", accentColor)}>
+          <p className={cn("text-xs font-medium", labelColor)}>{label}</p>
+          <p className={cn("text-2xl font-black leading-tight", accentColor)}>
             {value}
-            <span className="ml-0.5 text-4xl font-black">건</span>
+            <span className="ml-0.5 text-2xl font-black">건</span>
           </p>
           {detail && !expanded && (
             <p
               className={cn(
-                "truncate text-lg",
+                "truncate text-xs",
                 labelColor,
                 detailBold && "font-bold",
               )}
