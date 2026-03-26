@@ -25,13 +25,10 @@ export function KanbanColumn({
   return (
     <div className="flex min-w-[220px] flex-1 flex-col">
       <div className="mb-3 px-1">
-        <div className="inline-flex items-center gap-1.5 rounded-lg border border-neutral-200/80 bg-white/60 px-2.5 py-1 shadow-sm backdrop-blur-md">
+        <div className="inline-flex items-center rounded-lg bg-neutral-100/70 px-2.5 py-1">
           <h3 className="text-xs font-medium text-neutral-700">
             {column.label}
           </h3>
-          <span className="text-[11px] text-neutral-400">
-            {projects.length}
-          </span>
         </div>
       </div>
 
