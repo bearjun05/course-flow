@@ -37,7 +37,9 @@ function MetricCard({
     <div
       className={cn(
         "rounded-lg border overflow-hidden",
-        isDanger ? "border-red-200 bg-red-50" : "border-border bg-card",
+        isDanger
+          ? "border-red-200 bg-red-50 shadow-[0_2px_12px_rgba(239,68,68,0.08)]"
+          : "border-0 bg-card shadow-[0_2px_12px_rgba(0,0,0,0.06)]",
       )}
     >
       <div

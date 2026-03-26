@@ -58,7 +58,7 @@ export function ProjectCard({
   const trafficLight = getAutoTrafficLight(project);
 
   return (
-    <div className="group relative rounded-xl border border-border bg-card p-4 shadow-sm transition-all hover:border-neutral-300 hover:bg-neutral-50 hover:shadow-md">
+    <div className="group relative rounded-2xl border-0 bg-card p-4 shadow-[0_2px_12px_rgba(0,0,0,0.06)] transition-all hover:shadow-[0_4px_20px_rgba(0,0,0,0.1)]">
       <div className="absolute right-3 top-3">
         <DropdownMenu>
           <DropdownMenuTrigger className="flex h-7 w-7 items-center justify-center rounded-lg text-muted-foreground opacity-0 transition-opacity hover:bg-accent hover:text-foreground group-hover:opacity-100">
