@@ -30,7 +30,6 @@ export function KanbanCard({ project, column, onClick }: KanbanCardProps) {
 
   const dday = getDday(project.rolloutDate);
   const isOverdue = dday < 0;
-  const isProduction = column === "제작";
 
   return (
     <div
@@ -67,7 +66,7 @@ export function KanbanCard({ project, column, onClick }: KanbanCardProps) {
         </div>
       </div>
 
-      {isProduction && project.chapterCount > 0 && (
+      {project.chapterCount > 0 && (
         <div className="mt-2.5">
           <ChapterPipeline project={project} />
         </div>

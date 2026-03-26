@@ -120,15 +120,15 @@ export function ChapterPipeline({ project }: ChapterPipelineProps) {
 
   return (
     <div className="space-y-1.5">
-      {/* 챕터별 6칸 진척도 */}
-      <div className="flex flex-wrap gap-1.5">
+      {/* 챕터별 6칸 진척도 — 전체 너비 채움 */}
+      <div className="flex w-full gap-1">
         {chapterData.map(({ ch, filledCount }) => (
-          <div key={ch} className="flex gap-[2px]">
+          <div key={ch} className="flex flex-1 gap-[2px]">
             {Array.from({ length: 6 }, (_, i) => (
               <div
                 key={i}
                 className={cn(
-                  "h-[7px] w-[5px] rounded-[2px]",
+                  "h-[7px] flex-1 rounded-[2px]",
                   i < filledCount ? SLOT_FILLED_COLORS[i] : "bg-neutral-100",
                 )}
               />

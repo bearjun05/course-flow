@@ -25,11 +25,7 @@ export function KanbanColumn({
   return (
     <div className="flex min-w-[220px] flex-1 flex-col">
       <div className="mb-3 px-1">
-        <div className="inline-flex items-center rounded-lg bg-neutral-100/70 px-2.5 py-1">
-          <h3 className="text-xs font-medium text-neutral-700">
-            {column.label}
-          </h3>
-        </div>
+        <h3 className="text-xs font-medium text-neutral-500">{column.label}</h3>
       </div>
 
       <div
