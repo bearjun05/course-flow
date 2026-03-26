@@ -21,8 +21,8 @@ export function AppHeader({ title, description }: AppHeaderProps) {
         )}
       </div>
       <Link href="/projects/new">
-        <Button size="sm" className="gap-1.5">
-          <Plus className="h-4 w-4" />
+        <Button className="gap-2 px-5 py-2.5 text-base font-bold bg-white text-neutral-900 border border-neutral-200 hover:bg-neutral-50 shadow-sm">
+          <Plus className="h-5 w-5" />
           강의 제작 요청
         </Button>
       </Link>
