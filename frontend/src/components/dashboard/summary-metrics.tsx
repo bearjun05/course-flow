@@ -95,6 +95,7 @@ function MetricCard({
 
 export function SummaryMetrics({ projects }: SummaryMetricsProps) {
   const [todayExpanded, setTodayExpanded] = useState(false);
+  const [overdueExpanded, setOverdueExpanded] = useState(false);
 
   const activeProjects = projects.filter((p) => isProjectActive(p.status));
 
@@ -133,6 +134,18 @@ export function SummaryMetrics({ projects }: SummaryMetricsProps) {
     overdueProjects.length > 0
       ? overdueProjects.map((p) => p.title).join(", ")
       : undefined;
+
+  // 지연 프로젝트의 진행 중 태스크
+  const overdueTasks = overdueProjects.flatMap((p) =>
+    p.tasks
+      .filter((t) => t.status === "진행")
+      .map((t) => ({
+        projectTitle: p.title,
+        chapter: t.chapter,
+        taskType: t.taskType,
+        assignee: t.assignee,
+      })),
+  );
 
   return (
     <div className="grid grid-cols-2 gap-4">
@@ -173,6 +186,32 @@ export function SummaryMetrics({ projects }: SummaryMetricsProps) {
         detail={overdueDetail}
         detailBold
         variant="danger"
+        expandable={overdueCount > 0}
+        expanded={overdueExpanded}
+        onToggle={() => setOverdueExpanded((v) => !v)}
+        expandContent={
+          <ul className="space-y-1.5 max-h-48 overflow-y-auto">
+            {overdueTasks.map((t, i) => (
+              <li key={i} className="flex items-center justify-between text-xs">
+                <span>
+                  <span className="font-medium text-red-600">
+                    {t.projectTitle}
+                  </span>
+                  <span className="mx-1.5 text-red-300">/</span>
+                  <span className="text-red-400">
+                    {t.chapter > 0 ? `CH${t.chapter} ` : ""}
+                    {t.taskType}
+                  </span>
+                </span>
+                {t.assignee && (
+                  <span className="shrink-0 ml-2 text-red-400">
+                    {t.assignee}
+                  </span>
+                )}
+              </li>
+            ))}
+          </ul>
+        }
       />
     </div>
   );
