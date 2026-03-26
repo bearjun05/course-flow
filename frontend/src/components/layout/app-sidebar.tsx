@@ -25,22 +25,22 @@ export function AppSidebar() {
   return (
     <aside
       className={cn(
-        "relative flex h-full flex-col border-r border-border bg-card transition-all duration-200",
-        collapsed ? "w-16" : "w-60"
+        "relative flex h-full flex-col border-r border-border bg-background transition-all duration-200",
+        collapsed ? "w-14" : "w-56",
       )}
     >
-      <div className="flex h-14 items-center gap-2 border-b border-border px-4">
+      <div className="flex h-12 items-center gap-2 border-b border-border px-4">
         {!collapsed && (
-          <span className="text-[15px] font-semibold tracking-tight text-foreground">
+          <span className="text-sm font-semibold tracking-tight text-foreground">
             CourseFlow
           </span>
         )}
         {collapsed && (
-          <span className="mx-auto text-[15px] font-bold text-primary">C</span>
+          <span className="mx-auto text-sm font-bold text-foreground">C</span>
         )}
       </div>
 
-      <nav className="flex-1 space-y-1 px-2 py-3">
+      <nav className="flex-1 space-y-0.5 px-2 py-2">
         {NAV_ITEMS.map((item) => {
           const active = pathname === item.href;
           return (
@@ -48,13 +48,13 @@ export function AppSidebar() {
               key={item.href}
               href={item.href}
               className={cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
+                "flex items-center gap-2.5 rounded-md px-2.5 py-1.5 text-sm transition-colors",
                 active
-                  ? "bg-accent font-medium text-foreground"
-                  : "text-muted-foreground hover:bg-accent hover:text-foreground"
+                  ? "bg-neutral-100 font-medium text-foreground"
+                  : "text-muted-foreground hover:bg-neutral-100 hover:text-foreground",
               )}
             >
-              <item.icon className="h-[18px] w-[18px] shrink-0" />
+              <item.icon className="h-4 w-4 shrink-0" />
               {!collapsed && <span>{item.label}</span>}
             </Link>
           );

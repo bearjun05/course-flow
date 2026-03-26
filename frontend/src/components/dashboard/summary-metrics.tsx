@@ -1,7 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { Layers, CalendarCheck, AlertTriangle, ChevronDown } from "lucide-react";
+import {
+  Layers,
+  CalendarCheck,
+  AlertTriangle,
+  ChevronDown,
+} from "lucide-react";
 import type { Project } from "@/lib/types";
 import { getDday, isProjectActive, cn } from "@/lib/utils";
 
@@ -33,37 +38,39 @@ function MetricCard({
   expandContent,
 }: MetricCardProps) {
   return (
-    <div className="rounded-xl border border-border bg-card overflow-hidden">
+    <div className="rounded-lg border border-border bg-card overflow-hidden">
       <div
         className={cn(
-          "flex items-center gap-4 px-5 py-4",
-          expandable && "cursor-pointer hover:bg-accent/30 transition-colors"
+          "flex items-center gap-3 px-4 py-3",
+          expandable && "cursor-pointer hover:bg-neutral-50 transition-colors",
         )}
         onClick={expandable ? onToggle : undefined}
       >
-        <div
+        <Icon
           className={cn(
-            "flex h-10 w-10 shrink-0 items-center justify-center rounded-lg",
-            variant === "danger" ? "bg-red-50 text-red-500" : "bg-accent text-muted-foreground"
+            "h-4 w-4 shrink-0",
+            variant === "danger" && value > 0
+              ? "text-red-400"
+              : "text-muted-foreground/60",
           )}
-        >
-          <Icon className="h-5 w-5" />
-        </div>
+        />
         <div className="min-w-0 flex-1">
           <p className="text-xs text-muted-foreground">{label}</p>
           <p
             className={cn(
-              "text-2xl font-semibold tracking-tight",
-              variant === "danger" && value > 0 ? "text-red-500" : "text-foreground"
+              "text-base font-semibold",
+              variant === "danger" && value > 0
+                ? "text-red-500"
+                : "text-foreground",
             )}
           >
             {value}
-            <span className="ml-0.5 text-sm font-normal text-muted-foreground">
+            <span className="ml-0.5 text-xs font-normal text-muted-foreground">
               건
             </span>
           </p>
           {detail && !expanded && (
-            <p className="mt-0.5 truncate text-xs text-muted-foreground">
+            <p className="truncate text-[11px] text-muted-foreground">
               {detail}
             </p>
           )}
@@ -71,16 +78,14 @@ function MetricCard({
         {expandable && (
           <ChevronDown
             className={cn(
-              "h-4 w-4 text-muted-foreground transition-transform shrink-0",
-              expanded && "rotate-180"
+              "h-3.5 w-3.5 text-muted-foreground transition-transform shrink-0",
+              expanded && "rotate-180",
             )}
           />
         )}
       </div>
       {expanded && expandContent && (
-        <div className="border-t border-border px-5 py-3">
-          {expandContent}
-        </div>
+        <div className="border-t border-border px-4 py-3">{expandContent}</div>
       )}
     </div>
   );
@@ -100,7 +105,7 @@ export function SummaryMetrics({ projects }: SummaryMetricsProps) {
         chapter: t.chapter,
         taskType: t.taskType,
         assignee: t.assignee,
-      }))
+      })),
   );
 
   const todayDetail =
@@ -109,15 +114,14 @@ export function SummaryMetrics({ projects }: SummaryMetricsProps) {
           .slice(0, 2)
           .map(
             (t) =>
-              `${t.projectTitle.slice(0, 10)}${t.projectTitle.length > 10 ? "…" : ""} / ${t.chapter > 0 ? `CH${t.chapter} ` : ""}${t.taskType}`
+              `${t.projectTitle.slice(0, 10)}${t.projectTitle.length > 10 ? "…" : ""} / ${t.chapter > 0 ? `CH${t.chapter} ` : ""}${t.taskType}`,
           )
-          .join(", ") + (todayTasks.length > 2 ? ` 외 ${todayTasks.length - 2}건` : "")
+          .join(", ") +
+        (todayTasks.length > 2 ? ` 외 ${todayTasks.length - 2}건` : "")
       : "진행 중인 태스크 없음";
 
   const overdueCount = projects.filter(
-    (p) =>
-      isProjectActive(p.status) &&
-      getDday(p.rolloutDate) < 0
+    (p) => isProjectActive(p.status) && getDday(p.rolloutDate) < 0,
   ).length;
 
   return (
