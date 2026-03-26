@@ -35,8 +35,8 @@ function MetricCard({
   expandContent,
 }: MetricCardProps) {
   const isDanger = variant === "danger" && value > 0;
-  const accentColor = isDanger ? "text-red-500" : "text-indigo-400";
-  const labelColor = isDanger ? "text-red-400" : "text-neutral-500";
+  const accentColor = isDanger ? "text-red-500" : "text-foreground";
+  const labelColor = isDanger ? "text-red-400" : "text-foreground";
 
   return (
     <div
@@ -57,18 +57,14 @@ function MetricCard({
       >
         <div className="min-w-0 flex-1">
           <p className="text-xs font-medium text-foreground">{label}</p>
-          <p className={cn("text-2xl font-black leading-tight", accentColor)}>
+          <p
+            className={cn("text-[29px] font-black leading-tight", accentColor)}
+          >
             {value}
-            <span className="ml-0.5 text-2xl font-black">건</span>
+            <span className="ml-0.5 text-[29px] font-black">건</span>
           </p>
           {detail && !expanded && (
-            <p
-              className={cn(
-                "truncate text-xs",
-                labelColor,
-                detailBold && "font-bold",
-              )}
-            >
+            <p className={cn("truncate text-xs font-bold", labelColor)}>
               {detail}
             </p>
           )}
