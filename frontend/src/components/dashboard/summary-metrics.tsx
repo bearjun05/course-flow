@@ -14,6 +14,7 @@ interface MetricCardProps {
   label: string;
   value: number;
   detail?: string;
+  detailBold?: boolean;
   variant?: "default" | "danger";
   expandable?: boolean;
   expanded?: boolean;
@@ -26,6 +27,7 @@ function MetricCard({
   label,
   value,
   detail,
+  detailBold = false,
   variant = "default",
   expandable = false,
   expanded = false,
@@ -33,6 +35,9 @@ function MetricCard({
   expandContent,
 }: MetricCardProps) {
   const isDanger = variant === "danger" && value > 0;
+  const accentColor = isDanger ? "text-red-500" : "text-indigo-400";
+  const labelColor = isDanger ? "text-red-400" : "text-neutral-500";
+
   return (
     <div
       className={cn(
@@ -50,39 +55,21 @@ function MetricCard({
         )}
         onClick={expandable ? onToggle : undefined}
       >
-        <Icon
-          className={cn(
-            "h-4 w-4 shrink-0",
-            isDanger ? "text-red-400" : "text-muted-foreground/60",
-          )}
-        />
+        <Icon className={cn("h-5 w-5 shrink-0", accentColor)} />
         <div className="min-w-0 flex-1">
-          <p
-            className={cn(
-              "text-xs",
-              isDanger ? "text-red-400" : "text-muted-foreground",
-            )}
-          >
-            {label}
-          </p>
-          <p
-            className={cn(
-              "text-2xl font-bold leading-tight",
-              isDanger ? "text-red-600" : "text-foreground",
-            )}
-          >
+          <p className={cn("text-lg font-medium", labelColor)}>{label}</p>
+          <p className={cn("text-4xl font-black leading-tight", accentColor)}>
             {value}
-            <span
-              className={cn(
-                "ml-0.5 text-xs font-normal",
-                isDanger ? "text-red-400" : "text-muted-foreground",
-              )}
-            >
-              건
-            </span>
+            <span className="ml-0.5 text-4xl font-black">건</span>
           </p>
           {detail && !expanded && (
-            <p className="truncate text-[11px] text-muted-foreground">
+            <p
+              className={cn(
+                "truncate text-lg",
+                labelColor,
+                detailBold && "font-bold",
+              )}
+            >
               {detail}
             </p>
           )}
@@ -90,7 +77,7 @@ function MetricCard({
         {expandable && (
           <ChevronDown
             className={cn(
-              "h-3.5 w-3.5 text-muted-foreground transition-transform shrink-0",
+              "h-4 w-4 text-muted-foreground transition-transform shrink-0",
               expanded && "rotate-180",
             )}
           />
@@ -132,14 +119,24 @@ export function SummaryMetrics({ projects }: SummaryMetricsProps) {
     .filter((p) => p.tasks.some((t) => t.status === "진행"))
     .sort((a, b) => getDday(a.rolloutDate) - getDday(b.rolloutDate));
 
+  // 모든 강의명 한 줄에 노출, 45자 초과 시 "외 N개"로 줄임
+  const allNames = projectsWithTasks.map((p) => p.title).join(", ");
   const todayDetail =
-    projectsWithTasks.length > 0
-      ? `${projectsWithTasks[0].title}${projectsWithTasks.length > 1 ? ` 외 ${projectsWithTasks.length - 1}개` : ""}`
-      : "진행 중인 태스크 없음";
+    projectsWithTasks.length === 0
+      ? "진행 중인 태스크 없음"
+      : allNames.length <= 45
+        ? allNames
+        : `${projectsWithTasks[0].title} 외 ${projectsWithTasks.length - 1}개`;
 
-  const overdueCount = projects.filter(
+  // 지연 프로젝트
+  const overdueProjects = projects.filter(
     (p) => isProjectActive(p.status) && getDday(p.rolloutDate) < 0,
-  ).length;
+  );
+  const overdueCount = overdueProjects.length;
+  const overdueDetail =
+    overdueProjects.length > 0
+      ? overdueProjects.map((p) => p.title).join(", ")
+      : undefined;
 
   return (
     <div className="grid grid-cols-2 gap-4">
@@ -177,6 +174,8 @@ export function SummaryMetrics({ projects }: SummaryMetricsProps) {
         icon={AlertTriangle}
         label="지연"
         value={overdueCount}
+        detail={overdueDetail}
+        detailBold
         variant="danger"
       />
     </div>
