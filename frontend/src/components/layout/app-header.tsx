@@ -11,7 +11,7 @@ interface AppHeaderProps {
 
 export function AppHeader({ title, description }: AppHeaderProps) {
   return (
-    <header className="flex items-center justify-between border-b border-border bg-card/80 px-6 py-4 backdrop-blur-sm">
+    <header className="sticky top-0 z-10 flex items-center justify-between border-b border-border bg-card/80 px-6 py-4 backdrop-blur-sm">
       <h1 className="text-lg font-semibold tracking-tight text-foreground">
         {title}
       </h1>
