@@ -2,64 +2,107 @@
 
 import type { Project, TaskType } from "@/lib/types";
 import { cn } from "@/lib/utils";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 
-type Stage = "교안" | "촬영" | "편집" | "자막" | "검수" | "완료";
+const PIPELINE_STAGE_NAMES = [
+  "교안",
+  "촬영",
+  "편집",
+  "자막",
+  "검수",
+  "배포",
+] as const;
+type PipelineStageName = (typeof PIPELINE_STAGE_NAMES)[number];
 
-const STAGE_ORDER: TaskType[] = ["교안제작", "촬영", "편집", "자막", "검수"];
+const PIPELINE_TASK_TYPES: (TaskType | null)[] = [
+  "교안제작",
+  "촬영",
+  "편집",
+  "자막",
+  "검수",
+  null, // 배포: 챕터 내 모든 태스크 완료 시
+];
 
-const STAGE_STYLE: Record<Stage, { bg: string; hex: string; label: string }> = {
-  교안: { bg: "bg-neutral-300", hex: "#d4d4d4", label: "교안" },
-  촬영: { bg: "bg-[#FFD400]", hex: "#FFD400", label: "촬영" },
-  편집: { bg: "bg-[#F2E600]", hex: "#F2E600", label: "편집" },
-  자막: { bg: "bg-[#D4E600]", hex: "#D4E600", label: "자막" },
-  검수: { bg: "bg-[#A8E600]", hex: "#A8E600", label: "검수" },
-  완료: { bg: "bg-[#66CC33]", hex: "#66CC33", label: "완료" },
-};
+// 채워진 슬롯에 사용할 색상 (교안→촬영→편집→자막→검수→배포 순)
+const SLOT_FILLED_COLORS = [
+  "bg-neutral-300", // 교안
+  "bg-[#FFD400]", // 촬영
+  "bg-[#F2E600]", // 편집
+  "bg-[#D4E600]", // 자막
+  "bg-[#A8E600]", // 검수
+  "bg-[#66CC33]", // 배포
+];
 
-function taskTypeToStage(t: TaskType): Stage {
-  if (t === "교안제작") return "교안";
-  if (t === "촬영") return "촬영";
-  if (t === "편집") return "편집";
-  if (t === "자막") return "자막";
-  if (t === "검수") return "검수";
-  return "교안";
-}
+function getChapterProgress(
+  project: Project,
+  chapter: number,
+): { filledCount: number; stageName: PipelineStageName } {
+  const tasks = project.tasks.filter((t) => t.chapter === chapter);
+  if (tasks.length === 0) return { filledCount: 0, stageName: "교안" };
 
-function getChapterStage(project: Project, chapter: number): Stage {
-  const chapterTasks = project.tasks.filter((t) => t.chapter === chapter);
-  if (chapterTasks.length === 0) return "교안";
+  // 모든 챕터 태스크 완료 → 배포(6번째) 슬롯까지 채움
+  const chapterTaskTypes: TaskType[] = [
+    "교안제작",
+    "촬영",
+    "편집",
+    "자막",
+    "검수",
+  ];
+  const allDone = chapterTaskTypes.every((type) => {
+    const t = tasks.find((x) => x.taskType === type);
+    return t?.status === "완료";
+  });
+  if (allDone) return { filledCount: 6, stageName: "배포" };
 
-  const allDone = chapterTasks.every((t) => t.status === "완료");
-  if (allDone) return "완료";
-
-  for (let i = STAGE_ORDER.length - 1; i >= 0; i--) {
-    const task = chapterTasks.find((t) => t.taskType === STAGE_ORDER[i]);
-    if (task && (task.status === "진행" || task.status === "리뷰")) {
-      return taskTypeToStage(STAGE_ORDER[i]);
+  // 가장 진행된 단계 찾기 (역순 탐색)
+  for (let i = 4; i >= 0; i--) {
+    const taskType = PIPELINE_TASK_TYPES[i] as TaskType;
+    const task = tasks.find((t) => t.taskType === taskType);
+    if (
+      task &&
+      (task.status === "완료" ||
+        task.status === "진행" ||
+        task.status === "리뷰")
+    ) {
+      return { filledCount: i + 1, stageName: PIPELINE_STAGE_NAMES[i] };
     }
   }
 
-  for (let i = STAGE_ORDER.length - 1; i >= 0; i--) {
-    const task = chapterTasks.find((t) => t.taskType === STAGE_ORDER[i]);
-    if (task && task.status === "완료") {
-      const nextIdx = i + 1;
-      if (nextIdx < STAGE_ORDER.length) {
-        return taskTypeToStage(STAGE_ORDER[nextIdx]);
-      }
-      return "완료";
-    }
-  }
-
-  return "교안";
+  return { filledCount: 0, stageName: "교안" };
 }
 
 interface ChapterPipelineProps {
   project: Project;
+}
+
+interface ChapterData {
+  ch: number;
+  filledCount: number;
+  stageName: PipelineStageName;
+}
+
+interface StageGroup {
+  stageName: PipelineStageName;
+  chapters: number[];
+  label: string;
+}
+
+function summarizeChapters(chapterData: ChapterData[]): StageGroup[] {
+  const raw: { stageName: PipelineStageName; chapters: number[] }[] = [];
+  for (const { ch, stageName } of chapterData) {
+    const last = raw[raw.length - 1];
+    if (last && last.stageName === stageName) {
+      last.chapters.push(ch);
+    } else {
+      raw.push({ stageName, chapters: [ch] });
+    }
+  }
+  return raw.map((g) => ({
+    ...g,
+    label:
+      g.chapters.length === 1
+        ? `${g.chapters[0]}장`
+        : `${g.chapters[0]}-${g.chapters[g.chapters.length - 1]}장`,
+  }));
 }
 
 export function ChapterPipeline({ project }: ChapterPipelineProps) {
@@ -67,79 +110,46 @@ export function ChapterPipeline({ project }: ChapterPipelineProps) {
 
   const chapters = Array.from(
     { length: project.chapterCount },
-    (_, i) => i + 1
+    (_, i) => i + 1,
   );
-  const stages = chapters.map((ch) => getChapterStage(project, ch));
+  const chapterData: ChapterData[] = chapters.map((ch) => ({
+    ch,
+    ...getChapterProgress(project, ch),
+  }));
+  const groups = summarizeChapters(chapterData);
 
   return (
     <div className="space-y-1.5">
-      {/* Segment bar */}
-      <div className="flex gap-[3px]">
-        {stages.map((stage, idx) => {
-          const s = STAGE_STYLE[stage];
-          return (
-            <Tooltip key={idx}>
-              <TooltipTrigger
+      {/* 챕터별 6칸 진척도 */}
+      <div className="flex flex-wrap gap-1.5">
+        {chapterData.map(({ ch, filledCount }) => (
+          <div key={ch} className="flex gap-[2px]">
+            {Array.from({ length: 6 }, (_, i) => (
+              <div
+                key={i}
                 className={cn(
-                  "h-[6px] flex-1 rounded-full transition-colors",
-                  s.bg
+                  "h-[7px] w-[5px] rounded-[2px]",
+                  i < filledCount ? SLOT_FILLED_COLORS[i] : "bg-neutral-100",
                 )}
               />
-              <TooltipContent side="bottom" className="text-[10px] px-2 py-1">
-                CH{chapters[idx]}: {s.label}
-              </TooltipContent>
-            </Tooltip>
-          );
-        })}
+            ))}
+          </div>
+        ))}
       </div>
 
-      {/* Legend: group consecutive same-stage chapters */}
+      {/* N장·단계 라벨 */}
       <div className="flex flex-wrap gap-x-2 gap-y-0.5">
-        {summarizeStages(chapters, stages).map((group, idx) => (
+        {groups.map((group, idx) => (
           <span
             key={idx}
-            className="inline-flex items-center gap-1 text-[10px] text-muted-foreground leading-none"
+            className="text-[10px] leading-none text-muted-foreground"
           >
-            <span
-              className={cn(
-                "h-[5px] w-[5px] rounded-full",
-                STAGE_STYLE[group.stage].bg
-              )}
-            />
-            <span>
-              {group.label}
-              <span className="ml-0.5 opacity-60">{STAGE_STYLE[group.stage].label}</span>
-            </span>
+            <span className="font-medium">{group.label}</span>
+            <span className="mx-0.5 opacity-40">·</span>
+            <span>{group.stageName}</span>
           </span>
         ))}
       </div>
     </div>
   );
-}
-
-interface StageGroup {
-  stage: Stage;
-  chapters: number[];
-  label: string;
-}
-
-function summarizeStages(chapters: number[], stages: Stage[]): StageGroup[] {
-  const raw: { stage: Stage; chapters: number[] }[] = [];
-
-  for (let i = 0; i < stages.length; i++) {
-    const last = raw[raw.length - 1];
-    if (last && last.stage === stages[i]) {
-      last.chapters.push(chapters[i]);
-    } else {
-      raw.push({ stage: stages[i], chapters: [chapters[i]] });
-    }
-  }
-
-  return raw.map((g) => ({
-    ...g,
-    label:
-      g.chapters.length === 1
-        ? `CH${g.chapters[0]}`
-        : `CH${g.chapters[0]}-${g.chapters[g.chapters.length - 1]}`,
-  }));
 }
