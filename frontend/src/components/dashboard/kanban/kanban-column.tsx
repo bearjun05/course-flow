@@ -13,35 +13,26 @@ interface KanbanColumnProps {
   column: { id: KanbanColumnType; label: string };
   projects: Project[];
   onCardClick: (project: Project) => void;
-  viewStyle?: "divider" | "bg";
-  bgColor?: string;
 }
 
 export function KanbanColumn({
   column,
   projects,
   onCardClick,
-  viewStyle = "divider",
-  bgColor,
 }: KanbanColumnProps) {
   const { setNodeRef, isOver } = useDroppable({ id: column.id });
-  const isDivider = viewStyle === "divider";
 
   return (
-    <div
-      className={cn(
-        "flex min-w-[220px] flex-1 flex-col",
-        isDivider ? "px-4 first:pl-0 last:pr-0" : "",
-        !isDivider && bgColor && `${bgColor} rounded-xl p-3`,
-      )}
-    >
-      <div className="mb-3 flex items-center gap-2 px-1">
-        <h3 className="text-xs font-medium text-muted-foreground">
-          {column.label}
-        </h3>
-        <span className="text-[11px] text-muted-foreground/60">
-          {projects.length}
-        </span>
+    <div className="flex min-w-[220px] flex-1 flex-col">
+      <div className="mb-3 px-1">
+        <div className="inline-flex items-center gap-1.5 rounded-lg border border-neutral-200/80 bg-white/60 px-2.5 py-1 shadow-sm backdrop-blur-md">
+          <h3 className="text-xs font-medium text-neutral-700">
+            {column.label}
+          </h3>
+          <span className="text-[11px] text-neutral-400">
+            {projects.length}
+          </span>
+        </div>
       </div>
 
       <div
