@@ -43,7 +43,7 @@ function MetricCard({
       className={cn(
         "rounded-lg border overflow-hidden",
         isDanger
-          ? "border-0 bg-red-50 shadow-[0_2px_14px_rgba(120,100,80,0.08)]"
+          ? "border border-red-100 bg-red-50 shadow-[0_2px_14px_rgba(120,100,80,0.08)]"
           : "border-0 bg-card shadow-[0_2px_14px_rgba(120,100,80,0.08)]",
       )}
     >
