@@ -36,7 +36,7 @@ function MetricCard({
 }: MetricCardProps) {
   const isDanger = variant === "danger" && value > 0;
   const accentColor = isDanger ? "text-red-500" : "text-foreground";
-  const labelColor = "text-foreground";
+  const detailColor = isDanger ? "text-red-500" : "text-foreground";
 
   return (
     <div
@@ -56,8 +56,8 @@ function MetricCard({
         onClick={expandable ? onToggle : undefined}
       >
         <div className="min-w-0 flex-1">
-          <p className="text-xs font-medium text-foreground">{label}</p>
-          <p className="mt-0.5" />
+          <p className="text-xs font-medium text-neutral-400">{label}</p>
+          <p className="mt-1" />
           <p
             className={cn("text-[29px] font-black leading-tight", accentColor)}
           >
@@ -65,7 +65,7 @@ function MetricCard({
             <span className="ml-0.5 text-[29px] font-black">건</span>
           </p>
           {detail && !expanded && (
-            <p className={cn("truncate text-xs font-bold", labelColor)}>
+            <p className={cn("mt-1 truncate text-xs font-bold", detailColor)}>
               {detail}
             </p>
           )}
