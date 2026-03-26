@@ -9,6 +9,13 @@ interface SummaryMetricsProps {
   projects: Project[];
 }
 
+interface Task {
+  projectTitle: string;
+  chapter: number;
+  taskType: string;
+  assignee?: string;
+}
+
 interface MetricCardProps {
   icon: React.ElementType;
   label: string;
@@ -20,6 +27,75 @@ interface MetricCardProps {
   expanded?: boolean;
   onToggle?: () => void;
   expandContent?: React.ReactNode;
+}
+
+function GroupedTaskList({
+  tasks,
+  danger = false,
+}: {
+  tasks: Task[];
+  danger?: boolean;
+}) {
+  // 프로젝트별로 그룹핑
+  const groups: { projectTitle: string; items: Task[] }[] = [];
+  for (const t of tasks) {
+    const last = groups[groups.length - 1];
+    if (last && last.projectTitle === t.projectTitle) {
+      last.items.push(t);
+    } else {
+      groups.push({ projectTitle: t.projectTitle, items: [t] });
+    }
+  }
+
+  return (
+    <ul className="space-y-0.5 max-h-48 overflow-y-auto">
+      {groups.map((group) =>
+        group.items.map((t, i) => (
+          <li
+            key={`${group.projectTitle}-${i}`}
+            className="flex items-baseline justify-between text-xs py-0.5"
+          >
+            <span className="flex items-baseline gap-0">
+              <span
+                className={cn(
+                  "font-medium w-[180px] shrink-0",
+                  danger ? "text-red-600" : "text-foreground",
+                )}
+              >
+                {i === 0 ? group.projectTitle : ""}
+              </span>
+              <span
+                className={cn(
+                  "mx-1.5",
+                  danger ? "text-red-300" : "text-muted-foreground/40",
+                )}
+              >
+                /
+              </span>
+              <span
+                className={cn(
+                  danger ? "text-red-400" : "text-muted-foreground",
+                )}
+              >
+                {t.chapter > 0 ? `CH${t.chapter} ` : ""}
+                {t.taskType}
+              </span>
+            </span>
+            {t.assignee && (
+              <span
+                className={cn(
+                  "shrink-0 ml-2",
+                  danger ? "text-red-400" : "text-muted-foreground",
+                )}
+              >
+                {t.assignee}
+              </span>
+            )}
+          </li>
+        )),
+      )}
+    </ul>
+  );
 }
 
 function MetricCard({
@@ -82,7 +158,7 @@ function MetricCard({
       {expanded && expandContent && (
         <div
           className={cn(
-            "border-t px-4 py-3",
+            "border-t px-6 py-3",
             isDanger ? "border-red-200" : "border-border",
           )}
         >
@@ -94,17 +170,15 @@ function MetricCard({
 }
 
 export function SummaryMetrics({ projects }: SummaryMetricsProps) {
-  const [todayExpanded, setTodayExpanded] = useState(false);
-  const [overdueExpanded, setOverdueExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(false);
 
   const activeProjects = projects.filter((p) => isProjectActive(p.status));
 
-  const todayTasks = activeProjects.flatMap((p) =>
+  const todayTasks: Task[] = activeProjects.flatMap((p) =>
     p.tasks
       .filter((t) => t.status === "진행")
       .map((t) => ({
         projectTitle: p.title,
-        projectId: p.id,
         chapter: t.chapter,
         taskType: t.taskType,
         assignee: t.assignee,
@@ -116,7 +190,6 @@ export function SummaryMetrics({ projects }: SummaryMetricsProps) {
     .filter((p) => p.tasks.some((t) => t.status === "진행"))
     .sort((a, b) => getDday(a.rolloutDate) - getDday(b.rolloutDate));
 
-  // 모든 강의명 한 줄에 노출, 45자 초과 시 "외 N개"로 줄임
   const allNames = projectsWithTasks.map((p) => p.title).join(", ");
   const todayDetail =
     projectsWithTasks.length === 0
@@ -135,8 +208,7 @@ export function SummaryMetrics({ projects }: SummaryMetricsProps) {
       ? overdueProjects.map((p) => p.title).join(", ")
       : undefined;
 
-  // 지연 프로젝트의 진행 중 태스크
-  const overdueTasks = overdueProjects.flatMap((p) =>
+  const overdueTasks: Task[] = overdueProjects.flatMap((p) =>
     p.tasks
       .filter((t) => t.status === "진행")
       .map((t) => ({
@@ -147,6 +219,9 @@ export function SummaryMetrics({ projects }: SummaryMetricsProps) {
       })),
   );
 
+  const toggle = () => setExpanded((v) => !v);
+  const canExpand = todayTasks.length > 0 || overdueCount > 0;
+
   return (
     <div className="grid grid-cols-2 gap-4">
       <MetricCard
@@ -154,30 +229,10 @@ export function SummaryMetrics({ projects }: SummaryMetricsProps) {
         label="오늘 태스크"
         value={todayTasks.length}
         detail={todayDetail}
-        expandable={todayTasks.length > 0}
-        expanded={todayExpanded}
-        onToggle={() => setTodayExpanded((v) => !v)}
-        expandContent={
-          <ul className="space-y-1.5 max-h-48 overflow-y-auto">
-            {todayTasks.map((t, i) => (
-              <li key={i} className="flex items-center justify-between text-xs">
-                <span className="text-foreground">
-                  <span className="font-medium">{t.projectTitle}</span>
-                  <span className="mx-1.5 text-muted-foreground/40">/</span>
-                  <span className="text-muted-foreground">
-                    {t.chapter > 0 ? `CH${t.chapter} ` : ""}
-                    {t.taskType}
-                  </span>
-                </span>
-                {t.assignee && (
-                  <span className="text-muted-foreground shrink-0 ml-2">
-                    {t.assignee}
-                  </span>
-                )}
-              </li>
-            ))}
-          </ul>
-        }
+        expandable={canExpand}
+        expanded={expanded}
+        onToggle={toggle}
+        expandContent={<GroupedTaskList tasks={todayTasks} />}
       />
       <MetricCard
         icon={AlertTriangle}
@@ -186,32 +241,10 @@ export function SummaryMetrics({ projects }: SummaryMetricsProps) {
         detail={overdueDetail}
         detailBold
         variant="danger"
-        expandable={overdueCount > 0}
-        expanded={overdueExpanded}
-        onToggle={() => setOverdueExpanded((v) => !v)}
-        expandContent={
-          <ul className="space-y-1.5 max-h-48 overflow-y-auto">
-            {overdueTasks.map((t, i) => (
-              <li key={i} className="flex items-center justify-between text-xs">
-                <span>
-                  <span className="font-medium text-red-600">
-                    {t.projectTitle}
-                  </span>
-                  <span className="mx-1.5 text-red-300">/</span>
-                  <span className="text-red-400">
-                    {t.chapter > 0 ? `CH${t.chapter} ` : ""}
-                    {t.taskType}
-                  </span>
-                </span>
-                {t.assignee && (
-                  <span className="shrink-0 ml-2 text-red-400">
-                    {t.assignee}
-                  </span>
-                )}
-              </li>
-            ))}
-          </ul>
-        }
+        expandable={canExpand}
+        expanded={expanded}
+        onToggle={toggle}
+        expandContent={<GroupedTaskList tasks={overdueTasks} danger />}
       />
     </div>
   );
