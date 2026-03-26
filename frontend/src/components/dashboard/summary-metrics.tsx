@@ -36,14 +36,14 @@ function MetricCard({
 }: MetricCardProps) {
   const isDanger = variant === "danger" && value > 0;
   const accentColor = isDanger ? "text-red-500" : "text-foreground";
-  const labelColor = isDanger ? "text-red-400" : "text-foreground";
+  const labelColor = "text-foreground";
 
   return (
     <div
       className={cn(
         "rounded-lg border overflow-hidden",
         isDanger
-          ? "border-red-200 bg-red-50 shadow-[0_2px_12px_rgba(239,68,68,0.08)]"
+          ? "border-0 bg-red-50 shadow-[0_2px_14px_rgba(120,100,80,0.08)]"
           : "border-0 bg-card shadow-[0_2px_14px_rgba(120,100,80,0.08)]",
       )}
     >
@@ -57,6 +57,7 @@ function MetricCard({
       >
         <div className="min-w-0 flex-1">
           <p className="text-xs font-medium text-foreground">{label}</p>
+          <p className="mt-0.5" />
           <p
             className={cn("text-[29px] font-black leading-tight", accentColor)}
           >
