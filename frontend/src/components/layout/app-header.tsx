@@ -16,12 +16,9 @@ export function AppHeader({ title, description }: AppHeaderProps) {
         {title}
       </h1>
       <Link href="/projects/new">
-        <Button
-          size="sm"
-          className="gap-1.5 border border-neutral-200/80 bg-white/60 text-neutral-700 shadow-sm backdrop-blur-md transition-all duration-500 ease-out hover:bg-white/95 hover:border-neutral-300/70 hover:text-neutral-900 hover:shadow-md"
-        >
-          <Plus className="h-3.5 w-3.5" />
-          강의 제작 요청
+        <Button className="gap-2 border border-neutral-200/80 bg-white/60 text-neutral-700 shadow-sm backdrop-blur-md transition-all duration-500 ease-out hover:bg-white/95 hover:border-neutral-300/70 hover:text-neutral-900 hover:shadow-md">
+          <Plus className="h-4 w-4" />
+          신규 강의 추가
         </Button>
       </Link>
     </header>
