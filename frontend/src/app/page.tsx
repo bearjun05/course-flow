@@ -88,6 +88,8 @@ export default function DashboardPage() {
       <div className="space-y-6 px-6 py-6">
         <SummaryMetrics projects={projects} />
 
+        <Separator />
+
         <KanbanBoard
           projects={projects}
           onStatusChange={handleKanbanStatusChange}
