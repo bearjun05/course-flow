@@ -112,7 +112,7 @@ export function KanbanBoard({ projects, onStatusChange }: KanbanBoardProps) {
 
         <DragOverlay>
           {activeProject && (
-            <div className="w-[220px] rotate-2 rounded-xl border border-primary/30 bg-card p-3.5 shadow-md">
+            <div className="w-[220px] rotate-2 rounded-xl border border-primary/30 bg-card p-3.5 shadow-xl">
               <p className="text-[13px] font-medium text-foreground">
                 {activeProject.title}
               </p>
