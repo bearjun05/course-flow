@@ -1,12 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import {
-  Layers,
-  CalendarCheck,
-  AlertTriangle,
-  ChevronDown,
-} from "lucide-react";
+import { CalendarCheck, AlertTriangle, ChevronDown } from "lucide-react";
 import type { Project } from "@/lib/types";
 import { getDday, isProjectActive, cn } from "@/lib/utils";
 
@@ -37,35 +32,50 @@ function MetricCard({
   onToggle,
   expandContent,
 }: MetricCardProps) {
+  const isDanger = variant === "danger" && value > 0;
   return (
-    <div className="rounded-lg border border-border bg-card overflow-hidden">
+    <div
+      className={cn(
+        "rounded-lg border overflow-hidden",
+        isDanger ? "border-red-200 bg-red-50" : "border-border bg-card",
+      )}
+    >
       <div
         className={cn(
           "flex items-center gap-3 px-4 py-3",
-          expandable && "cursor-pointer hover:bg-neutral-50 transition-colors",
+          expandable &&
+            "cursor-pointer hover:bg-neutral-50/80 transition-colors",
         )}
         onClick={expandable ? onToggle : undefined}
       >
         <Icon
           className={cn(
             "h-4 w-4 shrink-0",
-            variant === "danger" && value > 0
-              ? "text-red-400"
-              : "text-muted-foreground/60",
+            isDanger ? "text-red-400" : "text-muted-foreground/60",
           )}
         />
         <div className="min-w-0 flex-1">
-          <p className="text-xs text-muted-foreground">{label}</p>
           <p
             className={cn(
-              "text-base font-semibold",
-              variant === "danger" && value > 0
-                ? "text-red-500"
-                : "text-foreground",
+              "text-xs",
+              isDanger ? "text-red-400" : "text-muted-foreground",
+            )}
+          >
+            {label}
+          </p>
+          <p
+            className={cn(
+              "text-2xl font-bold leading-tight",
+              isDanger ? "text-red-600" : "text-foreground",
             )}
           >
             {value}
-            <span className="ml-0.5 text-xs font-normal text-muted-foreground">
+            <span
+              className={cn(
+                "ml-0.5 text-xs font-normal",
+                isDanger ? "text-red-400" : "text-muted-foreground",
+              )}
+            >
               건
             </span>
           </p>
@@ -85,7 +95,14 @@ function MetricCard({
         )}
       </div>
       {expanded && expandContent && (
-        <div className="border-t border-border px-4 py-3">{expandContent}</div>
+        <div
+          className={cn(
+            "border-t px-4 py-3",
+            isDanger ? "border-red-200" : "border-border",
+          )}
+        >
+          {expandContent}
+        </div>
       )}
     </div>
   );
@@ -108,16 +125,14 @@ export function SummaryMetrics({ projects }: SummaryMetricsProps) {
       })),
   );
 
+  // 오늘 태스크가 있는 프로젝트를 마감 임박 순으로 정렬
+  const projectsWithTasks = activeProjects
+    .filter((p) => p.tasks.some((t) => t.status === "진행"))
+    .sort((a, b) => getDday(a.rolloutDate) - getDday(b.rolloutDate));
+
   const todayDetail =
-    todayTasks.length > 0
-      ? todayTasks
-          .slice(0, 2)
-          .map(
-            (t) =>
-              `${t.projectTitle.slice(0, 10)}${t.projectTitle.length > 10 ? "…" : ""} / ${t.chapter > 0 ? `CH${t.chapter} ` : ""}${t.taskType}`,
-          )
-          .join(", ") +
-        (todayTasks.length > 2 ? ` 외 ${todayTasks.length - 2}건` : "")
+    projectsWithTasks.length > 0
+      ? `${projectsWithTasks[0].title}${projectsWithTasks.length > 1 ? ` 외 ${projectsWithTasks.length - 1}개` : ""}`
       : "진행 중인 태스크 없음";
 
   const overdueCount = projects.filter(
@@ -125,12 +140,7 @@ export function SummaryMetrics({ projects }: SummaryMetricsProps) {
   ).length;
 
   return (
-    <div className="grid grid-cols-3 gap-4">
-      <MetricCard
-        icon={Layers}
-        label="진행 중 프로젝트"
-        value={activeProjects.length}
-      />
+    <div className="grid grid-cols-2 gap-4">
       <MetricCard
         icon={CalendarCheck}
         label="오늘 태스크"
