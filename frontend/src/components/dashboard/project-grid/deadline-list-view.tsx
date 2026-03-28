@@ -81,7 +81,7 @@ function ProjectRow({
           {project.title}
         </span>
         {project.version && (
-          <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-md bg-sky-50 text-sky-400 shrink-0">
+          <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-400 shrink-0">
             {project.version}
           </span>
         )}
