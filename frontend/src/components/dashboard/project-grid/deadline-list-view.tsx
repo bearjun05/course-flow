@@ -48,9 +48,9 @@ const UNIT_TEXT: Record<string, string> = {
 };
 
 const TRAFFIC_LIGHT_COLORS: Record<string, string> = {
-  green: "bg-emerald-400",
-  yellow: "bg-amber-400",
-  red: "bg-[#FA0030]",
+  green: "bg-[#6ECC9A]",
+  yellow: "bg-[#F5C842]",
+  red: "bg-[#F47A8A]",
 };
 
 function ProjectRow({ project }: { project: Project }) {
