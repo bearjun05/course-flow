@@ -15,11 +15,11 @@ const PIPELINE_TASK_TYPES: TaskType[] = [
 ];
 
 const SLOT_FILLED_COLORS = [
-  "bg-[#DCEBCA]",
-  "bg-[#CFE1B9]",
-  "bg-[#C2D5AA]",
-  "bg-[#B5C99A]",
-  "bg-[#A6B98B]",
+  "bg-[#EDF2DC]",
+  "bg-[#DDE8C0]",
+  "bg-[#CCDC9F]",
+  "bg-[#BACE80]",
+  "bg-[#A8BE60]",
 ];
 
 function getChapterProgress(
