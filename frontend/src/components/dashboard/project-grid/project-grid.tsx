@@ -1,7 +1,13 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Search, Filter, PartyPopper } from "lucide-react";
+import {
+  Search,
+  Filter,
+  PartyPopper,
+  LayoutList,
+  Columns2,
+} from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -11,10 +17,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type { Project, ProjectStatus, TrafficLight, BusinessUnit } from "@/lib/types";
+import type {
+  Project,
+  ProjectStatus,
+  TrafficLight,
+  BusinessUnit,
+} from "@/lib/types";
 import { getDday } from "@/lib/utils";
 import { PROJECT_STATUSES, BUSINESS_UNITS, KDT_TRACKS } from "@/lib/constants";
 import { ColumnView } from "./column-view";
+import { DeadlineListView } from "./deadline-list-view";
+import { cn } from "@/lib/utils";
 
 interface ProjectGridProps {
   projects: Project[];
@@ -37,9 +50,14 @@ export function ProjectGrid({
   onDuplicate,
   onHide,
 }: ProjectGridProps) {
+  const [viewMode, setViewMode] = useState<"column" | "list">("column");
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState<ProjectStatus | "all">("all");
-  const [businessFilter, setBusinessFilter] = useState<BusinessUnit | "all">("all");
+  const [statusFilter, setStatusFilter] = useState<ProjectStatus | "all">(
+    "all",
+  );
+  const [businessFilter, setBusinessFilter] = useState<BusinessUnit | "all">(
+    "all",
+  );
   const [trackFilter, setTrackFilter] = useState<string>("all");
 
   const filteredProjects = useMemo(() => {
@@ -97,6 +115,32 @@ export function ProjectGrid({
             {filteredProjects.length}
           </Badge>
         </div>
+        <div className="flex items-center rounded-lg border border-border p-0.5 gap-0.5">
+          <button
+            onClick={() => setViewMode("column")}
+            className={cn(
+              "flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs transition-colors",
+              viewMode === "column"
+                ? "bg-background shadow-sm text-foreground font-medium"
+                : "text-muted-foreground hover:text-foreground",
+            )}
+          >
+            <Columns2 className="h-3.5 w-3.5" />
+            칼럼
+          </button>
+          <button
+            onClick={() => setViewMode("list")}
+            className={cn(
+              "flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs transition-colors",
+              viewMode === "list"
+                ? "bg-background shadow-sm text-foreground font-medium"
+                : "text-muted-foreground hover:text-foreground",
+            )}
+          >
+            <LayoutList className="h-3.5 w-3.5" />
+            리스트
+          </button>
+        </div>
       </div>
 
       <div className="mb-4 flex flex-wrap items-center gap-3">
@@ -114,7 +158,9 @@ export function ProjectGrid({
           <Filter className="h-3.5 w-3.5 text-muted-foreground" />
           <Select
             value={statusFilter}
-            onValueChange={(v) => { if (v) setStatusFilter(v as ProjectStatus | "all"); }}
+            onValueChange={(v) => {
+              if (v) setStatusFilter(v as ProjectStatus | "all");
+            }}
           >
             <SelectTrigger className="h-8 w-auto gap-1 border-border text-xs">
               <SelectValue placeholder="상태" />
@@ -158,7 +204,9 @@ export function ProjectGrid({
           {businessFilter === "KDT" && (
             <Select
               value={trackFilter}
-              onValueChange={(v) => { if (v) setTrackFilter(v); }}
+              onValueChange={(v) => {
+                if (v) setTrackFilter(v);
+              }}
             >
               <SelectTrigger className="h-8 w-auto gap-1 border-border text-xs">
                 <SelectValue placeholder="트랙" />
@@ -187,6 +235,8 @@ export function ProjectGrid({
               : "모든 강의 제작이 마무리되었습니다!"}
           </p>
         </div>
+      ) : viewMode === "list" ? (
+        <DeadlineListView {...viewProps} />
       ) : (
         <ColumnView {...viewProps} />
       )}
