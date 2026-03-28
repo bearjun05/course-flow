@@ -136,10 +136,21 @@ export function DeadlineListView({
       (a, b) => getDday(a.rolloutDate) - getDday(b.rolloutDate),
     );
     return (
-      <div className="rounded-xl border border-border overflow-hidden divide-y divide-border">
-        {sorted.map((project) => (
-          <ProjectRow key={project.id} project={project} simple />
-        ))}
+      <div>
+        <div className="flex items-center gap-2 mb-2 px-1">
+          <span className="text-xs font-semibold text-muted-foreground">
+            전체
+          </span>
+          <span className="text-[11px] text-muted-foreground/50">
+            {sorted.length}
+          </span>
+          <div className="flex-1 h-px bg-border" />
+        </div>
+        <div className="rounded-xl border border-border overflow-hidden divide-y divide-border">
+          {sorted.map((project) => (
+            <ProjectRow key={project.id} project={project} simple />
+          ))}
+        </div>
       </div>
     );
   }
