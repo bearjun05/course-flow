@@ -104,6 +104,12 @@ export function KanbanCard({ project, column, onClick }: KanbanCardProps) {
             )}
           >
             {project.businessUnit}
+            {project.trackName && (
+              <>
+                <span className="mx-1 opacity-50">·</span>
+                {project.trackName}
+              </>
+            )}
           </span>
           <span
             className={cn(
