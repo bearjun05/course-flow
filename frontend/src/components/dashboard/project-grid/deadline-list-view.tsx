@@ -70,10 +70,8 @@ function ProjectRow({
         />
       )}
 
-      {/* 아이콘 */}
-      <div className="flex items-center justify-center w-7 h-7 rounded-lg bg-neutral-100 shrink-0">
-        <Video className="w-3.5 h-3.5 text-neutral-400" />
-      </div>
+      {/* 아이콘 실루엣 */}
+      <Video className="w-3.5 h-3.5 text-neutral-300 shrink-0" />
 
       {/* 제목 + 버전 */}
       <div className="flex items-baseline gap-1.5 flex-1 min-w-0">
@@ -81,7 +79,7 @@ function ProjectRow({
           {project.title}
         </span>
         {project.version && (
-          <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-400 shrink-0">
+          <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-md bg-blue-50 text-blue-300 shrink-0">
             {project.version}
           </span>
         )}
