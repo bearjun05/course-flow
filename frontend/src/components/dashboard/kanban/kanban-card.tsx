@@ -27,9 +27,9 @@ const UNIT_COLORS: Record<string, string> = {
 };
 
 const TYPE_COLORS: Record<string, string> = {
-  신규: "bg-stone-100 text-stone-500",
-  부분리뉴얼: "bg-stone-200 text-stone-600",
-  전체리뉴얼: "bg-stone-300 text-stone-700",
+  신규: "bg-[#F2E0C8] text-[#7C4B2A]",
+  부분리뉴얼: "bg-[#DFC4A0] text-[#5C3418]",
+  전체리뉴얼: "bg-[#C4A882] text-[#3E2208]",
 };
 
 export function KanbanCard({ project, column, onClick }: KanbanCardProps) {
