@@ -421,7 +421,7 @@ export const mockProjects: Project[] = [
     id: "proj-7",
     title: "파이썬으로 배우는 자동화 업무",
     version: "v1.0",
-    status: "교안",
+    status: "리허설",
     businessUnit: "KDC",
     productionType: "신규",
     rolloutDate: "2026-05-10",
