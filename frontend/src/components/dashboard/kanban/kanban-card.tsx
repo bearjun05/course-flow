@@ -145,13 +145,17 @@ export function KanbanCard({ project, column, onClick }: KanbanCardProps) {
               stroke="currentColor"
               strokeWidth="1.5"
             />
-            <path
-              d={`M6 6 L6 1 A5 5 0 ${completion >= 50 ? 1 : 0} 1 ${
-                6 + 5 * Math.sin((completion / 100) * 2 * Math.PI)
-              } ${6 - 5 * Math.cos((completion / 100) * 2 * Math.PI)} Z`}
-              fill="currentColor"
-              opacity="0.3"
-            />
+            {completion >= 100 ? (
+              <circle cx="6" cy="6" r="5" fill="currentColor" opacity="0.3" />
+            ) : (
+              <path
+                d={`M6 6 L6 1 A5 5 0 ${completion >= 50 ? 1 : 0} 1 ${
+                  6 + 5 * Math.sin((completion / 100) * 2 * Math.PI)
+                } ${6 - 5 * Math.cos((completion / 100) * 2 * Math.PI)} Z`}
+                fill="currentColor"
+                opacity="0.3"
+              />
+            )}
           </svg>
           {completion}%
         </span>

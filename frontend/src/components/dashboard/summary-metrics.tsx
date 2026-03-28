@@ -115,7 +115,7 @@ function MetricCard({
 
   // 지연 있음 → Sparta Red / 지연 없음 → Sparta Purple / 오늘 태스크 → Sparta Blue
   const cardBg = isDanger
-    ? "bg-gradient-to-br from-[#FCF2F4] to-[#FFD6DC]/50"
+    ? "bg-[#FCF2F4]"
     : isGood
       ? "bg-gradient-to-br from-[#F9EEFD] to-[#F6E1FD]/50"
       : "bg-gradient-to-br from-neutral-50 to-gray-50/60";
