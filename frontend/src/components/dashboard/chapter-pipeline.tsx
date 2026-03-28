@@ -15,11 +15,11 @@ const PIPELINE_TASK_TYPES: TaskType[] = [
 ];
 
 const SLOT_FILLED_COLORS = [
+  "bg-[#EFFBFE]",
+  "bg-[#DDF7FE]",
   "bg-[#C9F0FB]",
-  "bg-[#9BEAFA]",
-  "bg-[#6BDBF2]",
-  "bg-[#49C9E3]",
-  "bg-[#2992B2]", // 5번째 - Sparta Blue
+  "bg-[#B0E8F8]",
+  "bg-[#9BEAFA]", // 5번째 - 가장 진하게
 ];
 
 function getChapterProgress(
