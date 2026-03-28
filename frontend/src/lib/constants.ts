@@ -3,7 +3,7 @@ import type { KanbanColumn, ProjectStatus, DdayGroup } from "./types";
 export const KANBAN_COLUMNS: { id: KanbanColumn; label: string }[] = [
   { id: "교안", label: "교안" },
   { id: "촬영", label: "촬영" },
-  { id: "편집/검수", label: "편집/검수" },
+  { id: "편집·검수", label: "편집·검수" },
   { id: "롤아웃", label: "롤아웃" },
 ];
 
@@ -11,7 +11,7 @@ export const PROJECT_STATUSES: { value: ProjectStatus; label: string }[] = [
   { value: "기획", label: "기획" },
   { value: "교안", label: "교안" },
   { value: "촬영", label: "촬영" },
-  { value: "편집/검수", label: "편집/검수" },
+  { value: "편집·검수", label: "편집·검수" },
   { value: "롤아웃", label: "롤아웃" },
   { value: "완료", label: "완료" },
   { value: "중단", label: "중단" },
@@ -20,14 +20,14 @@ export const PROJECT_STATUSES: { value: ProjectStatus; label: string }[] = [
 export const STATUS_TO_KANBAN: Partial<Record<ProjectStatus, KanbanColumn>> = {
   교안: "교안",
   촬영: "촬영",
-  "편집/검수": "편집/검수",
+  "편집·검수": "편집·검수",
   롤아웃: "롤아웃",
 };
 
 export const KANBAN_TO_STATUS: Record<KanbanColumn, ProjectStatus> = {
   교안: "교안",
   촬영: "촬영",
-  "편집/검수": "편집/검수",
+  "편집·검수": "편집·검수",
   롤아웃: "롤아웃",
 };
 
@@ -82,8 +82,8 @@ export const STATUS_BADGE_VARIANT: Record<ProjectStatus, string> = {
   기획: "bg-neutral-100 text-neutral-500",
   교안: "bg-[#EDF2DC] text-[#7A9445]",
   촬영: "bg-[#E5EDCF] text-[#728A3E]",
-  "편집/검수": "bg-[#DDE9C2] text-[#6A8438]",
-  롤아웃: "bg-[#D6E5B6] text-[#628034]",
+  "편집·검수": "bg-[#DDE9C2] text-[#6A8438]",
+  롤아웃: "bg-[#E5F0D0] text-[#7A9445]",
   완료: "bg-neutral-100 text-neutral-400",
   중단: "bg-neutral-100 text-neutral-400",
 };
