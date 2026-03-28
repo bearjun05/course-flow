@@ -3,16 +3,22 @@
 import Link from "next/link";
 import { Video } from "lucide-react";
 import type { Project, ProjectStatus, TrafficLight } from "@/lib/types";
-import { getDday, formatDday, getDdayColor, cn } from "@/lib/utils";
+import {
+  getDday,
+  formatDday,
+  getDdayColor,
+  getAutoTrafficLight,
+  cn,
+} from "@/lib/utils";
 import { DDAY_GROUPS } from "@/lib/constants";
 
 interface DeadlineListViewProps {
   projects: Project[];
   onStatusChange: (projectId: string, status: ProjectStatus) => void;
   onTrafficLightChange: (projectId: string, light: TrafficLight) => void;
+  flat?: boolean; // true = 섹션 없이 DB 스타일 전체 목록
 }
 
-// 프로젝트 상태 → 진척 단계 색 (프로그래스바와 동일 팔레트)
 const STATUS_COLORS: Record<string, string> = {
   기획: "bg-neutral-100 text-neutral-400",
   교안작성: "bg-[#EDF2DC] text-[#6B7C3A]",
@@ -47,21 +53,11 @@ const TRAFFIC_LIGHT_COLORS: Record<string, string> = {
   red: "bg-[#FA0030]",
 };
 
-function TrafficDot({ light }: { light: TrafficLight }) {
-  return (
-    <span
-      className={cn(
-        "inline-block w-2 h-2 rounded-full shrink-0",
-        TRAFFIC_LIGHT_COLORS[light] ?? "bg-neutral-300",
-      )}
-    />
-  );
-}
-
 function ProjectRow({ project }: { project: Project }) {
   const dday = getDday(project.rolloutDate);
-  const isOverdue = dday < 0;
+  const isOverdue = dday < 0 && project.status !== "완료";
   const isCompleted = project.status === "완료";
+  const light = getAutoTrafficLight(project);
   const subtitle = [project.businessUnit, project.trackName]
     .filter(Boolean)
     .join(" · ");
@@ -71,11 +67,17 @@ function ProjectRow({ project }: { project: Project }) {
       href={`/projects/${project.id}`}
       className={cn(
         "flex items-center gap-3 px-4 py-3 hover:bg-muted/30 transition-colors",
-        isOverdue && !isCompleted && "bg-[#FCF2F4] hover:bg-[#FCF2F4]/80",
+        isOverdue && "bg-[#FCF2F4] hover:bg-[#FCF2F4]/80",
+        isCompleted && "opacity-60",
       )}
     >
       {/* 신호등 */}
-      <TrafficDot light={project.trafficLight} />
+      <span
+        className={cn(
+          "inline-block w-2 h-2 rounded-full shrink-0",
+          TRAFFIC_LIGHT_COLORS[light] ?? "bg-neutral-300",
+        )}
+      />
 
       {/* 아이콘 */}
       <div className="flex items-center justify-center w-7 h-7 rounded-lg bg-neutral-100 shrink-0">
@@ -107,8 +109,12 @@ function ProjectRow({ project }: { project: Project }) {
         {STATUS_LABELS[project.status] ?? project.status}
       </span>
 
-      {/* D-Day (마감일) */}
-      {!isCompleted ? (
+      {/* 날짜 */}
+      {isCompleted ? (
+        <span className="text-[11px] text-muted-foreground shrink-0 w-32 text-right">
+          {project.rolloutDate.slice(5).replace("-", "/")} 출시
+        </span>
+      ) : (
         <span
           className={cn(
             "text-[12px] font-medium shrink-0 w-32 text-right",
@@ -120,22 +126,33 @@ function ProjectRow({ project }: { project: Project }) {
             ({project.rolloutDate.slice(5).replace("-", "/")})
           </span>
         </span>
-      ) : (
-        <span className="text-[11px] text-muted-foreground shrink-0 w-32 text-right">
-          {project.rolloutDate.slice(5).replace("-", "/")} 출시
-        </span>
       )}
     </Link>
   );
 }
 
-export function DeadlineListView({ projects }: DeadlineListViewProps) {
-  const activeProjects = projects.filter((p) => p.status !== "완료");
-  const completedProjects = projects.filter((p) => p.status === "완료");
+export function DeadlineListView({
+  projects,
+  flat = false,
+}: DeadlineListViewProps) {
+  if (flat) {
+    // DB 스타일: 섹션 없이 마감일 순 전체 목록
+    const sorted = [...projects].sort(
+      (a, b) => getDday(a.rolloutDate) - getDday(b.rolloutDate),
+    );
+    return (
+      <div className="rounded-xl border border-border overflow-hidden divide-y divide-border">
+        {sorted.map((project) => (
+          <ProjectRow key={project.id} project={project} />
+        ))}
+      </div>
+    );
+  }
 
+  // 섹션별 보기 (진행 중 전용)
   const sections = DDAY_GROUPS.map((group) => ({
     ...group,
-    projects: activeProjects
+    projects: projects
       .filter((p) => {
         const d = getDday(p.rolloutDate);
         return d >= group.min && d <= group.max;
@@ -147,7 +164,6 @@ export function DeadlineListView({ projects }: DeadlineListViewProps) {
     <div className="space-y-6">
       {sections.map((section) => (
         <div key={section.label}>
-          {/* 섹션 헤더 */}
           <div className="flex items-center gap-2 mb-2 px-1">
             <span className="text-xs font-semibold text-muted-foreground">
               {section.label}
@@ -157,8 +173,6 @@ export function DeadlineListView({ projects }: DeadlineListViewProps) {
             </span>
             <div className="flex-1 h-px bg-border" />
           </div>
-
-          {/* 행 목록 */}
           <div className="rounded-xl border border-border overflow-hidden divide-y divide-border">
             {section.projects.map((project) => (
               <ProjectRow key={project.id} project={project} />
@@ -166,28 +180,6 @@ export function DeadlineListView({ projects }: DeadlineListViewProps) {
           </div>
         </div>
       ))}
-
-      {/* 완료 섹션 */}
-      {completedProjects.length > 0 && (
-        <div>
-          <div className="flex items-center gap-2 mb-2 px-1">
-            <span className="text-xs font-semibold text-muted-foreground">
-              완료
-            </span>
-            <span className="text-[11px] text-muted-foreground/50">
-              {completedProjects.length}
-            </span>
-            <div className="flex-1 h-px bg-border" />
-          </div>
-          <div className="rounded-xl border border-border overflow-hidden divide-y divide-border opacity-60">
-            {completedProjects
-              .sort((a, b) => getDday(a.rolloutDate) - getDday(b.rolloutDate))
-              .map((project) => (
-                <ProjectRow key={project.id} project={project} />
-              ))}
-          </div>
-        </div>
-      )}
     </div>
   );
 }

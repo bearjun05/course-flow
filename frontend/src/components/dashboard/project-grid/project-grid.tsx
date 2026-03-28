@@ -1,13 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import {
-  Search,
-  Filter,
-  PartyPopper,
-  LayoutList,
-  Columns2,
-} from "lucide-react";
+import { Search, Filter, PartyPopper } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -23,9 +17,7 @@ import type {
   TrafficLight,
   BusinessUnit,
 } from "@/lib/types";
-import { getDday } from "@/lib/utils";
 import { PROJECT_STATUSES, BUSINESS_UNITS, KDT_TRACKS } from "@/lib/constants";
-import { ColumnView } from "./column-view";
 import { DeadlineListView } from "./deadline-list-view";
 import { cn } from "@/lib/utils";
 
@@ -39,18 +31,14 @@ interface ProjectGridProps {
   onHide: (projectId: string) => void;
 }
 
-const COMPLETE_HIDE_DAYS = 7;
+type TabMode = "active" | "all";
 
 export function ProjectGrid({
   projects,
   onStatusChange,
   onTrafficLightChange,
-  onRolloutChange,
-  onDelete,
-  onDuplicate,
-  onHide,
 }: ProjectGridProps) {
-  const [viewMode, setViewMode] = useState<"column" | "list">("column");
+  const [tab, setTab] = useState<TabMode>("active");
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<ProjectStatus | "all">(
     "all",
@@ -60,19 +48,9 @@ export function ProjectGrid({
   );
   const [trackFilter, setTrackFilter] = useState<string>("all");
 
-  const filteredProjects = useMemo(() => {
-    let result = projects.filter((p) => !p.hidden);
-
-    if (!search) {
-      result = result.filter((p) => {
-        if (p.status === "중단") return false;
-        if (p.status === "완료") {
-          const daysSincePayment = -getDday(p.paymentDate);
-          return daysSincePayment < COMPLETE_HIDE_DAYS;
-        }
-        return true;
-      });
-    }
+  // 공통 필터 (검색/사업부/트랙/상태)
+  function applyFilters(list: Project[]): Project[] {
+    let result = list.filter((p) => !p.hidden);
 
     if (search) {
       const q = search.toLowerCase();
@@ -92,81 +70,66 @@ export function ProjectGrid({
     }
 
     return result;
-  }, [projects, search, statusFilter, businessFilter, trackFilter]);
+  }
 
-  // 리스트 뷰용: 완료·중단 포함 (검색/필터 적용, 시간 제한 없음)
-  const listProjects = useMemo(() => {
-    let result = projects.filter((p) => !p.hidden && p.status !== "중단");
+  // 진행 중 탭: 완료·중단 제외
+  const activeProjects = useMemo(
+    () =>
+      applyFilters(
+        projects.filter((p) => p.status !== "완료" && p.status !== "중단"),
+      ),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [projects, search, statusFilter, businessFilter, trackFilter],
+  );
 
-    if (search) {
-      const q = search.toLowerCase();
-      result = result.filter((p) => p.title.toLowerCase().includes(q));
-    }
+  // 전체 탭: 중단만 제외 (완료 포함)
+  const allProjects = useMemo(
+    () => applyFilters(projects.filter((p) => p.status !== "중단")),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [projects, search, statusFilter, businessFilter, trackFilter],
+  );
 
-    if (statusFilter !== "all") {
-      result = result.filter((p) => p.status === statusFilter);
-    }
-
-    if (businessFilter !== "all") {
-      result = result.filter((p) => p.businessUnit === businessFilter);
-    }
-
-    if (businessFilter === "KDT" && trackFilter !== "all") {
-      result = result.filter((p) => p.trackName === trackFilter);
-    }
-
-    return result;
-  }, [projects, search, statusFilter, businessFilter, trackFilter]);
-
-  const viewProps = {
-    projects: filteredProjects,
-    onStatusChange,
-    onTrafficLightChange,
-    onRolloutChange,
-    onDelete,
-    onDuplicate,
-    onHide,
-  };
+  const displayProjects = tab === "active" ? activeProjects : allProjects;
 
   return (
     <div>
+      {/* 헤더: 탭 + 카운트 */}
       <div className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <h2 className="text-sm font-semibold text-foreground">
             전체 프로젝트
           </h2>
           <Badge variant="secondary" className="text-[10px] font-normal">
-            {filteredProjects.length}
+            {displayProjects.length}
           </Badge>
         </div>
         <div className="flex items-center rounded-lg border border-border p-0.5 gap-0.5">
           <button
-            onClick={() => setViewMode("column")}
+            onClick={() => setTab("active")}
             className={cn(
-              "flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs transition-colors",
-              viewMode === "column"
+              "rounded-md px-2.5 py-1 text-xs transition-colors",
+              tab === "active"
                 ? "bg-background shadow-sm text-foreground font-medium"
                 : "text-muted-foreground hover:text-foreground",
             )}
           >
-            <Columns2 className="h-3.5 w-3.5" />
-            칼럼
+            진행 중
           </button>
           <button
-            onClick={() => setViewMode("list")}
+            onClick={() => setTab("all")}
             className={cn(
-              "flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs transition-colors",
-              viewMode === "list"
+              "rounded-md px-2.5 py-1 text-xs transition-colors",
+              tab === "all"
                 ? "bg-background shadow-sm text-foreground font-medium"
                 : "text-muted-foreground hover:text-foreground",
             )}
           >
-            <LayoutList className="h-3.5 w-3.5" />
-            리스트
+            전체
           </button>
         </div>
       </div>
 
+      {/* 검색 + 필터 */}
       <div className="mb-4 flex flex-wrap items-center gap-3">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
@@ -250,7 +213,8 @@ export function ProjectGrid({
         </div>
       </div>
 
-      {filteredProjects.length === 0 ? (
+      {/* 목록 */}
+      {displayProjects.length === 0 ? (
         <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border py-16">
           <PartyPopper className="mb-3 h-8 w-8 text-muted-foreground/40" />
           <p className="text-sm text-muted-foreground">
@@ -259,14 +223,13 @@ export function ProjectGrid({
               : "모든 강의 제작이 마무리되었습니다!"}
           </p>
         </div>
-      ) : viewMode === "list" ? (
+      ) : (
         <DeadlineListView
-          projects={listProjects}
+          projects={displayProjects}
           onStatusChange={onStatusChange}
           onTrafficLightChange={onTrafficLightChange}
+          flat={tab === "all"}
         />
-      ) : (
-        <ColumnView {...viewProps} />
       )}
     </div>
   );
