@@ -15,11 +15,11 @@ const PIPELINE_TASK_TYPES: TaskType[] = [
 ];
 
 const SLOT_FILLED_COLORS = [
-  "bg-[#C9F0FB]", // 1단계 - 가장 연하게
   "bg-[#9BEAFA]",
-  "bg-[#6BDBF2]",
+  "bg-[#2992B2]", // 2번째가 가장 진하게
   "bg-[#49C9E3]",
-  "bg-[#2992B2]", // 5단계 - 가장 진하게
+  "bg-[#6BDBF2]",
+  "bg-[#C9F0FB]",
 ];
 
 function getChapterProgress(
