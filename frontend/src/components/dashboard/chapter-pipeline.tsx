@@ -93,14 +93,12 @@ export function ChapterPipeline({ project }: ChapterPipelineProps) {
     ch,
     ...getChapterProgress(project, ch),
   }));
-  const groups = summarizeChapters(chapterData);
 
   return (
-    <div className="space-y-1.5">
-      {/* 챕터별 5칸 진척도 — 전체 너비 채움 */}
-      <div className="flex w-full gap-2">
-        {chapterData.map(({ ch, filledCount }) => (
-          <div key={ch} className="flex flex-1 gap-[2px]">
+    <div className="flex w-full gap-2">
+      {chapterData.map(({ ch, filledCount, stageName }) => (
+        <div key={ch} className="flex flex-1 flex-col gap-1">
+          <div className="flex gap-[2px]">
             {Array.from({ length: 5 }, (_, i) => (
               <div
                 key={i}
@@ -111,22 +109,13 @@ export function ChapterPipeline({ project }: ChapterPipelineProps) {
               />
             ))}
           </div>
-        ))}
-      </div>
-
-      {/* N장·단계 라벨 */}
-      <div className="flex flex-wrap gap-x-2 gap-y-0.5">
-        {groups.map((group, idx) => (
-          <span
-            key={idx}
-            className="text-[10px] leading-none text-muted-foreground"
-          >
-            <span className="font-medium">{group.label}</span>
+          <span className="text-[9px] leading-none text-muted-foreground text-center truncate">
+            <span className="font-medium">{ch}장</span>
             <span className="mx-0.5 opacity-40">·</span>
-            <span>{group.stageName}</span>
+            <span>{stageName}</span>
           </span>
-        ))}
-      </div>
+        </div>
+      ))}
     </div>
   );
 }
