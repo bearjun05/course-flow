@@ -103,7 +103,6 @@ function MetricCard({
   label,
   value,
   detail,
-  detailBold = false,
   variant = "default",
   expandable = false,
   expanded = false,
@@ -111,57 +110,106 @@ function MetricCard({
   expandContent,
 }: MetricCardProps) {
   const isDanger = variant === "danger" && value > 0;
-  const accentColor = isDanger ? "text-red-500" : "text-foreground";
-  const detailColor = isDanger ? "text-red-500" : "text-foreground";
+  const isGood = variant === "danger" && value === 0;
+  const isNeutral = variant === "default";
+
+  const cardBg = isDanger
+    ? "bg-gradient-to-br from-red-50 to-rose-50/60"
+    : isGood
+      ? "bg-gradient-to-br from-green-50 to-emerald-50/60"
+      : "bg-gradient-to-br from-neutral-50 to-gray-50/60";
+  const iconWrapperBg = isDanger
+    ? "bg-red-100/80"
+    : isGood
+      ? "bg-green-100/80"
+      : "bg-neutral-200/60";
+  const iconColor = isDanger
+    ? "text-red-500"
+    : isGood
+      ? "text-green-500"
+      : "text-neutral-400";
+  const titleColor = isDanger
+    ? "text-red-700"
+    : isGood
+      ? "text-green-700"
+      : "text-neutral-600";
+  const valueColor = isDanger
+    ? "text-red-600"
+    : isGood
+      ? "text-green-600"
+      : "text-neutral-500";
+  const detailColor = isDanger
+    ? "text-red-400"
+    : isGood
+      ? "text-green-400"
+      : "text-neutral-400";
+  const borderColor = isDanger
+    ? "border-red-100"
+    : isGood
+      ? "border-green-100"
+      : "border-neutral-200";
+  const dividerColor = isDanger
+    ? "border-red-200/60"
+    : isGood
+      ? "border-green-200/60"
+      : "border-neutral-200/60";
 
   return (
     <div
       className={cn(
-        "rounded-lg border overflow-hidden",
-        isDanger
-          ? "border border-red-100 bg-red-50 shadow-[0_2px_14px_rgba(120,100,80,0.08)]"
-          : "border-0 bg-card shadow-[0_2px_14px_rgba(120,100,80,0.08)]",
+        "rounded-2xl border overflow-hidden shadow-sm",
+        cardBg,
+        borderColor,
       )}
     >
       <div
         className={cn(
-          "flex items-center gap-3 px-6 py-3",
-          expandable &&
-            "cursor-pointer hover:bg-neutral-50/80 transition-colors",
+          "flex items-center gap-4 px-5 py-4",
+          expandable && "cursor-pointer hover:brightness-[0.97] transition-all",
         )}
         onClick={expandable ? onToggle : undefined}
       >
-        <div className="min-w-0 flex-1">
-          <p className="text-xs font-medium text-neutral-400">{label}</p>
-          <p className="mt-1" />
-          <p
-            className={cn("text-[29px] font-black leading-tight", accentColor)}
-          >
-            {value}
-            <span className="ml-0.5 text-[29px] font-black">건</span>
-          </p>
-          {detail && !expanded && (
-            <p className={cn("mt-1 truncate text-xs font-bold", detailColor)}>
-              {detail}
-            </p>
-          )}
-        </div>
-        {expandable && (
-          <ChevronDown
-            className={cn(
-              "h-4 w-4 text-muted-foreground transition-transform shrink-0",
-              expanded && "rotate-180",
-            )}
-          />
-        )}
-      </div>
-      {expanded && expandContent && (
+        {/* 아이콘 박스 */}
         <div
           className={cn(
-            "border-t px-6 py-3",
-            isDanger ? "border-red-200" : "border-border",
+            "flex items-center justify-center w-11 h-11 rounded-xl shrink-0 shadow-sm",
+            iconWrapperBg,
           )}
         >
+          <Icon className={cn("w-5 h-5", iconColor)} />
+        </div>
+
+        {/* 텍스트 */}
+        <div className="min-w-0 flex-1">
+          <p className={cn("text-sm font-semibold leading-tight", titleColor)}>
+            {label}
+          </p>
+          <p className={cn("text-xs mt-0.5 truncate", detailColor)}>
+            {value === 0 ? "없음" : (detail ?? `${value}건`)}
+          </p>
+        </div>
+
+        {/* 숫자 + 화살표 */}
+        <div className="flex items-center gap-2 shrink-0">
+          <span className={cn("text-2xl font-black", valueColor)}>{value}</span>
+          {expandable && (
+            <ChevronDown
+              className={cn(
+                "h-4 w-4 transition-transform",
+                isDanger
+                  ? "text-red-300"
+                  : isGood
+                    ? "text-green-300"
+                    : "text-neutral-300",
+                expanded && "rotate-180",
+              )}
+            />
+          )}
+        </div>
+      </div>
+
+      {expanded && expandContent && (
+        <div className={cn("border-t px-5 py-3", dividerColor)}>
           {expandContent}
         </div>
       )}
