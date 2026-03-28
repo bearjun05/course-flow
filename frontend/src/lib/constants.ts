@@ -2,7 +2,6 @@ import type { KanbanColumn, ProjectStatus, DdayGroup } from "./types";
 
 export const KANBAN_COLUMNS: { id: KanbanColumn; label: string }[] = [
   { id: "교안작성", label: "교안작성" },
-  { id: "리허설", label: "리허설" },
   { id: "제작", label: "촬영 · 편집 · 검수" },
   { id: "롤아웃", label: "롤아웃" },
 ];
@@ -30,7 +29,6 @@ export const STATUS_TO_KANBAN: Partial<Record<ProjectStatus, KanbanColumn>> = {
 
 export const KANBAN_TO_STATUS: Record<KanbanColumn, ProjectStatus> = {
   교안작성: "교안",
-  리허설: "교안",
   제작: "촬영",
   롤아웃: "롤아웃",
 };

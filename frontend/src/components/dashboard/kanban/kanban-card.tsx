@@ -20,17 +20,9 @@ function getCompletionRate(project: Project): number {
   return Math.round((done / tasks.length) * 100);
 }
 
-const UNIT_COLORS: Record<string, string> = {
-  KDT: "bg-amber-100 text-amber-700",
-  KDC: "bg-yellow-100 text-yellow-700",
-  신사업: "bg-orange-100 text-orange-700",
-};
+const UNIT_COLOR = "bg-yellow-100 text-yellow-700";
 
-const TYPE_COLORS: Record<string, string> = {
-  신규: "bg-[#FAF0E6] text-[#A0673A]",
-  부분리뉴얼: "bg-[#F5E6D3] text-[#8B5230]",
-  전체리뉴얼: "bg-[#EDD9BC] text-[#6B3D20]",
-};
+const TYPE_COLOR = "bg-[#FAF0E6] text-[#A0673A]";
 
 export function KanbanCard({ project, column, onClick }: KanbanCardProps) {
   const {
@@ -99,8 +91,7 @@ export function KanbanCard({ project, column, onClick }: KanbanCardProps) {
           <span
             className={cn(
               "text-[10px] font-medium px-1.5 py-0.5 rounded-md",
-              UNIT_COLORS[project.businessUnit] ??
-                "bg-neutral-100 text-neutral-500",
+              UNIT_COLOR,
             )}
           >
             {project.businessUnit}
@@ -114,8 +105,7 @@ export function KanbanCard({ project, column, onClick }: KanbanCardProps) {
           <span
             className={cn(
               "text-[10px] font-medium px-1.5 py-0.5 rounded-md",
-              TYPE_COLORS[project.productionType] ??
-                "bg-neutral-100 text-neutral-500",
+              TYPE_COLOR,
             )}
           >
             {project.productionType}

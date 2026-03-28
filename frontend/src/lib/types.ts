@@ -69,7 +69,7 @@ export interface Project {
   createdAt: string;
 }
 
-export type KanbanColumn = "교안작성" | "리허설" | "제작" | "롤아웃";
+export type KanbanColumn = "교안작성" | "제작" | "롤아웃";
 
 export interface DdayGroup {
   label: string;
