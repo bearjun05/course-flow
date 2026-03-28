@@ -63,11 +63,13 @@ export function KanbanCard({ project, column, onClick }: KanbanCardProps) {
       {...listeners}
       onClick={() => onClick(project)}
       className={cn(
-        "cursor-grab rounded-xl bg-white border border-neutral-100 p-4 shadow-sm transition-all duration-200",
+        "cursor-grab rounded-xl border p-4 shadow-sm transition-all duration-200",
         isDragging
           ? "z-50 rotate-1 shadow-lg"
           : "hover:-translate-y-0.5 hover:shadow-md",
-        isOverdue && "border-l-2 border-l-[#FA0030]",
+        isOverdue
+          ? "bg-[#FCF2F4] border-[#FFD6DC] border-l-2 border-l-[#FA0030]"
+          : "bg-white border-neutral-100",
       )}
     >
       {/* 제목 + D-Day 한 줄 */}
