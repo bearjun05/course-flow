@@ -23,11 +23,9 @@ interface DeadlineListViewProps {
 
 const STATUS_COLORS: Record<string, string> = {
   교안: "bg-[#EDF2DC] text-[#7A9445]",
-  리허설: "bg-[#E6EDCF] text-[#728A3E]",
-  촬영: "bg-[#DEEAC2] text-[#6A8438]",
-  편집: "bg-[#D7E5B5] text-[#627E34]",
-  검수: "bg-[#CFDFAB] text-[#5A7830]",
-  롤아웃: "bg-[#CCDC9F] text-[#527228]",
+  촬영: "bg-[#E5EDCF] text-[#728A3E]",
+  "편집/검수": "bg-[#DDE9C2] text-[#6A8438]",
+  롤아웃: "bg-[#D6E5B6] text-[#628034]",
 };
 
 const TRAFFIC_LIGHT_COLORS: Record<string, string> = {

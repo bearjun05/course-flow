@@ -1,10 +1,8 @@
 export type ProjectStatus =
   | "기획"
   | "교안"
-  | "리허설"
   | "촬영"
-  | "편집"
-  | "검수"
+  | "편집/검수"
   | "롤아웃"
   | "완료"
   | "중단";
@@ -69,7 +67,7 @@ export interface Project {
   createdAt: string;
 }
 
-export type KanbanColumn = "교안작성" | "리허설" | "제작" | "롤아웃";
+export type KanbanColumn = "교안" | "촬영" | "편집/검수" | "롤아웃";
 
 export interface DdayGroup {
   label: string;
