@@ -19,23 +19,18 @@ interface DeadlineListViewProps {
   flat?: boolean; // true = 섹션 없이 DB 스타일 전체 목록
 }
 
+// 프로그래스바와 동일한 올리브 그린 팔레트 (배경은 밝게, 텍스트는 중간 톤)
 const STATUS_COLORS: Record<string, string> = {
   기획: "bg-neutral-100 text-neutral-500",
-  교안: "bg-sky-50 text-sky-500",
-  리허설: "bg-violet-50 text-violet-500",
-  촬영: "bg-orange-50 text-orange-500",
-  편집: "bg-amber-50 text-amber-500",
-  자막: "bg-teal-50 text-teal-500",
-  검수: "bg-cyan-50 text-cyan-600",
-  롤아웃: "bg-green-50 text-green-600",
+  교안: "bg-[#EDF2DC] text-[#7A9445]",
+  리허설: "bg-[#E4EDCA] text-[#728A3E]",
+  촬영: "bg-[#D9E6B8] text-[#628034]",
+  편집: "bg-[#CCDC9F] text-[#5A7830]",
+  자막: "bg-[#C0D088] text-[#52702A]",
+  검수: "bg-[#B4C874] text-[#4A6824]",
+  롤아웃: "bg-[#A8BE60] text-[#42601E]",
   완료: "bg-neutral-100 text-neutral-400",
   중단: "bg-neutral-100 text-neutral-400",
-};
-
-const PRODUCTION_TYPE_COLORS: Record<string, string> = {
-  신규: "bg-neutral-100 text-neutral-400",
-  부분리뉴얼: "bg-neutral-100 text-neutral-400",
-  전체리뉴얼: "bg-neutral-100 text-neutral-400",
 };
 
 const TRAFFIC_LIGHT_COLORS: Record<string, string> = {
@@ -80,10 +75,17 @@ function ProjectRow({
         <Video className="w-3.5 h-3.5 text-neutral-400" />
       </div>
 
-      {/* 제목 */}
-      <span className="text-[13px] font-medium text-foreground truncate flex-1 min-w-0">
-        {project.title}
-      </span>
+      {/* 제목 + 버전 */}
+      <div className="flex items-baseline gap-1.5 flex-1 min-w-0">
+        <span className="text-[13px] font-medium text-foreground truncate">
+          {project.title}
+        </span>
+        {project.version && (
+          <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-md bg-neutral-100 text-neutral-400 shrink-0">
+            {project.version}
+          </span>
+        )}
+      </div>
 
       {/* 배지 그룹 */}
       <div className="flex items-center gap-1 shrink-0">
@@ -92,16 +94,6 @@ function ProjectRow({
           {[project.businessUnit, project.trackName]
             .filter(Boolean)
             .join(" · ")}
-        </span>
-        {/* 강의버전 */}
-        <span
-          className={cn(
-            "text-[10px] font-medium px-1.5 py-0.5 rounded-md",
-            PRODUCTION_TYPE_COLORS[project.productionType] ??
-              "bg-neutral-100 text-neutral-400",
-          )}
-        >
-          {project.productionType}
         </span>
         {/* 상태 */}
         <span
