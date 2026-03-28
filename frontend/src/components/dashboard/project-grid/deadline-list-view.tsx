@@ -21,6 +21,13 @@ interface DeadlineListViewProps {
   flat?: boolean; // true = 섹션 없이 DB 스타일 전체 목록
 }
 
+const STATUS_COLORS: Record<string, string> = {
+  교안: "bg-[#EDF2DC] text-[#7A9445]",
+  리허설: "bg-[#E4EDCA] text-[#728A3E]",
+  제작: "bg-[#D9E6B8] text-[#628034]",
+  롤아웃: "bg-[#CCDC9F] text-[#5A7830]",
+};
+
 const TRAFFIC_LIGHT_COLORS: Record<string, string> = {
   green: "bg-[#6ECC9A]",
   yellow: "bg-[#F5C842]",
@@ -96,7 +103,7 @@ function ProjectRow({
         <span
           className={cn(
             "text-[10px] font-medium px-1.5 py-0.5 rounded-md",
-            theme.typeBadge,
+            STATUS_COLORS[project.status] ?? theme.typeBadge,
           )}
         >
           {project.status}
