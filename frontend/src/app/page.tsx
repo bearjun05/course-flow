@@ -14,6 +14,13 @@ import type {
   KanbanColumn,
 } from "@/lib/types";
 import { KANBAN_TO_STATUS } from "@/lib/constants";
+import {
+  BadgeThemeProvider,
+  useBadgeTheme,
+  BADGE_THEMES,
+  type BadgeThemeKey,
+} from "@/lib/badge-theme";
+import { cn } from "@/lib/utils";
 
 export default function DashboardPage() {
   const [projects, setProjects] = useState<Project[]>(mockProjects);
@@ -82,6 +89,68 @@ export default function DashboardPage() {
   );
 
   return (
+    <BadgeThemeProvider>
+      <DashboardContent
+        projects={projects}
+        onKanbanStatusChange={handleKanbanStatusChange}
+        onStatusChange={handleStatusChange}
+        onTrafficLightChange={handleTrafficLightChange}
+        onRolloutChange={handleRolloutChange}
+        onDelete={handleDelete}
+        onDuplicate={handleDuplicate}
+        onHide={handleHide}
+      />
+    </BadgeThemeProvider>
+  );
+}
+
+function BadgeThemeToggle() {
+  const { themeKey, setThemeKey } = useBadgeTheme();
+  return (
+    <div className="flex items-center gap-2">
+      <span className="text-[11px] text-muted-foreground">배지 색상</span>
+      <div className="flex items-center rounded-lg border border-border p-0.5 gap-0.5">
+        {(["A", "B", "C"] as BadgeThemeKey[]).map((key) => (
+          <button
+            key={key}
+            onClick={() => setThemeKey(key)}
+            className={cn(
+              "rounded-md px-2.5 py-1 text-xs transition-colors",
+              themeKey === key
+                ? "bg-background shadow-sm text-foreground font-medium"
+                : "text-muted-foreground hover:text-foreground",
+            )}
+          >
+            {key} · {BADGE_THEMES[key].description}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+interface DashboardContentProps {
+  projects: Project[];
+  onKanbanStatusChange: (projectId: string, newColumn: KanbanColumn) => void;
+  onStatusChange: (projectId: string, status: ProjectStatus) => void;
+  onTrafficLightChange: (projectId: string, light: TrafficLight) => void;
+  onRolloutChange: (projectId: string, date: string) => void;
+  onDelete: (projectId: string) => void;
+  onDuplicate: (projectId: string) => void;
+  onHide: (projectId: string) => void;
+}
+
+function DashboardContent({
+  projects,
+  onKanbanStatusChange,
+  onStatusChange,
+  onTrafficLightChange,
+  onRolloutChange,
+  onDelete,
+  onDuplicate,
+  onHide,
+}: DashboardContentProps) {
+  return (
     <div className="min-h-screen">
       <AppHeader title="강의 제작 페이지" />
 
@@ -90,21 +159,26 @@ export default function DashboardPage() {
 
         <Separator />
 
+        <div className="flex items-center justify-between mb-2">
+          <div />
+          <BadgeThemeToggle />
+        </div>
+
         <KanbanBoard
           projects={projects}
-          onStatusChange={handleKanbanStatusChange}
+          onStatusChange={onKanbanStatusChange}
         />
 
         <Separator />
 
         <ProjectGrid
           projects={projects}
-          onStatusChange={handleStatusChange}
-          onTrafficLightChange={handleTrafficLightChange}
-          onRolloutChange={handleRolloutChange}
-          onDelete={handleDelete}
-          onDuplicate={handleDuplicate}
-          onHide={handleHide}
+          onStatusChange={onStatusChange}
+          onTrafficLightChange={onTrafficLightChange}
+          onRolloutChange={onRolloutChange}
+          onDelete={onDelete}
+          onDuplicate={onDuplicate}
+          onHide={onHide}
         />
       </div>
     </div>

@@ -6,6 +6,7 @@ import { User, BookOpen } from "lucide-react";
 import type { Project, KanbanColumn } from "@/lib/types";
 import { getDday, formatDday, getDdayColor, cn } from "@/lib/utils";
 import { ChapterPipeline } from "@/components/dashboard/chapter-pipeline";
+import { useBadgeTheme } from "@/lib/badge-theme";
 
 interface KanbanCardProps {
   project: Project;
@@ -20,11 +21,8 @@ function getCompletionRate(project: Project): number {
   return Math.round((done / tasks.length) * 100);
 }
 
-const UNIT_COLOR = "bg-yellow-100 text-yellow-700";
-
-const TYPE_COLOR = "bg-[#FAF0E6] text-[#A0673A]";
-
 export function KanbanCard({ project, column, onClick }: KanbanCardProps) {
+  const { theme } = useBadgeTheme();
   const {
     attributes,
     listeners,
@@ -91,7 +89,7 @@ export function KanbanCard({ project, column, onClick }: KanbanCardProps) {
           <span
             className={cn(
               "text-[10px] font-medium px-1.5 py-0.5 rounded-md",
-              UNIT_COLOR,
+              theme.unitBadge,
             )}
           >
             {project.businessUnit}
@@ -105,7 +103,7 @@ export function KanbanCard({ project, column, onClick }: KanbanCardProps) {
           <span
             className={cn(
               "text-[10px] font-medium px-1.5 py-0.5 rounded-md",
-              TYPE_COLOR,
+              theme.typeBadge,
             )}
           >
             {project.productionType}

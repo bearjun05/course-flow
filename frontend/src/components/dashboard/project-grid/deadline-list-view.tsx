@@ -12,6 +12,7 @@ import {
   cn,
 } from "@/lib/utils";
 import { DDAY_GROUPS } from "@/lib/constants";
+import { useBadgeTheme } from "@/lib/badge-theme";
 
 interface DeadlineListViewProps {
   projects: Project[];
@@ -47,6 +48,7 @@ function ProjectRow({
   project: Project;
   simple?: boolean;
 }) {
+  const { theme } = useBadgeTheme();
   const dday = getDday(project.rolloutDate);
   const isOverdue = dday < 0 && project.status !== "완료";
   const isCompleted = project.status === "완료";
@@ -80,7 +82,12 @@ function ProjectRow({
           {project.title}
         </span>
         {project.version && (
-          <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-md bg-[#DFF0FA] text-[#5A8CB8] shrink-0">
+          <span
+            className={cn(
+              "text-[10px] font-medium px-1.5 py-0.5 rounded-md shrink-0",
+              theme.versionBadge,
+            )}
+          >
             {project.version}
           </span>
         )}
@@ -89,7 +96,12 @@ function ProjectRow({
       {/* 배지 그룹 */}
       <div className="flex items-center gap-1 shrink-0">
         {/* 사업부 */}
-        <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-md bg-neutral-100 text-neutral-500">
+        <span
+          className={cn(
+            "text-[10px] font-medium px-1.5 py-0.5 rounded-md",
+            theme.listUnitBadge,
+          )}
+        >
           {[project.businessUnit, project.trackName]
             .filter(Boolean)
             .join(" · ")}
