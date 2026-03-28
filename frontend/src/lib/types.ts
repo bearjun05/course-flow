@@ -1,7 +1,6 @@
 export type ProjectStatus =
   | "기획"
   | "교안"
-  | "리허설"
   | "촬영"
   | "편집"
   | "자막"

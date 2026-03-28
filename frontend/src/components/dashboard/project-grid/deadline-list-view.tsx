@@ -19,16 +19,15 @@ interface DeadlineListViewProps {
   flat?: boolean; // true = 섹션 없이 DB 스타일 전체 목록
 }
 
-// 프로그래스바와 동일한 올리브 그린 팔레트 (배경은 밝게, 텍스트는 중간 톤)
+// 프로그래스바와 동일한 올리브 그린 팔레트
 const STATUS_COLORS: Record<string, string> = {
   기획: "bg-neutral-100 text-neutral-500",
   교안: "bg-[#EDF2DC] text-[#7A9445]",
-  리허설: "bg-[#E4EDCA] text-[#728A3E]",
-  촬영: "bg-[#D9E6B8] text-[#628034]",
-  편집: "bg-[#CCDC9F] text-[#5A7830]",
-  자막: "bg-[#C0D088] text-[#52702A]",
-  검수: "bg-[#B4C874] text-[#4A6824]",
-  롤아웃: "bg-[#A8BE60] text-[#42601E]",
+  촬영: "bg-[#E4EDCA] text-[#728A3E]",
+  편집: "bg-[#D9E6B8] text-[#628034]",
+  자막: "bg-[#D4E2AE] text-[#5C7A30]",
+  검수: "bg-[#CCDC9F] text-[#5A7830]",
+  롤아웃: "bg-[#CCDC9F] text-[#5A7830]",
   완료: "bg-neutral-100 text-neutral-400",
   중단: "bg-neutral-100 text-neutral-400",
 };
