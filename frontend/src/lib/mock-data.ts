@@ -149,6 +149,24 @@ const project3Tasks = createChapterTasks(
   },
 );
 
+// Project 6: 롤아웃, 3 chapters, all done
+const project6Tasks = createChapterTasks(
+  "proj-6",
+  3,
+  (ch, type) => {
+    if (ch === 0) return type === "리허설" ? "완료" : "진행";
+    return "완료";
+  },
+  () => "김선우",
+  (ch, type) => {
+    if (ch === 0)
+      return type === "리허설"
+        ? { start: "2026-01-20", end: "2026-01-22" }
+        : { start: "2026-03-27", end: undefined };
+    return { start: "2026-02-01", end: "2026-03-20" };
+  },
+);
+
 // Project 4: 교안작성, 6 chapters, early stage
 const project4Tasks = createChapterTasks(
   "proj-4",
@@ -356,6 +374,26 @@ export const mockProjects: Project[] = [
     videoFeedbacks: [],
     note: "1~3챕터 교안 작성 중",
     createdAt: "2026-01-20T10:00:00Z",
+  },
+  {
+    id: "proj-6",
+    title: "마케팅 실무의 이해",
+    version: "v1.0",
+    status: "롤아웃",
+    businessUnit: "KDT",
+    trackName: "디지털 마케터",
+    productionType: "전체리뉴얼",
+    rolloutDate: "2026-03-27",
+    paymentDate: "2026-04-27",
+    chapterCount: 3,
+    chapterDurations: [2.0, 2.0, 2.0],
+    tutor: "김선우",
+    slackChannel: "#courseflow-marketing",
+    trafficLight: "green",
+    tasks: project6Tasks,
+    lectures: createLectures("proj-6", [2.0, 2.0, 2.0]),
+    videoFeedbacks: [],
+    createdAt: "2025-12-01T09:00:00Z",
   },
   {
     id: "proj-5",
