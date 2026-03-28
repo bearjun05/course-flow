@@ -21,15 +21,15 @@ function getCompletionRate(project: Project): number {
 }
 
 const UNIT_COLORS: Record<string, string> = {
-  KDT: "bg-blue-100 text-blue-700",
-  KDC: "bg-violet-100 text-violet-700",
-  신사업: "bg-amber-100 text-amber-700",
+  KDT: "bg-[#C9F0FB] text-[#0B6885]", // Sparta Blue
+  KDC: "bg-[#F1D8FA] text-[#8723BA]", // Sparta Purple
+  신사업: "bg-[#F5D3DD] text-[#850028]", // Dark Red
 };
 
 const TYPE_COLORS: Record<string, string> = {
-  신규: "bg-emerald-100 text-emerald-700",
-  부분리뉴얼: "bg-orange-100 text-orange-700",
-  전체리뉴얼: "bg-rose-100 text-rose-700",
+  신규: "bg-[#DDF7FE] text-[#2992B2]", // Sparta Blue light
+  부분리뉴얼: "bg-[#F6E1FD] text-[#A936C2]", // Sparta Purple light
+  전체리뉴얼: "bg-[#F5EBEE] text-[#C4315E]", // Dark Red light
 };
 
 export function KanbanCard({ project, column, onClick }: KanbanCardProps) {
@@ -67,7 +67,7 @@ export function KanbanCard({ project, column, onClick }: KanbanCardProps) {
         isDragging
           ? "z-50 rotate-1 shadow-lg"
           : "hover:-translate-y-0.5 hover:shadow-md",
-        isOverdue && "border-l-2 border-l-red-400",
+        isOverdue && "border-l-2 border-l-[#C4315E]",
       )}
     >
       {/* 제목 + D-Day 한 줄 */}

@@ -113,46 +113,47 @@ function MetricCard({
   const isGood = variant === "danger" && value === 0;
   const isNeutral = variant === "default";
 
+  // 지연 있음 → Dark Red / 지연 없음 → Sparta Purple / 오늘 태스크 → Sparta Blue
   const cardBg = isDanger
-    ? "bg-gradient-to-br from-red-50 to-rose-50/60"
+    ? "bg-gradient-to-br from-[#F5EBEE] to-[#F5D3DD]/50"
     : isGood
-      ? "bg-gradient-to-br from-green-50 to-emerald-50/60"
-      : "bg-gradient-to-br from-neutral-50 to-gray-50/60";
+      ? "bg-gradient-to-br from-[#F9EEFD] to-[#F6E1FD]/50"
+      : "bg-gradient-to-br from-[#EFFBFE] to-[#DDF7FE]/50";
   const iconWrapperBg = isDanger
-    ? "bg-red-100/80"
+    ? "bg-[#F0B4C6]/80"
     : isGood
-      ? "bg-green-100/80"
-      : "bg-neutral-200/60";
+      ? "bg-[#F1D8FA]/80"
+      : "bg-[#C9F0FB]/80";
   const iconColor = isDanger
-    ? "text-red-500"
+    ? "text-[#C4315E]"
     : isGood
-      ? "text-green-500"
-      : "text-neutral-400";
+      ? "text-[#A936C2]"
+      : "text-[#2992B2]";
   const titleColor = isDanger
-    ? "text-red-700"
+    ? "text-[#850028]"
     : isGood
-      ? "text-green-700"
-      : "text-neutral-600";
+      ? "text-[#8723BA]"
+      : "text-[#0B6885]";
   const valueColor = isDanger
-    ? "text-red-600"
+    ? "text-[#C4315E]"
     : isGood
-      ? "text-green-600"
-      : "text-neutral-500";
+      ? "text-[#A936C2]"
+      : "text-[#2992B2]";
   const detailColor = isDanger
-    ? "text-red-400"
+    ? "text-[#E890AB]"
     : isGood
-      ? "text-green-400"
-      : "text-neutral-400";
+      ? "text-[#CA50E5]"
+      : "text-[#6BDBF2]";
   const borderColor = isDanger
-    ? "border-red-100"
+    ? "border-[#F5D3DD]"
     : isGood
-      ? "border-green-100"
-      : "border-neutral-200";
+      ? "border-[#F1D8FA]"
+      : "border-[#C9F0FB]";
   const dividerColor = isDanger
-    ? "border-red-200/60"
+    ? "border-[#F0B4C6]/60"
     : isGood
-      ? "border-green-200/60"
-      : "border-neutral-200/60";
+      ? "border-[#E992FC]/60"
+      : "border-[#9BEAFA]/60";
 
   return (
     <div
@@ -197,10 +198,10 @@ function MetricCard({
               className={cn(
                 "h-4 w-4 transition-transform",
                 isDanger
-                  ? "text-red-300"
+                  ? "text-[#E890AB]"
                   : isGood
-                    ? "text-green-300"
-                    : "text-neutral-300",
+                    ? "text-[#E992FC]"
+                    : "text-[#9BEAFA]",
                 expanded && "rotate-180",
               )}
             />
