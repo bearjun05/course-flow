@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { Video } from "lucide-react";
 import type { Project, ProjectStatus, TrafficLight } from "@/lib/types";
@@ -130,10 +131,13 @@ export function DeadlineListView({
   projects,
   flat = false,
 }: DeadlineListViewProps) {
+  const [sortBy, setSortBy] = useState<"deadline" | "name">("deadline");
+
   if (flat) {
-    // DB 스타일: 섹션 없이 마감일 순 전체 목록
-    const sorted = [...projects].sort(
-      (a, b) => getDday(a.rolloutDate) - getDday(b.rolloutDate),
+    const sorted = [...projects].sort((a, b) =>
+      sortBy === "name"
+        ? a.title.localeCompare(b.title, "ko")
+        : getDday(a.rolloutDate) - getDday(b.rolloutDate),
     );
     return (
       <div>
@@ -145,6 +149,30 @@ export function DeadlineListView({
             {sorted.length}
           </span>
           <div className="flex-1 h-px bg-border" />
+          <div className="flex items-center rounded-md border border-border p-0.5 gap-0.5">
+            <button
+              onClick={() => setSortBy("deadline")}
+              className={cn(
+                "rounded px-2 py-0.5 text-[11px] transition-colors",
+                sortBy === "deadline"
+                  ? "bg-background shadow-sm text-foreground font-medium"
+                  : "text-muted-foreground hover:text-foreground",
+              )}
+            >
+              마감일
+            </button>
+            <button
+              onClick={() => setSortBy("name")}
+              className={cn(
+                "rounded px-2 py-0.5 text-[11px] transition-colors",
+                sortBy === "name"
+                  ? "bg-background shadow-sm text-foreground font-medium"
+                  : "text-muted-foreground hover:text-foreground",
+              )}
+            >
+              이름
+            </button>
+          </div>
         </div>
         <div className="rounded-xl border border-border overflow-hidden divide-y divide-border">
           {sorted.map((project) => (
