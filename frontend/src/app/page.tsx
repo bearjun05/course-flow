@@ -14,13 +14,7 @@ import type {
   KanbanColumn,
 } from "@/lib/types";
 import { KANBAN_TO_STATUS } from "@/lib/constants";
-import {
-  BadgeThemeProvider,
-  useBadgeTheme,
-  BADGE_THEMES,
-  type BadgeThemeKey,
-} from "@/lib/badge-theme";
-import { cn } from "@/lib/utils";
+import { BadgeThemeProvider } from "@/lib/badge-theme";
 
 export default function DashboardPage() {
   const [projects, setProjects] = useState<Project[]>(mockProjects);
@@ -104,31 +98,6 @@ export default function DashboardPage() {
   );
 }
 
-function BadgeThemeToggle() {
-  const { themeKey, setThemeKey } = useBadgeTheme();
-  return (
-    <div className="flex items-center gap-2">
-      <span className="text-[11px] text-muted-foreground">배지 색상</span>
-      <div className="flex items-center rounded-lg border border-border p-0.5 gap-0.5">
-        {(["A", "B", "C"] as BadgeThemeKey[]).map((key) => (
-          <button
-            key={key}
-            onClick={() => setThemeKey(key)}
-            className={cn(
-              "rounded-md px-2.5 py-1 text-xs transition-colors",
-              themeKey === key
-                ? "bg-background shadow-sm text-foreground font-medium"
-                : "text-muted-foreground hover:text-foreground",
-            )}
-          >
-            {key} · {BADGE_THEMES[key].description}
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-}
-
 interface DashboardContentProps {
   projects: Project[];
   onKanbanStatusChange: (projectId: string, newColumn: KanbanColumn) => void;
@@ -158,11 +127,6 @@ function DashboardContent({
         <SummaryMetrics projects={projects} />
 
         <Separator />
-
-        <div className="flex items-center justify-between mb-2">
-          <div />
-          <BadgeThemeToggle />
-        </div>
 
         <KanbanBoard
           projects={projects}

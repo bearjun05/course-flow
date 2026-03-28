@@ -27,7 +27,7 @@ export const BADGE_THEMES: Record<BadgeThemeKey, BadgeTheme> = {
     description: "올리브+뉴트럴",
     unitBadge: "bg-[#F5F0E8] text-[#8B7A55]",
     typeBadge: "bg-[#EEF0E6] text-[#6E7A55]",
-    versionBadge: "bg-[#DFF0FA] text-[#5A8CB8]",
+    versionBadge: "bg-neutral-100 text-neutral-400",
     listUnitBadge: "bg-[#F5F0E8] text-[#8B7A55]",
   },
   C: {
