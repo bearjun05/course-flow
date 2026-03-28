@@ -4,7 +4,6 @@ export type ProjectStatus =
   | "리허설"
   | "촬영"
   | "편집"
-  | "자막"
   | "검수"
   | "롤아웃"
   | "완료"

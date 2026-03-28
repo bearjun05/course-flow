@@ -11,7 +11,9 @@ export const PROJECT_STATUSES: { value: ProjectStatus; label: string }[] = [
   { value: "기획", label: "기획" },
   { value: "교안", label: "교안" },
   { value: "리허설", label: "리허설" },
-  { value: "제작", label: "제작" },
+  { value: "촬영", label: "촬영" },
+  { value: "편집", label: "편집" },
+  { value: "검수", label: "검수" },
   { value: "롤아웃", label: "롤아웃" },
   { value: "완료", label: "완료" },
   { value: "중단", label: "중단" },
@@ -20,14 +22,16 @@ export const PROJECT_STATUSES: { value: ProjectStatus; label: string }[] = [
 export const STATUS_TO_KANBAN: Partial<Record<ProjectStatus, KanbanColumn>> = {
   교안: "교안작성",
   리허설: "리허설",
-  제작: "제작",
+  촬영: "제작",
+  편집: "제작",
+  검수: "제작",
   롤아웃: "롤아웃",
 };
 
 export const KANBAN_TO_STATUS: Record<KanbanColumn, ProjectStatus> = {
   교안작성: "교안",
   리허설: "리허설",
-  제작: "제작",
+  제작: "촬영",
   롤아웃: "롤아웃",
 };
 
@@ -81,9 +85,11 @@ export const PRODUCTION_PROCESSES = [
 export const STATUS_BADGE_VARIANT: Record<ProjectStatus, string> = {
   기획: "bg-neutral-100 text-neutral-500",
   교안: "bg-[#EDF2DC] text-[#7A9445]",
-  리허설: "bg-[#E4EDCA] text-[#728A3E]",
-  제작: "bg-[#D9E6B8] text-[#628034]",
-  롤아웃: "bg-[#CCDC9F] text-[#5A7830]",
+  리허설: "bg-[#E6EDCF] text-[#728A3E]",
+  촬영: "bg-[#DEEAC2] text-[#6A8438]",
+  편집: "bg-[#D7E5B5] text-[#627E34]",
+  검수: "bg-[#CFDFAB] text-[#5A7830]",
+  롤아웃: "bg-[#CCDC9F] text-[#527228]",
   완료: "bg-neutral-100 text-neutral-400",
   중단: "bg-neutral-100 text-neutral-400",
 };
