@@ -3,33 +3,24 @@
 import type { Project, TaskType } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
-const PIPELINE_STAGE_NAMES = [
-  "교안",
-  "촬영",
-  "편집",
-  "자막",
-  "검수",
-  "배포",
-] as const;
+const PIPELINE_STAGE_NAMES = ["교안", "촬영", "편집", "자막", "검수"] as const;
 type PipelineStageName = (typeof PIPELINE_STAGE_NAMES)[number];
 
-const PIPELINE_TASK_TYPES: (TaskType | null)[] = [
+const PIPELINE_TASK_TYPES: TaskType[] = [
   "교안제작",
   "촬영",
   "편집",
   "자막",
   "검수",
-  null, // 배포: 챕터 내 모든 태스크 완료 시
 ];
 
-// 채워진 슬롯에 사용할 색상 (교안→촬영→편집→자막→검수→배포 순)
+// 채워진 슬롯에 사용할 색상 (교안→촬영→편집→자막→검수 순)
 const SLOT_FILLED_COLORS = [
   "bg-neutral-300", // 교안
   "bg-[#FFD400]", // 촬영
   "bg-[#F2E600]", // 편집
   "bg-[#D4E600]", // 자막
   "bg-[#A8E600]", // 검수
-  "bg-[#66CC33]", // 배포
 ];
 
 function getChapterProgress(
@@ -39,23 +30,9 @@ function getChapterProgress(
   const tasks = project.tasks.filter((t) => t.chapter === chapter);
   if (tasks.length === 0) return { filledCount: 0, stageName: "교안" };
 
-  // 모든 챕터 태스크 완료 → 배포(6번째) 슬롯까지 채움
-  const chapterTaskTypes: TaskType[] = [
-    "교안제작",
-    "촬영",
-    "편집",
-    "자막",
-    "검수",
-  ];
-  const allDone = chapterTaskTypes.every((type) => {
-    const t = tasks.find((x) => x.taskType === type);
-    return t?.status === "완료";
-  });
-  if (allDone) return { filledCount: 6, stageName: "배포" };
-
   // 가장 진행된 단계 찾기 (역순 탐색)
   for (let i = 4; i >= 0; i--) {
-    const taskType = PIPELINE_TASK_TYPES[i] as TaskType;
+    const taskType = PIPELINE_TASK_TYPES[i];
     const task = tasks.find((t) => t.taskType === taskType);
     if (
       task &&
@@ -120,11 +97,11 @@ export function ChapterPipeline({ project }: ChapterPipelineProps) {
 
   return (
     <div className="space-y-1.5">
-      {/* 챕터별 6칸 진척도 — 전체 너비 채움 */}
-      <div className="flex w-full gap-1">
+      {/* 챕터별 5칸 진척도 — 전체 너비 채움 */}
+      <div className="flex w-full gap-2">
         {chapterData.map(({ ch, filledCount }) => (
           <div key={ch} className="flex flex-1 gap-[2px]">
-            {Array.from({ length: 6 }, (_, i) => (
+            {Array.from({ length: 5 }, (_, i) => (
               <div
                 key={i}
                 className={cn(

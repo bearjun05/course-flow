@@ -77,7 +77,7 @@ export function KanbanCard({ project, column, onClick }: KanbanCardProps) {
         </p>
         <span
           className={cn(
-            "text-[11px] font-medium shrink-0 mt-0.5",
+            "text-[13.5px] font-medium shrink-0",
             getDdayColor(dday),
           )}
         >

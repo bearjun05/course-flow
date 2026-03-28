@@ -1,4 +1,12 @@
-import type { Project, ChapterTask, TaskType, TaskStatus, Lecture, VideoFeedback, VideoReview } from "./types";
+import type {
+  Project,
+  ChapterTask,
+  TaskType,
+  TaskStatus,
+  Lecture,
+  VideoFeedback,
+  VideoReview,
+} from "./types";
 
 const TASK_TYPES_PER_CHAPTER: TaskType[] = [
   "교안제작",
@@ -13,7 +21,10 @@ function createChapterTasks(
   chapterCount: number,
   statusFn: (chapter: number, taskType: TaskType) => TaskStatus,
   assigneeFn?: (chapter: number, taskType: TaskType) => string | undefined,
-  dateFn?: (chapter: number, taskType: TaskType) => { start?: string; end?: string }
+  dateFn?: (
+    chapter: number,
+    taskType: TaskType,
+  ) => { start?: string; end?: string },
 ): ChapterTask[] {
   const tasks: ChapterTask[] = [];
 
@@ -65,13 +76,18 @@ const project1Tasks = createChapterTasks(
   () => "완료",
   () => undefined,
   (ch, type) => {
-    const day = ch === 0 ? (type === "리허설" ? 5 : 18) : 10 + ch * 5 + TASK_TYPES_PER_CHAPTER.indexOf(type);
+    const day =
+      ch === 0
+        ? type === "리허설"
+          ? 5
+          : 18
+        : 10 + ch * 5 + TASK_TYPES_PER_CHAPTER.indexOf(type);
     const d = Math.min(28, Math.max(1, day));
     return {
       start: `2025-12-${String(d).padStart(2, "0")}`,
       end: `2025-12-${String(Math.min(28, d + 2)).padStart(2, "0")}`,
     };
-  }
+  },
 );
 
 // Project 2: 촬영, 5 chapters, mix of completed/in-progress
@@ -100,12 +116,18 @@ const project2Tasks = createChapterTasks(
         ? { start: "2026-02-10", end: "2026-02-12" }
         : {};
     const idx = TASK_TYPES_PER_CHAPTER.indexOf(type);
-    const completed = (ch <= 2 && idx <= 2) || (ch === 3 && idx <= 1) || (ch >= 4 && type === "교안제작");
-    const inProgress = (ch <= 2 && idx === 3) || (ch === 3 && idx === 2) || (ch >= 4 && type === "촬영");
+    const completed =
+      (ch <= 2 && idx <= 2) ||
+      (ch === 3 && idx <= 1) ||
+      (ch >= 4 && type === "교안제작");
+    const inProgress =
+      (ch <= 2 && idx === 3) ||
+      (ch === 3 && idx === 2) ||
+      (ch >= 4 && type === "촬영");
     if (completed) return { start: "2026-02-15", end: "2026-03-01" };
     if (inProgress) return { start: "2026-03-02", end: undefined };
     return {};
-  }
+  },
 );
 
 // Project 3: 편집_검수, 3 chapters, most filming done
@@ -121,12 +143,10 @@ const project3Tasks = createChapterTasks(
   () => "이준혁",
   (ch, type) => {
     const idx = TASK_TYPES_PER_CHAPTER.indexOf(type);
-    if (idx <= 2)
-      return { start: "2026-02-01", end: "2026-02-28" };
-    if (idx === 3)
-      return { start: "2026-03-01", end: undefined };
+    if (idx <= 2) return { start: "2026-02-01", end: "2026-02-28" };
+    if (idx === 3) return { start: "2026-03-01", end: undefined };
     return {};
-  }
+  },
 );
 
 // Project 4: 교안작성, 6 chapters, early stage
@@ -143,10 +163,13 @@ const project4Tasks = createChapterTasks(
     if (type === "교안제작" && ch <= 3)
       return { start: "2026-02-25", end: undefined };
     return {};
-  }
+  },
 );
 
-function createLectures(projectId: string, chapterDurations: number[]): Lecture[] {
+function createLectures(
+  projectId: string,
+  chapterDurations: number[],
+): Lecture[] {
   const lectures: Lecture[] = [];
   chapterDurations.forEach((dur, idx) => {
     const ch = idx + 1;
@@ -158,7 +181,10 @@ function createLectures(projectId: string, chapterDurations: number[]): Lecture[
         chapter: ch,
         lectureNumber: l,
         label: `${ch}-${l}`,
-        videoUrls: l <= 1 ? [`https://videos.example.com/${projectId}/${ch}-${l}.mp4`] : [],
+        videoUrls:
+          l <= 1
+            ? [`https://videos.example.com/${projectId}/${ch}-${l}.mp4`]
+            : [],
       });
     }
   });
@@ -168,21 +194,33 @@ function createLectures(projectId: string, chapterDurations: number[]): Lecture[
 const proj2Lectures = createLectures("proj-2", [2.0, 2.5, 2.0, 2.5, 2.0]);
 
 function makePmReview(scores: number[]): VideoReview {
-  const qIds = ["pm-q1","pm-q2","pm-q3","pm-q4","pm-q5","pm-q6"];
+  const qIds = ["pm-q1", "pm-q2", "pm-q3", "pm-q4", "pm-q5", "pm-q6"];
   return {
     reviewer: "pm",
-    scores: qIds.map((id, i) => ({ questionId: id, score: scores[i], comment: "" })),
-    averageScore: +(scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(1),
+    scores: qIds.map((id, i) => ({
+      questionId: id,
+      score: scores[i],
+      comment: "",
+    })),
+    averageScore: +(scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(
+      1,
+    ),
     completedAt: "2026-03-05T14:00:00Z",
   };
 }
 
 function makeCmReview(scores: number[]): VideoReview {
-  const qIds = ["cm-q1","cm-q2","cm-q3","cm-q4","cm-q5","cm-q6"];
+  const qIds = ["cm-q1", "cm-q2", "cm-q3", "cm-q4", "cm-q5", "cm-q6"];
   return {
     reviewer: "cm",
-    scores: qIds.map((id, i) => ({ questionId: id, score: scores[i], comment: "" })),
-    averageScore: +(scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(1),
+    scores: qIds.map((id, i) => ({
+      questionId: id,
+      score: scores[i],
+      comment: "",
+    })),
+    averageScore: +(scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(
+      1,
+    ),
     completedAt: "2026-03-05T16:00:00Z",
   };
 }
@@ -194,7 +232,8 @@ const proj2Feedbacks: VideoFeedback[] = [
     pmReview: makePmReview([5, 4, 5, 4, 5, 4]),
     cmReview: makeCmReview([4, 5, 4, 4, 5, 4]),
     verdict: "승인",
-    feedbackText: "전반적으로 의도한 내용과 영상 퀄리티가 충분히 확보되어 승인 가능합니다.",
+    feedbackText:
+      "전반적으로 의도한 내용과 영상 퀄리티가 충분히 확보되어 승인 가능합니다.",
   },
   {
     id: "fb-2",
@@ -202,7 +241,8 @@ const proj2Feedbacks: VideoFeedback[] = [
     pmReview: makePmReview([3, 3, 4, 3, 3, 4]),
     cmReview: makeCmReview([4, 3, 3, 3, 4, 3]),
     verdict: "보완",
-    feedbackText: "핵심 방향은 적절하나 일부 보완이 필요하여 수정 후 재검토가 필요합니다.",
+    feedbackText:
+      "핵심 방향은 적절하나 일부 보완이 필요하여 수정 후 재검토가 필요합니다.",
   },
   {
     id: "fb-3",
@@ -246,7 +286,7 @@ export const mockProjects: Project[] = [
     businessUnit: "KDT",
     trackName: "클라우드",
     productionType: "신규",
-    rolloutDate: "2026-03-20",
+    rolloutDate: "2026-04-20",
     paymentDate: "2026-04-20",
     chapterCount: 5,
     chapterDurations: [2.0, 2.5, 2.0, 2.5, 2.0],
