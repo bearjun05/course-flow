@@ -14,7 +14,7 @@ const PIPELINE_TASK_TYPES: TaskType[] = [
   "검수",
 ];
 
-const SLOT_FILLED_COLOR = "bg-black/25";
+const SLOT_FILLED_COLOR = "bg-[#49C9E3]/80";
 
 function getChapterProgress(
   project: Project,
