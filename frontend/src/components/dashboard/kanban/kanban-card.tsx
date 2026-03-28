@@ -2,9 +2,9 @@
 
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { User, BookOpen } from "lucide-react";
 import type { Project, KanbanColumn } from "@/lib/types";
 import { getDday, formatDday, getDdayColor, cn } from "@/lib/utils";
-import { Badge } from "@/components/ui/badge";
 import { ChapterPipeline } from "@/components/dashboard/chapter-pipeline";
 
 interface KanbanCardProps {
@@ -12,6 +12,25 @@ interface KanbanCardProps {
   column: KanbanColumn;
   onClick: (project: Project) => void;
 }
+
+function getCompletionRate(project: Project): number {
+  const tasks = project.tasks.filter((t) => t.chapter > 0);
+  if (tasks.length === 0) return 0;
+  const done = tasks.filter((t) => t.status === "완료").length;
+  return Math.round((done / tasks.length) * 100);
+}
+
+const UNIT_COLORS: Record<string, string> = {
+  KDT: "bg-blue-100 text-blue-700",
+  KDC: "bg-violet-100 text-violet-700",
+  신사업: "bg-amber-100 text-amber-700",
+};
+
+const TYPE_COLORS: Record<string, string> = {
+  신규: "bg-emerald-100 text-emerald-700",
+  부분리뉴얼: "bg-orange-100 text-orange-700",
+  전체리뉴얼: "bg-rose-100 text-rose-700",
+};
 
 export function KanbanCard({ project, column, onClick }: KanbanCardProps) {
   const {
@@ -30,6 +49,11 @@ export function KanbanCard({ project, column, onClick }: KanbanCardProps) {
 
   const dday = getDday(project.rolloutDate);
   const isOverdue = dday < 0;
+  const completion = getCompletionRate(project);
+
+  const label = [project.businessUnit, project.trackName]
+    .filter(Boolean)
+    .join(" · ");
 
   return (
     <div
@@ -39,38 +63,91 @@ export function KanbanCard({ project, column, onClick }: KanbanCardProps) {
       {...listeners}
       onClick={() => onClick(project)}
       className={cn(
-        "cursor-grab rounded-2xl border-0 p-3.5 shadow-[0_2px_10px_rgba(120,100,80,0.08)] transition-all duration-300",
+        "cursor-grab rounded-xl bg-white border border-neutral-100 p-4 shadow-sm transition-all duration-200",
         isDragging
-          ? "z-50 rotate-1 shadow-[0_8px_30px_rgba(120,100,80,0.18)]"
-          : "hover:-translate-y-1 hover:shadow-[0_6px_22px_rgba(120,100,80,0.14)]",
-        isOverdue ? "bg-red-50" : "bg-card",
+          ? "z-50 rotate-1 shadow-lg"
+          : "hover:-translate-y-0.5 hover:shadow-md",
+        isOverdue && "border-l-2 border-l-red-400",
       )}
     >
-      {/* 제목 + 사업부·트랙 + D-Day 한 줄 */}
-      <div className="flex items-center justify-between gap-2">
-        <p className="min-w-0 flex-1 truncate text-[13px] font-medium leading-snug text-foreground">
+      {/* 제목 + D-Day 한 줄 */}
+      <div className="flex items-start justify-between gap-2 mb-3">
+        <p className="text-[13.5px] font-semibold text-neutral-800 leading-snug line-clamp-2 flex-1">
           {project.title}
         </p>
-        <div className="flex shrink-0 items-center gap-1.5">
-          <Badge
-            variant="secondary"
-            className="h-5 px-1.5 text-[10px] font-normal"
+        <span
+          className={cn(
+            "text-[11px] font-medium shrink-0 mt-0.5",
+            getDdayColor(dday),
+          )}
+        >
+          {formatDday(dday)}
+        </span>
+      </div>
+
+      {/* 담당자 + 배지 */}
+      <div className="flex items-center gap-1.5 mb-3">
+        <div className="flex items-center justify-center w-5 h-5 rounded-full bg-neutral-100 shrink-0">
+          <User className="w-3 h-3 text-neutral-400" />
+        </div>
+        <span className="text-[11px] text-neutral-500 shrink-0">
+          {project.tutor ?? "미정"}
+        </span>
+        <div className="flex items-center gap-1 ml-auto">
+          <span
+            className={cn(
+              "text-[10px] font-medium px-1.5 py-0.5 rounded-md",
+              UNIT_COLORS[project.businessUnit] ??
+                "bg-neutral-100 text-neutral-500",
+            )}
           >
             {project.businessUnit}
-            {project.trackName ? ` · ${project.trackName}` : ""}
-          </Badge>
-          <span className="text-[10px] text-muted-foreground/40">·</span>
-          <p className={cn("text-[11px]", getDdayColor(dday))}>
-            {formatDday(dday)}
-          </p>
+          </span>
+          <span
+            className={cn(
+              "text-[10px] font-medium px-1.5 py-0.5 rounded-md",
+              TYPE_COLORS[project.productionType] ??
+                "bg-neutral-100 text-neutral-500",
+            )}
+          >
+            {project.productionType}
+          </span>
         </div>
       </div>
 
+      {/* 챕터 파이프라인 */}
       {project.chapterCount > 0 && (
-        <div className="mt-2.5">
+        <div className="mb-3">
           <ChapterPipeline project={project} />
         </div>
       )}
+
+      {/* 하단 메타 */}
+      <div className="flex items-center gap-3 text-[11px] text-neutral-400">
+        <span className="flex items-center gap-1">
+          <BookOpen className="w-3 h-3" />
+          {project.chapterCount}챕터
+        </span>
+        <span className="flex items-center gap-1">
+          <svg className="w-3 h-3" viewBox="0 0 12 12" fill="none">
+            <circle
+              cx="6"
+              cy="6"
+              r="5"
+              stroke="currentColor"
+              strokeWidth="1.5"
+            />
+            <path
+              d={`M6 6 L6 1 A5 5 0 ${completion >= 50 ? 1 : 0} 1 ${
+                6 + 5 * Math.sin((completion / 100) * 2 * Math.PI)
+              } ${6 - 5 * Math.cos((completion / 100) * 2 * Math.PI)} Z`}
+              fill="currentColor"
+              opacity="0.3"
+            />
+          </svg>
+          {completion}%
+        </span>
+      </div>
     </div>
   );
 }
