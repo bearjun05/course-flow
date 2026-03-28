@@ -16,11 +16,11 @@ const PIPELINE_TASK_TYPES: TaskType[] = [
 
 // 채워진 슬롯에 사용할 색상 (교안→촬영→편집→자막→검수 순)
 const SLOT_FILLED_COLORS = [
-  "bg-[#CCFBF1]", // 교안
-  "bg-[#5EEAD4]", // 촬영
-  "bg-[#2DD4BF]", // 편집
-  "bg-[#0D9488]", // 자막
-  "bg-[#0F766E]", // 검수
+  "bg-[#C9F0FB]", // 교안  (sparta blue 20)
+  "bg-[#9BEAFA]", // 촬영  (sparta blue 30)
+  "bg-[#6BDBF2]", // 편집  (sparta blue 50)
+  "bg-[#2992B2]", // 자막  (sparta blue 70)
+  "bg-[#0B6885]", // 검수  (sparta blue 80)
 ];
 
 function getChapterProgress(
