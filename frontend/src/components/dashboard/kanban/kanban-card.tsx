@@ -68,7 +68,7 @@ export function KanbanCard({ project, column, onClick }: KanbanCardProps) {
           ? "z-50 rotate-1 shadow-lg"
           : "hover:-translate-y-0.5 hover:shadow-md",
         isOverdue
-          ? "bg-[#FCF2F4] border-[#FFD6DC] border-l-2 border-l-[#FA0030]"
+          ? "bg-[#FCF2F4] border-[#FFD6DC]"
           : "bg-white border-neutral-100",
       )}
     >

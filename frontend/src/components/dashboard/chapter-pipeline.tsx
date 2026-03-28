@@ -99,7 +99,7 @@ export function ChapterPipeline({ project }: ChapterPipelineProps) {
       {chapterData.map(({ ch, filledCount, stageName }) => (
         <div
           key={ch}
-          className="flex-1 rounded-md bg-neutral-50 border border-neutral-100 px-1.5 py-1.5 flex flex-col gap-1"
+          className="flex-1 rounded-md bg-black/4 border border-black/6 px-1.5 py-1.5 flex flex-col gap-1"
         >
           <span className="text-[9px] font-semibold text-neutral-500 leading-none">
             {ch}장
@@ -110,7 +110,7 @@ export function ChapterPipeline({ project }: ChapterPipelineProps) {
                 key={i}
                 className={cn(
                   "h-[5px] flex-1 rounded-[2px]",
-                  i < filledCount ? SLOT_FILLED_COLORS[i] : "bg-neutral-200",
+                  i < filledCount ? SLOT_FILLED_COLORS[i] : "bg-black/8",
                 )}
               />
             ))}
