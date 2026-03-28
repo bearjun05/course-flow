@@ -1,8 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import { Video } from "lucide-react";
 import type { Project, ProjectStatus, TrafficLight } from "@/lib/types";
 import { getDday, formatDday, getDdayColor, cn } from "@/lib/utils";
+import { DDAY_GROUPS } from "@/lib/constants";
 
 interface DeadlineListViewProps {
   projects: Project[];
@@ -10,14 +12,15 @@ interface DeadlineListViewProps {
   onTrafficLightChange: (projectId: string, light: TrafficLight) => void;
 }
 
+// 프로젝트 상태 → 진척 단계 색 (프로그래스바와 동일 팔레트)
 const STATUS_COLORS: Record<string, string> = {
-  기획: "bg-neutral-100 text-neutral-500",
-  교안작성: "bg-amber-50 text-amber-600",
-  리허설: "bg-yellow-50 text-yellow-700",
-  촬영: "bg-orange-50 text-orange-600",
-  편집_검수: "bg-blue-50 text-blue-600",
-  롤아웃: "bg-violet-50 text-violet-600",
-  완료: "bg-emerald-50 text-emerald-600",
+  기획: "bg-neutral-100 text-neutral-400",
+  교안작성: "bg-[#EDF2DC] text-[#6B7C3A]",
+  리허설: "bg-[#DDE8C0] text-[#5C6E2A]",
+  촬영: "bg-[#CCDC9F] text-[#4E5F1E]",
+  편집_검수: "bg-[#BACE80] text-[#3F4F14]",
+  롤아웃: "bg-[#A8BE60] text-[#30400A]",
+  완료: "bg-emerald-100 text-emerald-700",
   중단: "bg-neutral-100 text-neutral-400",
 };
 
@@ -32,99 +35,105 @@ const STATUS_LABELS: Record<string, string> = {
   중단: "중단",
 };
 
-const UNIT_COLORS: Record<string, string> = {
-  KDT: "bg-amber-100 text-amber-700",
-  KDC: "bg-yellow-100 text-yellow-700",
-  신사업: "bg-orange-100 text-orange-700",
+const UNIT_TEXT: Record<string, string> = {
+  KDT: "text-amber-600",
+  KDC: "text-yellow-600",
+  신사업: "text-orange-600",
 };
 
 export function DeadlineListView({ projects }: DeadlineListViewProps) {
-  const sorted = [...projects].sort(
-    (a, b) => getDday(a.rolloutDate) - getDday(b.rolloutDate),
-  );
+  const sections = DDAY_GROUPS.map((group) => ({
+    ...group,
+    projects: projects
+      .filter((p) => {
+        const d = getDday(p.rolloutDate);
+        return d >= group.min && d <= group.max;
+      })
+      .sort((a, b) => getDday(a.rolloutDate) - getDday(b.rolloutDate)),
+  })).filter((g) => g.projects.length > 0);
 
   return (
-    <div className="rounded-xl border border-border overflow-hidden">
-      {/* 헤더 */}
-      <div className="grid grid-cols-[2fr_1fr_1fr_1fr_1fr_1fr] gap-4 px-4 py-2.5 bg-muted/40 text-[11px] font-medium text-muted-foreground border-b border-border">
-        <span>강의명</span>
-        <span>사업부 · 트랙</span>
-        <span>상태</span>
-        <span>튜터</span>
-        <span>마감일</span>
-        <span>D-Day</span>
-      </div>
+    <div className="space-y-6">
+      {sections.map((section) => (
+        <div key={section.label}>
+          {/* 섹션 헤더 */}
+          <div className="flex items-center gap-2 mb-2 px-1">
+            <span className="text-xs font-semibold text-muted-foreground">
+              {section.label}
+            </span>
+            <span className="text-[11px] text-muted-foreground/50">
+              {section.projects.length}
+            </span>
+            <div className="flex-1 h-px bg-border" />
+          </div>
 
-      {/* 행 목록 */}
-      <div className="divide-y divide-border">
-        {sorted.map((project) => {
-          const dday = getDday(project.rolloutDate);
-          const isOverdue = dday < 0;
+          {/* 행 목록 */}
+          <div className="rounded-xl border border-border overflow-hidden divide-y divide-border">
+            {section.projects.map((project) => {
+              const dday = getDday(project.rolloutDate);
+              const isOverdue = dday < 0;
+              const subtitle = [project.businessUnit, project.trackName]
+                .filter(Boolean)
+                .join(" · ");
 
-          return (
-            <Link
-              key={project.id}
-              href={`/projects/${project.id}`}
-              className={cn(
-                "grid grid-cols-[2fr_1fr_1fr_1fr_1fr_1fr] gap-4 px-4 py-3 items-center hover:bg-muted/30 transition-colors text-[12px]",
-                isOverdue && "bg-[#FCF2F4] hover:bg-[#FCF2F4]/80",
-              )}
-            >
-              {/* 강의명 */}
-              <span className="font-medium text-foreground truncate">
-                {project.title}
-              </span>
-
-              {/* 사업부 · 트랙 */}
-              <span>
-                <span
+              return (
+                <Link
+                  key={project.id}
+                  href={`/projects/${project.id}`}
                   className={cn(
-                    "text-[10px] font-medium px-1.5 py-0.5 rounded-md",
-                    UNIT_COLORS[project.businessUnit] ??
-                      "bg-neutral-100 text-neutral-500",
+                    "flex items-center gap-3 px-4 py-3 hover:bg-muted/30 transition-colors",
+                    isOverdue && "bg-[#FCF2F4] hover:bg-[#FCF2F4]/80",
                   )}
                 >
-                  {project.businessUnit}
-                  {project.trackName && (
-                    <>
-                      <span className="mx-1 opacity-50">·</span>
-                      {project.trackName}
-                    </>
-                  )}
-                </span>
-              </span>
+                  {/* 아이콘 */}
+                  <div className="flex items-center justify-center w-7 h-7 rounded-lg bg-neutral-100 shrink-0">
+                    <Video className="w-3.5 h-3.5 text-neutral-400" />
+                  </div>
 
-              {/* 상태 */}
-              <span>
-                <span
-                  className={cn(
-                    "text-[10px] font-medium px-1.5 py-0.5 rounded-md",
-                    STATUS_COLORS[project.status] ??
-                      "bg-neutral-100 text-neutral-500",
-                  )}
-                >
-                  {STATUS_LABELS[project.status] ?? project.status}
-                </span>
-              </span>
+                  {/* 제목 + 사업부·트랙 */}
+                  <div className="flex items-baseline gap-2 flex-1 min-w-0">
+                    <span className="text-[13px] font-medium text-foreground truncate">
+                      {project.title}
+                    </span>
+                    <span
+                      className={cn(
+                        "text-[11px] shrink-0",
+                        UNIT_TEXT[project.businessUnit] ?? "text-neutral-400",
+                      )}
+                    >
+                      {subtitle}
+                    </span>
+                  </div>
 
-              {/* 튜터 */}
-              <span className="text-muted-foreground truncate">
-                {project.tutor ?? "—"}
-              </span>
+                  {/* 상태 배지 */}
+                  <span
+                    className={cn(
+                      "text-[10px] font-medium px-1.5 py-0.5 rounded-md shrink-0",
+                      STATUS_COLORS[project.status] ??
+                        "bg-neutral-100 text-neutral-400",
+                    )}
+                  >
+                    {STATUS_LABELS[project.status] ?? project.status}
+                  </span>
 
-              {/* 마감일 */}
-              <span className="text-muted-foreground">
-                {project.rolloutDate.slice(5).replace("-", "/")}
-              </span>
-
-              {/* D-Day */}
-              <span className={cn("font-medium", getDdayColor(dday))}>
-                {formatDday(dday)}
-              </span>
-            </Link>
-          );
-        })}
-      </div>
+                  {/* D-Day (마감일) */}
+                  <span
+                    className={cn(
+                      "text-[12px] font-medium shrink-0 w-32 text-right",
+                      getDdayColor(dday),
+                    )}
+                  >
+                    {formatDday(dday)}
+                    <span className="ml-1.5 text-[11px] text-muted-foreground font-normal">
+                      ({project.rolloutDate.slice(5).replace("-", "/")})
+                    </span>
+                  </span>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      ))}
     </div>
   );
 }
