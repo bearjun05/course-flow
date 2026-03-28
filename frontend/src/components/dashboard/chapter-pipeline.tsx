@@ -95,24 +95,28 @@ export function ChapterPipeline({ project }: ChapterPipelineProps) {
   }));
 
   return (
-    <div className="flex w-full gap-2">
+    <div className="flex w-full gap-1">
       {chapterData.map(({ ch, filledCount, stageName }) => (
-        <div key={ch} className="flex flex-1 flex-col gap-1">
+        <div
+          key={ch}
+          className="flex-1 rounded-md bg-neutral-50 border border-neutral-100 px-1.5 py-1.5 flex flex-col gap-1"
+        >
+          <span className="text-[9px] font-semibold text-neutral-500 leading-none">
+            {ch}장
+          </span>
           <div className="flex gap-[2px]">
             {Array.from({ length: 5 }, (_, i) => (
               <div
                 key={i}
                 className={cn(
-                  "h-[7px] flex-1 rounded-[2px]",
-                  i < filledCount ? SLOT_FILLED_COLORS[i] : "bg-neutral-100",
+                  "h-[5px] flex-1 rounded-[2px]",
+                  i < filledCount ? SLOT_FILLED_COLORS[i] : "bg-neutral-200",
                 )}
               />
             ))}
           </div>
-          <span className="text-[9px] leading-none text-muted-foreground text-center truncate">
-            <span className="font-medium">{ch}장</span>
-            <span className="mx-0.5 opacity-40">·</span>
-            <span>{stageName}</span>
+          <span className="text-[9px] text-neutral-400 leading-none truncate">
+            {stageName}
           </span>
         </div>
       ))}
