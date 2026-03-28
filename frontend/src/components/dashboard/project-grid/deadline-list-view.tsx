@@ -53,7 +53,13 @@ const TRAFFIC_LIGHT_COLORS: Record<string, string> = {
   red: "bg-[#F47A8A]",
 };
 
-function ProjectRow({ project }: { project: Project }) {
+function ProjectRow({
+  project,
+  simple = false,
+}: {
+  project: Project;
+  simple?: boolean;
+}) {
   const dday = getDday(project.rolloutDate);
   const isOverdue = dday < 0 && project.status !== "완료";
   const isCompleted = project.status === "완료";
@@ -67,17 +73,19 @@ function ProjectRow({ project }: { project: Project }) {
       href={`/projects/${project.id}`}
       className={cn(
         "flex items-center gap-3 px-4 py-3 hover:bg-muted/30 transition-colors",
-        isOverdue && "bg-[#FCF2F4] hover:bg-[#FCF2F4]/80",
+        !simple && isOverdue && "bg-[#FCF2F4] hover:bg-[#FCF2F4]/80",
         isCompleted && "opacity-60",
       )}
     >
-      {/* 신호등 */}
-      <span
-        className={cn(
-          "inline-block w-2 h-2 rounded-full shrink-0",
-          TRAFFIC_LIGHT_COLORS[light] ?? "bg-neutral-300",
-        )}
-      />
+      {/* 신호등 (전체 탭에서는 숨김) */}
+      {!simple && (
+        <span
+          className={cn(
+            "inline-block w-2 h-2 rounded-full shrink-0",
+            TRAFFIC_LIGHT_COLORS[light] ?? "bg-neutral-300",
+          )}
+        />
+      )}
 
       {/* 아이콘 */}
       <div className="flex items-center justify-center w-7 h-7 rounded-lg bg-neutral-100 shrink-0">
@@ -143,7 +151,7 @@ export function DeadlineListView({
     return (
       <div className="rounded-xl border border-border overflow-hidden divide-y divide-border">
         {sorted.map((project) => (
-          <ProjectRow key={project.id} project={project} />
+          <ProjectRow key={project.id} project={project} simple />
         ))}
       </div>
     );
