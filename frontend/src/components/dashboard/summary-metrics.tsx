@@ -118,42 +118,42 @@ function MetricCard({
     ? "bg-gradient-to-br from-[#FCF2F4] to-[#FFD6DC]/50"
     : isGood
       ? "bg-gradient-to-br from-[#F9EEFD] to-[#F6E1FD]/50"
-      : "bg-gradient-to-br from-[#EFFBFE] to-[#DDF7FE]/50";
+      : "bg-gradient-to-br from-neutral-50 to-gray-50/60";
   const iconWrapperBg = isDanger
     ? "bg-[#FFBAC4]/80"
     : isGood
       ? "bg-[#F1D8FA]/80"
-      : "bg-[#C9F0FB]/80";
+      : "bg-neutral-200/60";
   const iconColor = isDanger
     ? "text-[#FA0030]"
     : isGood
       ? "text-[#A936C2]"
-      : "text-[#2992B2]";
+      : "text-neutral-400";
   const titleColor = isDanger
     ? "text-[#D90B32]"
     : isGood
       ? "text-[#8723BA]"
-      : "text-[#0B6885]";
+      : "text-neutral-600";
   const valueColor = isDanger
     ? "text-[#FA0030]"
     : isGood
       ? "text-[#A936C2]"
-      : "text-[#2992B2]";
+      : "text-neutral-500";
   const detailColor = isDanger
     ? "text-[#FC6F8C]"
     : isGood
       ? "text-[#CA50E5]"
-      : "text-[#6BDBF2]";
+      : "text-neutral-400";
   const borderColor = isDanger
     ? "border-[#FFD6DC]"
     : isGood
       ? "border-[#F1D8FA]"
-      : "border-[#C9F0FB]";
+      : "border-neutral-200";
   const dividerColor = isDanger
     ? "border-[#FFBAC4]/60"
     : isGood
       ? "border-[#E992FC]/60"
-      : "border-[#9BEAFA]/60";
+      : "border-neutral-200/60";
 
   return (
     <div
@@ -201,7 +201,7 @@ function MetricCard({
                   ? "text-[#FFBAC4]"
                   : isGood
                     ? "text-[#E992FC]"
-                    : "text-[#9BEAFA]",
+                    : "text-neutral-300",
                 expanded && "rotate-180",
               )}
             />
