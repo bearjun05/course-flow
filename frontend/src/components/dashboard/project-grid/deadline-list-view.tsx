@@ -74,7 +74,7 @@ function ProjectRow({
       className={cn(
         "flex items-center gap-3 px-4 py-3 hover:bg-muted/30 transition-colors",
         !simple && isOverdue && "bg-[#FCF2F4] hover:bg-[#FCF2F4]/80",
-        isCompleted && "opacity-60",
+        isCompleted && !simple && "opacity-60",
       )}
     >
       {/* 신호등 (전체 탭에서는 숨김) */}
