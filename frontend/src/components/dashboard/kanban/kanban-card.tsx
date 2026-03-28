@@ -21,15 +21,15 @@ function getCompletionRate(project: Project): number {
 }
 
 const UNIT_COLORS: Record<string, string> = {
-  KDT: "bg-amber-50 text-amber-500",
-  KDC: "bg-yellow-50 text-yellow-600",
-  신사업: "bg-orange-50 text-orange-500",
+  KDT: "bg-amber-100 text-amber-700",
+  KDC: "bg-yellow-100 text-yellow-700",
+  신사업: "bg-orange-100 text-orange-700",
 };
 
 const TYPE_COLORS: Record<string, string> = {
   신규: "bg-violet-50 text-violet-500",
   부분리뉴얼: "bg-purple-50 text-purple-500",
-  전체리뉴얼: "bg-fuchsia-50 text-fuchsia-500",
+  전체리뉴얼: "bg-purple-100 text-purple-400",
 };
 
 export function KanbanCard({ project, column, onClick }: KanbanCardProps) {
