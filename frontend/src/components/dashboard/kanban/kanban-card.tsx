@@ -21,15 +21,15 @@ function getCompletionRate(project: Project): number {
 }
 
 const UNIT_COLORS: Record<string, string> = {
-  KDT: "bg-[#C9F0FB] text-[#0B6885]", // Sparta Blue
-  KDC: "bg-[#F1D8FA] text-[#8723BA]", // Sparta Purple
-  신사업: "bg-[#F5D3DD] text-[#850028]", // Dark Red
+  KDT: "bg-amber-100 text-amber-700",
+  KDC: "bg-yellow-100 text-yellow-700",
+  신사업: "bg-orange-100 text-orange-700",
 };
 
 const TYPE_COLORS: Record<string, string> = {
-  신규: "bg-[#DDF7FE] text-[#2992B2]", // Sparta Blue light
-  부분리뉴얼: "bg-[#F6E1FD] text-[#A936C2]", // Sparta Purple light
-  전체리뉴얼: "bg-[#F5EBEE] text-[#C4315E]", // Dark Red light
+  신규: "bg-violet-100 text-violet-600",
+  부분리뉴얼: "bg-purple-100 text-purple-700",
+  전체리뉴얼: "bg-fuchsia-100 text-fuchsia-700",
 };
 
 export function KanbanCard({ project, column, onClick }: KanbanCardProps) {
