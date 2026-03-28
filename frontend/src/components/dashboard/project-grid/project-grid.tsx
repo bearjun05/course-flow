@@ -94,6 +94,30 @@ export function ProjectGrid({
     return result;
   }, [projects, search, statusFilter, businessFilter, trackFilter]);
 
+  // 리스트 뷰용: 완료·중단 포함 (검색/필터 적용, 시간 제한 없음)
+  const listProjects = useMemo(() => {
+    let result = projects.filter((p) => !p.hidden && p.status !== "중단");
+
+    if (search) {
+      const q = search.toLowerCase();
+      result = result.filter((p) => p.title.toLowerCase().includes(q));
+    }
+
+    if (statusFilter !== "all") {
+      result = result.filter((p) => p.status === statusFilter);
+    }
+
+    if (businessFilter !== "all") {
+      result = result.filter((p) => p.businessUnit === businessFilter);
+    }
+
+    if (businessFilter === "KDT" && trackFilter !== "all") {
+      result = result.filter((p) => p.trackName === trackFilter);
+    }
+
+    return result;
+  }, [projects, search, statusFilter, businessFilter, trackFilter]);
+
   const viewProps = {
     projects: filteredProjects,
     onStatusChange,
@@ -236,7 +260,11 @@ export function ProjectGrid({
           </p>
         </div>
       ) : viewMode === "list" ? (
-        <DeadlineListView {...viewProps} />
+        <DeadlineListView
+          projects={listProjects}
+          onStatusChange={onStatusChange}
+          onTrafficLightChange={onTrafficLightChange}
+        />
       ) : (
         <ColumnView {...viewProps} />
       )}

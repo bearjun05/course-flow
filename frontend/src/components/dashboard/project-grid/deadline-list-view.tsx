@@ -41,10 +41,101 @@ const UNIT_TEXT: Record<string, string> = {
   신사업: "text-orange-600",
 };
 
+const TRAFFIC_LIGHT_COLORS: Record<string, string> = {
+  green: "bg-emerald-400",
+  yellow: "bg-amber-400",
+  red: "bg-[#FA0030]",
+};
+
+function TrafficDot({ light }: { light: TrafficLight }) {
+  return (
+    <span
+      className={cn(
+        "inline-block w-2 h-2 rounded-full shrink-0",
+        TRAFFIC_LIGHT_COLORS[light] ?? "bg-neutral-300",
+      )}
+    />
+  );
+}
+
+function ProjectRow({ project }: { project: Project }) {
+  const dday = getDday(project.rolloutDate);
+  const isOverdue = dday < 0;
+  const isCompleted = project.status === "완료";
+  const subtitle = [project.businessUnit, project.trackName]
+    .filter(Boolean)
+    .join(" · ");
+
+  return (
+    <Link
+      href={`/projects/${project.id}`}
+      className={cn(
+        "flex items-center gap-3 px-4 py-3 hover:bg-muted/30 transition-colors",
+        isOverdue && !isCompleted && "bg-[#FCF2F4] hover:bg-[#FCF2F4]/80",
+      )}
+    >
+      {/* 신호등 */}
+      <TrafficDot light={project.trafficLight} />
+
+      {/* 아이콘 */}
+      <div className="flex items-center justify-center w-7 h-7 rounded-lg bg-neutral-100 shrink-0">
+        <Video className="w-3.5 h-3.5 text-neutral-400" />
+      </div>
+
+      {/* 제목 + 사업부·트랙 */}
+      <div className="flex items-baseline gap-2 flex-1 min-w-0">
+        <span className="text-[13px] font-medium text-foreground truncate">
+          {project.title}
+        </span>
+        <span
+          className={cn(
+            "text-[11px] shrink-0",
+            UNIT_TEXT[project.businessUnit] ?? "text-neutral-400",
+          )}
+        >
+          {subtitle}
+        </span>
+      </div>
+
+      {/* 상태 배지 */}
+      <span
+        className={cn(
+          "text-[10px] font-medium px-1.5 py-0.5 rounded-md shrink-0",
+          STATUS_COLORS[project.status] ?? "bg-neutral-100 text-neutral-400",
+        )}
+      >
+        {STATUS_LABELS[project.status] ?? project.status}
+      </span>
+
+      {/* D-Day (마감일) */}
+      {!isCompleted ? (
+        <span
+          className={cn(
+            "text-[12px] font-medium shrink-0 w-32 text-right",
+            getDdayColor(dday),
+          )}
+        >
+          {formatDday(dday)}
+          <span className="ml-1.5 text-[11px] text-muted-foreground font-normal">
+            ({project.rolloutDate.slice(5).replace("-", "/")})
+          </span>
+        </span>
+      ) : (
+        <span className="text-[11px] text-muted-foreground shrink-0 w-32 text-right">
+          {project.rolloutDate.slice(5).replace("-", "/")} 출시
+        </span>
+      )}
+    </Link>
+  );
+}
+
 export function DeadlineListView({ projects }: DeadlineListViewProps) {
+  const activeProjects = projects.filter((p) => p.status !== "완료");
+  const completedProjects = projects.filter((p) => p.status === "완료");
+
   const sections = DDAY_GROUPS.map((group) => ({
     ...group,
-    projects: projects
+    projects: activeProjects
       .filter((p) => {
         const d = getDday(p.rolloutDate);
         return d >= group.min && d <= group.max;
@@ -69,71 +160,34 @@ export function DeadlineListView({ projects }: DeadlineListViewProps) {
 
           {/* 행 목록 */}
           <div className="rounded-xl border border-border overflow-hidden divide-y divide-border">
-            {section.projects.map((project) => {
-              const dday = getDday(project.rolloutDate);
-              const isOverdue = dday < 0;
-              const subtitle = [project.businessUnit, project.trackName]
-                .filter(Boolean)
-                .join(" · ");
-
-              return (
-                <Link
-                  key={project.id}
-                  href={`/projects/${project.id}`}
-                  className={cn(
-                    "flex items-center gap-3 px-4 py-3 hover:bg-muted/30 transition-colors",
-                    isOverdue && "bg-[#FCF2F4] hover:bg-[#FCF2F4]/80",
-                  )}
-                >
-                  {/* 아이콘 */}
-                  <div className="flex items-center justify-center w-7 h-7 rounded-lg bg-neutral-100 shrink-0">
-                    <Video className="w-3.5 h-3.5 text-neutral-400" />
-                  </div>
-
-                  {/* 제목 + 사업부·트랙 */}
-                  <div className="flex items-baseline gap-2 flex-1 min-w-0">
-                    <span className="text-[13px] font-medium text-foreground truncate">
-                      {project.title}
-                    </span>
-                    <span
-                      className={cn(
-                        "text-[11px] shrink-0",
-                        UNIT_TEXT[project.businessUnit] ?? "text-neutral-400",
-                      )}
-                    >
-                      {subtitle}
-                    </span>
-                  </div>
-
-                  {/* 상태 배지 */}
-                  <span
-                    className={cn(
-                      "text-[10px] font-medium px-1.5 py-0.5 rounded-md shrink-0",
-                      STATUS_COLORS[project.status] ??
-                        "bg-neutral-100 text-neutral-400",
-                    )}
-                  >
-                    {STATUS_LABELS[project.status] ?? project.status}
-                  </span>
-
-                  {/* D-Day (마감일) */}
-                  <span
-                    className={cn(
-                      "text-[12px] font-medium shrink-0 w-32 text-right",
-                      getDdayColor(dday),
-                    )}
-                  >
-                    {formatDday(dday)}
-                    <span className="ml-1.5 text-[11px] text-muted-foreground font-normal">
-                      ({project.rolloutDate.slice(5).replace("-", "/")})
-                    </span>
-                  </span>
-                </Link>
-              );
-            })}
+            {section.projects.map((project) => (
+              <ProjectRow key={project.id} project={project} />
+            ))}
           </div>
         </div>
       ))}
+
+      {/* 완료 섹션 */}
+      {completedProjects.length > 0 && (
+        <div>
+          <div className="flex items-center gap-2 mb-2 px-1">
+            <span className="text-xs font-semibold text-muted-foreground">
+              완료
+            </span>
+            <span className="text-[11px] text-muted-foreground/50">
+              {completedProjects.length}
+            </span>
+            <div className="flex-1 h-px bg-border" />
+          </div>
+          <div className="rounded-xl border border-border overflow-hidden divide-y divide-border opacity-60">
+            {completedProjects
+              .sort((a, b) => getDday(a.rolloutDate) - getDday(b.rolloutDate))
+              .map((project) => (
+                <ProjectRow key={project.id} project={project} />
+              ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
