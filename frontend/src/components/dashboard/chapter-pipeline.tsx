@@ -14,7 +14,13 @@ const PIPELINE_TASK_TYPES: TaskType[] = [
   "검수",
 ];
 
-const SLOT_FILLED_COLOR = "bg-[#DCEBCA]";
+const SLOT_FILLED_COLORS = [
+  "bg-[#DCEBCA]",
+  "bg-[#CFE1B9]",
+  "bg-[#C2D5AA]",
+  "bg-[#B5C99A]",
+  "bg-[#A6B98B]",
+];
 
 function getChapterProgress(
   project: Project,
@@ -97,7 +103,7 @@ export function ChapterPipeline({ project }: ChapterPipelineProps) {
                 key={i}
                 className={cn(
                   "h-[4px] flex-1 rounded-full",
-                  i < filledCount ? SLOT_FILLED_COLOR : "bg-black/8",
+                  i < filledCount ? SLOT_FILLED_COLORS[i] : "bg-black/8",
                 )}
               />
             ))}
