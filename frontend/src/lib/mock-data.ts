@@ -328,7 +328,7 @@ export const mockProjects: Project[] = [
     id: "proj-3",
     title: "LLM 파인튜닝 마스터클래스",
     version: "v1.0",
-    status: "편집_검수",
+    status: "자막",
     businessUnit: "KDT",
     trackName: "AI",
     productionType: "신규",
@@ -355,7 +355,7 @@ export const mockProjects: Project[] = [
     id: "proj-4",
     title: "비전공자를 위한 데이터 분석",
     version: "v1.0",
-    status: "교안작성",
+    status: "교안",
     businessUnit: "KDC",
     productionType: "신규",
     rolloutDate: "2026-04-05",
@@ -416,5 +416,88 @@ export const mockProjects: Project[] = [
     videoFeedbacks: [],
     note: "튜터 섭외 중",
     createdAt: "2026-02-15T09:00:00Z",
+  },
+  {
+    id: "proj-7",
+    title: "파이썬으로 배우는 자동화 업무",
+    version: "v1.0",
+    status: "리허설",
+    businessUnit: "KDC",
+    productionType: "신규",
+    rolloutDate: "2026-05-10",
+    paymentDate: "2026-06-10",
+    chapterCount: 4,
+    chapterDurations: [2.0, 2.0, 2.0, 2.0],
+    tutor: "이현우",
+    curriculumManager: "김민지",
+    slackChannel: "#courseflow-python-auto",
+    trafficLight: "green",
+    tasks: createChapterTasks("proj-7", 4, (ch, type) => {
+      if (ch === 0) return type === "리허설" ? "진행" : "대기";
+      return "대기";
+    }),
+    lectures: createLectures("proj-7", [2.0, 2.0, 2.0, 2.0]),
+    videoFeedbacks: [],
+    createdAt: "2026-02-01T09:00:00Z",
+  },
+  {
+    id: "proj-8",
+    title: "엑셀 없이 구글 스프레드시트 마스터",
+    version: "v2.0",
+    status: "편집",
+    businessUnit: "KDC",
+    productionType: "부분리뉴얼",
+    rolloutDate: "2026-04-15",
+    paymentDate: "2026-05-15",
+    chapterCount: 3,
+    chapterDurations: [1.5, 2.0, 1.5],
+    tutor: "최유진",
+    curriculumManager: "박현아",
+    editor: "정민호",
+    slackChannel: "#courseflow-sheets",
+    trafficLight: "yellow",
+    tasks: createChapterTasks("proj-8", 3, (ch, type) => {
+      if (ch === 0) return type === "리허설" ? "완료" : "대기";
+      if (type === "교안제작" || type === "촬영") return "완료";
+      if (type === "편집") return ch <= 2 ? "완료" : "진행";
+      return "대기";
+    }),
+    lectures: createLectures("proj-8", [1.5, 2.0, 1.5]),
+    videoFeedbacks: [],
+    createdAt: "2026-01-15T09:00:00Z",
+  },
+  {
+    id: "proj-9",
+    title: "SQL 입문부터 실전까지",
+    version: "v1.0",
+    status: "검수",
+    businessUnit: "KDT",
+    trackName: "백엔드",
+    productionType: "신규",
+    rolloutDate: "2026-04-01",
+    paymentDate: "2026-05-01",
+    chapterCount: 4,
+    chapterDurations: [2.0, 2.5, 2.0, 2.0],
+    tutor: "강동훈",
+    curriculumManager: "이소영",
+    editor: "김태준",
+    reviewer: "박민서",
+    slackChannel: "#courseflow-sql",
+    trafficLight: "yellow",
+    tasks: createChapterTasks("proj-9", 4, (ch, type) => {
+      if (ch === 0) return type === "리허설" ? "완료" : "대기";
+      if (
+        type === "교안제작" ||
+        type === "촬영" ||
+        type === "편집" ||
+        type === "자막"
+      )
+        return "완료";
+      if (type === "검수") return ch <= 2 ? "완료" : "진행";
+      return "대기";
+    }),
+    lectures: createLectures("proj-9", [2.0, 2.5, 2.0, 2.0]),
+    videoFeedbacks: [],
+    createdAt: "2026-01-01T09:00:00Z",
   },
 ];

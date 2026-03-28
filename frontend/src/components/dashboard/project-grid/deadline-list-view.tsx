@@ -20,31 +20,22 @@ interface DeadlineListViewProps {
 }
 
 const STATUS_COLORS: Record<string, string> = {
-  기획: "bg-neutral-100 text-neutral-400",
-  교안작성: "bg-[#EDF2DC] text-[#6B7C3A]",
-  리허설: "bg-[#DDE8C0] text-[#5C6E2A]",
-  촬영: "bg-[#CCDC9F] text-[#4E5F1E]",
-  편집_검수: "bg-[#BACE80] text-[#3F4F14]",
-  롤아웃: "bg-[#A8BE60] text-[#30400A]",
-  완료: "bg-emerald-100 text-emerald-700",
+  기획: "bg-neutral-100 text-neutral-500",
+  교안: "bg-sky-50 text-sky-500",
+  리허설: "bg-violet-50 text-violet-500",
+  촬영: "bg-orange-50 text-orange-500",
+  편집: "bg-amber-50 text-amber-500",
+  자막: "bg-teal-50 text-teal-500",
+  검수: "bg-cyan-50 text-cyan-600",
+  롤아웃: "bg-green-50 text-green-600",
+  완료: "bg-neutral-100 text-neutral-400",
   중단: "bg-neutral-100 text-neutral-400",
 };
 
-const STATUS_LABELS: Record<string, string> = {
-  기획: "기획",
-  교안작성: "교안작성",
-  리허설: "리허설",
-  촬영: "촬영",
-  편집_검수: "편집·검수",
-  롤아웃: "롤아웃",
-  완료: "완료",
-  중단: "중단",
-};
-
-const UNIT_TEXT: Record<string, string> = {
-  KDT: "text-amber-600",
-  KDC: "text-yellow-600",
-  신사업: "text-orange-600",
+const PRODUCTION_TYPE_COLORS: Record<string, string> = {
+  신규: "bg-neutral-100 text-neutral-400",
+  부분리뉴얼: "bg-neutral-100 text-neutral-400",
+  전체리뉴얼: "bg-neutral-100 text-neutral-400",
 };
 
 const TRAFFIC_LIGHT_COLORS: Record<string, string> = {
@@ -64,9 +55,6 @@ function ProjectRow({
   const isOverdue = dday < 0 && project.status !== "완료";
   const isCompleted = project.status === "완료";
   const light = getAutoTrafficLight(project);
-  const subtitle = [project.businessUnit, project.trackName]
-    .filter(Boolean)
-    .join(" · ");
 
   return (
     <Link
@@ -92,30 +80,39 @@ function ProjectRow({
         <Video className="w-3.5 h-3.5 text-neutral-400" />
       </div>
 
-      {/* 제목 + 사업부·트랙 */}
-      <div className="flex items-baseline gap-2 flex-1 min-w-0">
-        <span className="text-[13px] font-medium text-foreground truncate">
-          {project.title}
+      {/* 제목 */}
+      <span className="text-[13px] font-medium text-foreground truncate flex-1 min-w-0">
+        {project.title}
+      </span>
+
+      {/* 배지 그룹 */}
+      <div className="flex items-center gap-1 shrink-0">
+        {/* 사업부 */}
+        <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-md bg-neutral-100 text-neutral-500">
+          {[project.businessUnit, project.trackName]
+            .filter(Boolean)
+            .join(" · ")}
         </span>
+        {/* 강의버전 */}
         <span
           className={cn(
-            "text-[11px] shrink-0",
-            UNIT_TEXT[project.businessUnit] ?? "text-neutral-400",
+            "text-[10px] font-medium px-1.5 py-0.5 rounded-md",
+            PRODUCTION_TYPE_COLORS[project.productionType] ??
+              "bg-neutral-100 text-neutral-400",
           )}
         >
-          {subtitle}
+          {project.productionType}
+        </span>
+        {/* 상태 */}
+        <span
+          className={cn(
+            "text-[10px] font-medium px-1.5 py-0.5 rounded-md",
+            STATUS_COLORS[project.status] ?? "bg-neutral-100 text-neutral-400",
+          )}
+        >
+          {project.status}
         </span>
       </div>
-
-      {/* 상태 배지 */}
-      <span
-        className={cn(
-          "text-[10px] font-medium px-1.5 py-0.5 rounded-md shrink-0",
-          STATUS_COLORS[project.status] ?? "bg-neutral-100 text-neutral-400",
-        )}
-      >
-        {STATUS_LABELS[project.status] ?? project.status}
-      </span>
 
       {/* 날짜 */}
       {isCompleted ? (

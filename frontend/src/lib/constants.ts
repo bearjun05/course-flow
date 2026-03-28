@@ -9,25 +9,29 @@ export const KANBAN_COLUMNS: { id: KanbanColumn; label: string }[] = [
 
 export const PROJECT_STATUSES: { value: ProjectStatus; label: string }[] = [
   { value: "기획", label: "기획" },
-  { value: "교안작성", label: "교안작성" },
+  { value: "교안", label: "교안" },
   { value: "리허설", label: "리허설" },
   { value: "촬영", label: "촬영" },
-  { value: "편집_검수", label: "편집 & 검수" },
+  { value: "편집", label: "편집" },
+  { value: "자막", label: "자막" },
+  { value: "검수", label: "검수" },
   { value: "롤아웃", label: "롤아웃" },
   { value: "완료", label: "완료" },
   { value: "중단", label: "중단" },
 ];
 
 export const STATUS_TO_KANBAN: Partial<Record<ProjectStatus, KanbanColumn>> = {
-  교안작성: "교안작성",
+  교안: "교안작성",
   리허설: "리허설",
   촬영: "제작",
-  편집_검수: "제작",
+  편집: "제작",
+  자막: "제작",
+  검수: "제작",
   롤아웃: "롤아웃",
 };
 
 export const KANBAN_TO_STATUS: Record<KanbanColumn, ProjectStatus> = {
-  교안작성: "교안작성",
+  교안작성: "교안",
   리허설: "리허설",
   제작: "촬영",
   롤아웃: "롤아웃",
@@ -81,12 +85,14 @@ export const PRODUCTION_PROCESSES = [
 ] as const;
 
 export const STATUS_BADGE_VARIANT: Record<ProjectStatus, string> = {
-  기획: "bg-neutral-100 text-neutral-600",
-  교안작성: "bg-blue-50 text-blue-600",
-  리허설: "bg-violet-50 text-violet-600",
-  촬영: "bg-blue-50 text-blue-600",
-  편집_검수: "bg-blue-50 text-blue-600",
-  롤아웃: "bg-amber-50 text-amber-600",
-  완료: "bg-emerald-50 text-emerald-600",
-  중단: "bg-red-50 text-red-500",
+  기획: "bg-neutral-100 text-neutral-500",
+  교안: "bg-sky-50 text-sky-500",
+  리허설: "bg-violet-50 text-violet-500",
+  촬영: "bg-orange-50 text-orange-500",
+  편집: "bg-amber-50 text-amber-500",
+  자막: "bg-teal-50 text-teal-500",
+  검수: "bg-cyan-50 text-cyan-600",
+  롤아웃: "bg-green-50 text-green-600",
+  완료: "bg-neutral-100 text-neutral-400",
+  중단: "bg-neutral-100 text-neutral-400",
 };
