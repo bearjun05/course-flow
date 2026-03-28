@@ -19,14 +19,14 @@ interface DeadlineListViewProps {
   flat?: boolean; // true = 섹션 없이 DB 스타일 전체 목록
 }
 
-// 프로그래스바와 동일한 올리브 그린 팔레트
+// 교안(#EDF2DC)→롤아웃(#CCDC9F) 6단계 균등 보간
 const STATUS_COLORS: Record<string, string> = {
   기획: "bg-neutral-100 text-neutral-500",
   교안: "bg-[#EDF2DC] text-[#7A9445]",
-  촬영: "bg-[#E4EDCA] text-[#728A3E]",
-  편집: "bg-[#D9E6B8] text-[#628034]",
-  자막: "bg-[#D4E2AE] text-[#5C7A30]",
-  검수: "bg-[#CCDC9F] text-[#5A7830]",
+  촬영: "bg-[#E6EED0] text-[#748E40]",
+  편집: "bg-[#E0E9C4] text-[#6E883C]",
+  자막: "bg-[#D9E5B7] text-[#688237]",
+  검수: "bg-[#D3E0AB] text-[#627C33]",
   롤아웃: "bg-[#CCDC9F] text-[#5A7830]",
   완료: "bg-neutral-100 text-neutral-400",
   중단: "bg-neutral-100 text-neutral-400",
