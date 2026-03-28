@@ -67,7 +67,7 @@ export function KanbanCard({ project, column, onClick }: KanbanCardProps) {
         isDragging
           ? "z-50 rotate-1 shadow-lg"
           : "hover:-translate-y-0.5 hover:shadow-md",
-        isOverdue && "border-l-2 border-l-[#C4315E]",
+        isOverdue && "border-l-2 border-l-[#FA0030]",
       )}
     >
       {/* 제목 + D-Day 한 줄 */}

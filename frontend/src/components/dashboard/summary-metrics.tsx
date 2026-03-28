@@ -113,44 +113,44 @@ function MetricCard({
   const isGood = variant === "danger" && value === 0;
   const isNeutral = variant === "default";
 
-  // 지연 있음 → Dark Red / 지연 없음 → Sparta Purple / 오늘 태스크 → Sparta Blue
+  // 지연 있음 → Sparta Red / 지연 없음 → Sparta Purple / 오늘 태스크 → Sparta Blue
   const cardBg = isDanger
-    ? "bg-gradient-to-br from-[#F5EBEE] to-[#F5D3DD]/50"
+    ? "bg-gradient-to-br from-[#FCF2F4] to-[#FFD6DC]/50"
     : isGood
       ? "bg-gradient-to-br from-[#F9EEFD] to-[#F6E1FD]/50"
       : "bg-gradient-to-br from-[#EFFBFE] to-[#DDF7FE]/50";
   const iconWrapperBg = isDanger
-    ? "bg-[#F0B4C6]/80"
+    ? "bg-[#FFBAC4]/80"
     : isGood
       ? "bg-[#F1D8FA]/80"
       : "bg-[#C9F0FB]/80";
   const iconColor = isDanger
-    ? "text-[#C4315E]"
+    ? "text-[#FA0030]"
     : isGood
       ? "text-[#A936C2]"
       : "text-[#2992B2]";
   const titleColor = isDanger
-    ? "text-[#850028]"
+    ? "text-[#D90B32]"
     : isGood
       ? "text-[#8723BA]"
       : "text-[#0B6885]";
   const valueColor = isDanger
-    ? "text-[#C4315E]"
+    ? "text-[#FA0030]"
     : isGood
       ? "text-[#A936C2]"
       : "text-[#2992B2]";
   const detailColor = isDanger
-    ? "text-[#E890AB]"
+    ? "text-[#FC6F8C]"
     : isGood
       ? "text-[#CA50E5]"
       : "text-[#6BDBF2]";
   const borderColor = isDanger
-    ? "border-[#F5D3DD]"
+    ? "border-[#FFD6DC]"
     : isGood
       ? "border-[#F1D8FA]"
       : "border-[#C9F0FB]";
   const dividerColor = isDanger
-    ? "border-[#F0B4C6]/60"
+    ? "border-[#FFBAC4]/60"
     : isGood
       ? "border-[#E992FC]/60"
       : "border-[#9BEAFA]/60";
@@ -198,7 +198,7 @@ function MetricCard({
               className={cn(
                 "h-4 w-4 transition-transform",
                 isDanger
-                  ? "text-[#E890AB]"
+                  ? "text-[#FFBAC4]"
                   : isGood
                     ? "text-[#E992FC]"
                     : "text-[#9BEAFA]",
