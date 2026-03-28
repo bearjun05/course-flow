@@ -13,12 +13,9 @@ import {
   type DragEndEvent,
 } from "@dnd-kit/core";
 import type { Project, KanbanColumn as KanbanColumnType } from "@/lib/types";
-import {
-  KANBAN_COLUMNS,
-  KANBAN_TO_STATUS,
-  STATUS_TO_KANBAN,
-} from "@/lib/constants";
+import { KANBAN_COLUMNS, KANBAN_TO_STATUS } from "@/lib/constants";
 import { isProjectActive } from "@/lib/utils";
+import { getEffectiveKanbanColumn } from "@/lib/process-helpers";
 import { KanbanColumn } from "./kanban-column";
 import { Badge } from "@/components/ui/badge";
 
@@ -36,12 +33,12 @@ export function KanbanBoard({ projects, onStatusChange }: KanbanBoardProps) {
   );
 
   const kanbanProjects = projects.filter(
-    (p) => isProjectActive(p.status) && STATUS_TO_KANBAN[p.status],
+    (p) => isProjectActive(p.status) && getEffectiveKanbanColumn(p),
   );
 
   const getColumnProjects = useCallback(
     (columnId: KanbanColumnType) =>
-      kanbanProjects.filter((p) => STATUS_TO_KANBAN[p.status] === columnId),
+      kanbanProjects.filter((p) => getEffectiveKanbanColumn(p) === columnId),
     [kanbanProjects],
   );
 
@@ -63,7 +60,7 @@ export function KanbanBoard({ projects, onStatusChange }: KanbanBoardProps) {
     } else {
       const overProject = kanbanProjects.find((p) => p.id === overId);
       if (overProject) {
-        targetColumn = STATUS_TO_KANBAN[overProject.status];
+        targetColumn = getEffectiveKanbanColumn(overProject);
       }
     }
 
@@ -71,7 +68,7 @@ export function KanbanBoard({ projects, onStatusChange }: KanbanBoardProps) {
       const activeProjectData = kanbanProjects.find((p) => p.id === active.id);
       if (
         activeProjectData &&
-        STATUS_TO_KANBAN[activeProjectData.status] !== targetColumn
+        getEffectiveKanbanColumn(activeProjectData) !== targetColumn
       ) {
         onStatusChange(active.id as string, targetColumn);
       }
