@@ -14,14 +14,7 @@ const PIPELINE_TASK_TYPES: TaskType[] = [
   "검수",
 ];
 
-// 채워진 슬롯에 사용할 색상 (교안→촬영→편집→자막→검수 순)
-const SLOT_FILLED_COLORS = [
-  "bg-[#C9F0FB]", // 교안  (sparta blue 20)
-  "bg-[#9BEAFA]", // 촬영  (sparta blue 30)
-  "bg-[#6BDBF2]", // 편집  (sparta blue 50)
-  "bg-[#2992B2]", // 자막  (sparta blue 70)
-  "bg-[#0B6885]", // 검수  (sparta blue 80)
-];
+const SLOT_FILLED_COLOR = "bg-black/25";
 
 function getChapterProgress(
   project: Project,
@@ -95,28 +88,22 @@ export function ChapterPipeline({ project }: ChapterPipelineProps) {
   }));
 
   return (
-    <div className="flex w-full gap-1">
+    <div className="flex w-full gap-2">
       {chapterData.map(({ ch, filledCount, stageName }) => (
-        <div
-          key={ch}
-          className="flex-1 rounded-md bg-black/4 border border-black/6 px-1.5 py-1.5 flex flex-col gap-1"
-        >
-          <span className="text-[9px] font-semibold text-neutral-500 leading-none">
-            {ch}장
-          </span>
+        <div key={ch} className="flex-1 flex flex-col gap-1">
           <div className="flex gap-[2px]">
             {Array.from({ length: 5 }, (_, i) => (
               <div
                 key={i}
                 className={cn(
-                  "h-[5px] flex-1 rounded-[2px]",
-                  i < filledCount ? SLOT_FILLED_COLORS[i] : "bg-black/8",
+                  "h-[4px] flex-1 rounded-full",
+                  i < filledCount ? SLOT_FILLED_COLOR : "bg-black/8",
                 )}
               />
             ))}
           </div>
           <span className="text-[9px] text-neutral-400 leading-none truncate">
-            {stageName}
+            {ch}장 · {stageName}
           </span>
         </div>
       ))}
