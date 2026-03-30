@@ -5,7 +5,10 @@ import { ChevronRight } from "lucide-react";
 import type { Project, KanbanColumn } from "@/lib/types";
 import { KANBAN_COLUMNS } from "@/lib/constants";
 import { getDday, formatDday, getDdayColor, cn } from "@/lib/utils";
-import { getChapterKanbanColumn } from "@/lib/process-helpers";
+import {
+  getChapterKanbanColumn,
+  getChapterDetailedStage,
+} from "@/lib/process-helpers";
 
 interface DotMatrixTableProps {
   projects: Project[];
@@ -64,6 +67,8 @@ function ProjectRows({ project }: { project: Project }) {
         <div className="mx-5 mb-4 rounded-xl border border-border/40 overflow-hidden bg-muted/10">
           {chapters.map((ch, idx) => {
             const col = getChapterKanbanColumn(project, ch);
+            const detailedStage = getChapterDetailedStage(project, ch);
+            const label = col === "편집·검수" ? detailedStage : COL_LABEL[col];
             return (
               <div
                 key={ch}
@@ -90,7 +95,7 @@ function ProjectRows({ project }: { project: Project }) {
                           COL_STYLE[col],
                         )}
                       >
-                        {COL_LABEL[col]}
+                        {label}
                       </span>
                     )}
                   </div>

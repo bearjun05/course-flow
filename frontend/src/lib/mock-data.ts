@@ -421,7 +421,7 @@ export const mockProjects: Project[] = [
     id: "proj-7",
     title: "파이썬으로 배우는 자동화 업무",
     version: "v1.0",
-    status: "교안",
+    status: "편집·검수",
     businessUnit: "KDC",
     productionType: "신규",
     rolloutDate: "2026-05-10",
@@ -430,10 +430,30 @@ export const mockProjects: Project[] = [
     chapterDurations: [2.0, 2.0, 2.0, 2.0],
     tutor: "이현우",
     curriculumManager: "김민지",
+    editor: "정민호",
     slackChannel: "#courseflow-python-auto",
     trafficLight: "green",
     tasks: createChapterTasks("proj-7", 4, (ch, type) => {
-      if (ch === 0) return type === "리허설" ? "진행" : "대기";
+      if (ch === 0) return type === "리허설" ? "완료" : "대기";
+      // 1장: 교안 단계
+      if (ch === 1) {
+        if (type === "교안제작") return "진행";
+        return "대기";
+      }
+      // 2장: 촬영 단계
+      if (ch === 2) {
+        if (type === "교안제작") return "완료";
+        if (type === "촬영") return "진행";
+        return "대기";
+      }
+      // 3장: 편집 단계 (편집 진행 중)
+      if (ch === 3) {
+        if (type === "교안제작" || type === "촬영") return "완료";
+        if (type === "편집") return "진행";
+        return "대기";
+      }
+      // 4장: 롤아웃 단계 (모두 완료)
+      if (ch === 4) return "완료";
       return "대기";
     }),
     lectures: createLectures("proj-7", [2.0, 2.0, 2.0, 2.0]),
