@@ -1,12 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import {
-  ChevronRight,
-  MoreHorizontal,
-  Trash2,
-  Pause,
-} from "lucide-react";
+import { ChevronRight, MoreHorizontal, Trash2, Pause } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
@@ -22,11 +17,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import type { Project, ProjectStatus, TrafficLight } from "@/lib/types";
-import {
-  STATUS_BADGE_VARIANT,
-  TRAFFIC_LIGHT_COLORS,
-  PROJECT_STATUSES,
-} from "@/lib/constants";
+import { PROJECT_STATUSES } from "@/lib/constants";
 import {
   getDday,
   formatDday,
@@ -57,6 +48,12 @@ const TRAFFIC_OPTIONS: { value: TrafficLight; label: string }[] = [
   { value: "red", label: "위험" },
 ];
 
+const VINTAGE_TRAFFIC: Record<TrafficLight, { bg: string; label: string }> = {
+  green: { bg: "bg-[#6ECC9A]", label: "정상" },
+  yellow: { bg: "bg-[#F5C842]", label: "주의" },
+  red: { bg: "bg-[#F47A8A]", label: "위험" },
+};
+
 export default function DetailHeader({
   project,
   activeTab,
@@ -70,7 +67,7 @@ export default function DetailHeader({
   const ddayColor = getDdayColor(dday);
   const progressPct = getProgressPercent(project.tasks);
   const progressTxt = getProgressText(project.tasks);
-  const tl = TRAFFIC_LIGHT_COLORS[project.trafficLight];
+  const tl = VINTAGE_TRAFFIC[project.trafficLight];
 
   return (
     <header className="sticky top-0 z-20 border-b border-border bg-card/80 backdrop-blur-sm">
@@ -120,20 +117,18 @@ export default function DetailHeader({
         </div>
 
         {/* Metadata chips */}
-        <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
-          {/* Status select */}
+        <div className="mt-2 flex flex-wrap items-center gap-2.5 text-xs">
+          {/* D-Day — 가장 왼쪽 */}
+          <span className={cn("font-medium", ddayColor)}>{ddayText}</span>
+
+          {/* Status select — 작고 연한 회색 */}
           <Select
             value={project.status}
             onValueChange={(v) => {
               if (v && onStatusChange) onStatusChange(v as ProjectStatus);
             }}
           >
-            <SelectTrigger
-              className={cn(
-                "h-6 w-auto gap-1 rounded-md border-none px-2 text-[10px] font-medium shadow-none",
-                STATUS_BADGE_VARIANT[project.status]
-              )}
-            >
+            <SelectTrigger className="h-5 w-auto gap-0.5 rounded-md border-none px-1.5 text-[10px] font-medium shadow-none bg-[#F0F0F0] text-[#6B6B6B]">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -145,13 +140,11 @@ export default function DetailHeader({
             </SelectContent>
           </Select>
 
-          <span className={ddayColor}>{ddayText}</span>
-
-          {/* Progress with bar */}
+          {/* Progress — 올리브톤 바 */}
           <span className="flex items-center gap-1.5 text-muted-foreground">
             <span className="h-1.5 w-16 overflow-hidden rounded-full bg-neutral-100">
               <span
-                className="block h-full rounded-full bg-primary transition-all"
+                className="block h-full rounded-full bg-[#A8BE60] transition-all"
                 style={{ width: `${progressPct}%` }}
               />
             </span>
@@ -159,24 +152,36 @@ export default function DetailHeader({
             <span className="opacity-60">({progressTxt})</span>
           </span>
 
-          {/* Traffic light select */}
+          {/* Traffic light — 빈티지, 크게 */}
           <Select
             value={project.trafficLight}
             onValueChange={(v) => {
-              if (v && onTrafficLightChange) onTrafficLightChange(v as TrafficLight);
+              if (v && onTrafficLightChange)
+                onTrafficLightChange(v as TrafficLight);
             }}
           >
-            <SelectTrigger className="h-6 w-auto gap-1 rounded-md border-none px-1.5 text-[10px] shadow-none hover:bg-accent">
+            <SelectTrigger className="h-5 w-auto gap-1 rounded-md border-none px-1.5 text-[10px] shadow-none hover:bg-accent">
               <span className="flex items-center gap-1">
-                <span className={`inline-block h-2 w-2 rounded-full ${tl.bg}`} />
+                <span
+                  className={cn("inline-block h-2.5 w-2.5 rounded-full", tl.bg)}
+                />
                 <span className="text-muted-foreground">{tl.label}</span>
               </span>
             </SelectTrigger>
             <SelectContent>
               {TRAFFIC_OPTIONS.map((opt) => (
-                <SelectItem key={opt.value} value={opt.value} className="text-xs">
+                <SelectItem
+                  key={opt.value}
+                  value={opt.value}
+                  className="text-xs"
+                >
                   <span className="flex items-center gap-1.5">
-                    <span className={`inline-block h-2 w-2 rounded-full ${TRAFFIC_LIGHT_COLORS[opt.value].bg}`} />
+                    <span
+                      className={cn(
+                        "inline-block h-2.5 w-2.5 rounded-full",
+                        VINTAGE_TRAFFIC[opt.value].bg,
+                      )}
+                    />
                     {opt.label}
                   </span>
                 </SelectItem>
@@ -184,10 +189,8 @@ export default function DetailHeader({
             </SelectContent>
           </Select>
 
-          <span className="text-muted-foreground">
-            {project.businessUnit}
-            {project.trackName ? ` · ${project.trackName}` : ""}
-          </span>
+          {/* 사업부만 (트랙명 제거) */}
+          <span className="text-muted-foreground">{project.businessUnit}</span>
         </div>
       </div>
     </header>
