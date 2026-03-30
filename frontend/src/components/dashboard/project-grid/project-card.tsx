@@ -48,12 +48,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
           <p className="text-[13.5px] font-semibold text-neutral-800 leading-snug line-clamp-2">
             {project.title}
           </p>
-          <span
-            className={cn(
-              "text-[10px] font-medium px-1.5 py-0.5 rounded-md shrink-0",
-              STATUS_BADGE_VARIANT[project.status],
-            )}
-          >
+          <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-md shrink-0 bg-[#E8EDF5] text-[#5A6A8A]">
             {project.status}
           </span>
         </div>
@@ -112,7 +107,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
       <div className="flex items-center gap-3 text-[11px] text-neutral-400">
         <span
           className={cn(
-            "inline-block w-2 h-2 rounded-full shrink-0",
+            "inline-block w-2.5 h-2.5 rounded-full shrink-0",
             TRAFFIC_LIGHT_COLORS[trafficLight].bg,
           )}
         />
