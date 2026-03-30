@@ -3,7 +3,14 @@
 import Link from "next/link";
 import { User, BookOpen } from "lucide-react";
 import type { Project } from "@/lib/types";
-import { getDday, formatDday, getDdayColor, cn } from "@/lib/utils";
+import {
+  getDday,
+  formatDday,
+  getDdayColor,
+  getAutoTrafficLight,
+  cn,
+} from "@/lib/utils";
+import { STATUS_BADGE_VARIANT, TRAFFIC_LIGHT_COLORS } from "@/lib/constants";
 import { ChapterPipeline } from "@/components/dashboard/chapter-pipeline";
 import { useBadgeTheme } from "@/lib/badge-theme";
 
@@ -23,6 +30,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
   const dday = getDday(project.rolloutDate);
   const isOverdue = dday < 0 && project.status !== "완료";
   const completion = getCompletionRate(project);
+  const trafficLight = getAutoTrafficLight(project);
 
   return (
     <Link
@@ -34,11 +42,21 @@ export function ProjectCard({ project }: ProjectCardProps) {
           : "bg-white border-neutral-100",
       )}
     >
-      {/* 제목 + D-Day */}
+      {/* 제목 + 상태 배지 + D-Day */}
       <div className="flex items-start justify-between gap-2 mb-3">
-        <p className="text-[13.5px] font-semibold text-neutral-800 leading-snug line-clamp-2 flex-1">
-          {project.title}
-        </p>
+        <div className="flex items-center gap-1.5 flex-1 min-w-0">
+          <p className="text-[13.5px] font-semibold text-neutral-800 leading-snug line-clamp-2">
+            {project.title}
+          </p>
+          <span
+            className={cn(
+              "text-[10px] font-medium px-1.5 py-0.5 rounded-md shrink-0",
+              STATUS_BADGE_VARIANT[project.status],
+            )}
+          >
+            {project.status}
+          </span>
+        </div>
         <span
           className={cn(
             "text-[13.5px] font-medium shrink-0",
@@ -92,6 +110,12 @@ export function ProjectCard({ project }: ProjectCardProps) {
 
       {/* 하단 메타 */}
       <div className="flex items-center gap-3 text-[11px] text-neutral-400">
+        <span
+          className={cn(
+            "inline-block w-2 h-2 rounded-full shrink-0",
+            TRAFFIC_LIGHT_COLORS[trafficLight].bg,
+          )}
+        />
         <span className="flex items-center gap-1">
           <BookOpen className="w-3 h-3" />
           {project.chapterCount}챕터
