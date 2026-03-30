@@ -20,12 +20,7 @@ interface DeadlineListViewProps {
   flat?: boolean;
 }
 
-const STATUS_COLORS: Record<string, string> = {
-  교안: "bg-[#EDF2DC] text-[#7A9445]",
-  촬영: "bg-[#E5EDCF] text-[#728A3E]",
-  "편집·검수": "bg-[#DDE9C2] text-[#6A8438]",
-  롤아웃: "bg-[#E5F0D0] text-[#7A9445]",
-};
+const STATUS_NEUTRAL = "bg-[#F0F0F0] text-[#6B6B6B]";
 
 const TRAFFIC_LIGHT_COLORS: Record<string, string> = {
   green: "bg-[#6ECC9A]",
@@ -81,7 +76,7 @@ function ProjectRow({ project }: { project: Project }) {
         <span
           className={cn(
             "text-[10px] font-medium px-1.5 py-0.5 rounded-md",
-            STATUS_COLORS[project.status] ?? theme.typeBadge,
+            STATUS_NEUTRAL,
           )}
         >
           {project.status}

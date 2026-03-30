@@ -15,7 +15,10 @@ import type { Project, ProjectStatus, BusinessUnit } from "@/lib/types";
 import { PROJECT_STATUSES, BUSINESS_UNITS, KDT_TRACKS } from "@/lib/constants";
 import { DeadlineListView } from "./deadline-list-view";
 import { cn } from "@/lib/utils";
-import { STATUS_BADGE_THEMES, useStatusBadgeTheme } from "./status-badge-theme";
+import {
+  TRAFFIC_LIGHT_THEMES,
+  useTrafficLightTheme,
+} from "./traffic-light-theme";
 
 interface ProjectGridProps {
   projects: Project[];
@@ -198,8 +201,8 @@ export function ProjectGrid({ projects }: ProjectGridProps) {
           )}
         </div>
 
-        {/* 상태 배지 색상 디버그 */}
-        <StatusBadgeToggle />
+        {/* 신호등 색상 디버그 */}
+        <TrafficLightToggle />
       </div>
 
       {/* 목록 */}
@@ -219,13 +222,13 @@ export function ProjectGrid({ projects }: ProjectGridProps) {
   );
 }
 
-function StatusBadgeToggle() {
-  const { themeKey, setThemeKey } = useStatusBadgeTheme();
+function TrafficLightToggle() {
+  const { themeKey, setThemeKey } = useTrafficLightTheme();
   return (
     <div className="flex items-center gap-1.5">
-      <span className="text-[10px] text-muted-foreground">배지색</span>
+      <span className="text-[10px] text-muted-foreground">신호등</span>
       <div className="flex items-center rounded-md border border-border p-0.5 gap-0.5">
-        {STATUS_BADGE_THEMES.map((t) => (
+        {TRAFFIC_LIGHT_THEMES.map((t) => (
           <button
             key={t.key}
             onClick={() => setThemeKey(t.key)}
@@ -239,8 +242,20 @@ function StatusBadgeToggle() {
             <span className="flex items-center gap-1">
               <span
                 className={cn(
-                  "inline-block w-2 h-2 rounded-full",
-                  t.style.split(" ")[0],
+                  "inline-block w-1.5 h-1.5 rounded-full",
+                  t.colors.green,
+                )}
+              />
+              <span
+                className={cn(
+                  "inline-block w-1.5 h-1.5 rounded-full",
+                  t.colors.yellow,
+                )}
+              />
+              <span
+                className={cn(
+                  "inline-block w-1.5 h-1.5 rounded-full",
+                  t.colors.red,
                 )}
               />
               {t.label}

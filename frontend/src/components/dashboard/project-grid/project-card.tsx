@@ -10,10 +10,9 @@ import {
   getAutoTrafficLight,
   cn,
 } from "@/lib/utils";
-import { TRAFFIC_LIGHT_COLORS } from "@/lib/constants";
 import { ChapterPipeline } from "@/components/dashboard/chapter-pipeline";
 import { useBadgeTheme } from "@/lib/badge-theme";
-import { useStatusBadgeTheme } from "./status-badge-theme";
+import { useTrafficLightTheme } from "./traffic-light-theme";
 
 interface ProjectCardProps {
   project: Project;
@@ -28,7 +27,7 @@ function getCompletionRate(project: Project): number {
 
 export function ProjectCard({ project }: ProjectCardProps) {
   const { theme } = useBadgeTheme();
-  const { style: statusStyle } = useStatusBadgeTheme();
+  const { colors: tlColors } = useTrafficLightTheme();
   const dday = getDday(project.rolloutDate);
   const isOverdue = dday < 0 && project.status !== "완료";
   const completion = getCompletionRate(project);
@@ -50,12 +49,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
           <p className="text-[13.5px] font-semibold text-neutral-800 leading-snug line-clamp-2">
             {project.title}
           </p>
-          <span
-            className={cn(
-              "text-[10px] font-medium px-1.5 py-0.5 rounded-md shrink-0",
-              statusStyle,
-            )}
-          >
+          <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-md shrink-0 bg-[#F0F0F0] text-[#6B6B6B]">
             {project.status}
           </span>
         </div>
@@ -115,7 +109,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
         <span
           className={cn(
             "inline-block w-2.5 h-2.5 rounded-full shrink-0",
-            TRAFFIC_LIGHT_COLORS[trafficLight].bg,
+            tlColors[trafficLight],
           )}
         />
         <span className="flex items-center gap-1">

@@ -9,14 +9,14 @@ import { Separator } from "@/components/ui/separator";
 import { mockProjects } from "@/lib/mock-data";
 import type { Project } from "@/lib/types";
 import { BadgeThemeProvider } from "@/lib/badge-theme";
-import { StatusBadgeThemeProvider } from "@/components/dashboard/project-grid/status-badge-theme";
+import { TrafficLightThemeProvider } from "@/components/dashboard/project-grid/traffic-light-theme";
 
 export default function DashboardPage() {
   const [projects] = useState<Project[]>(mockProjects);
 
   return (
     <BadgeThemeProvider>
-      <StatusBadgeThemeProvider>
+      <TrafficLightThemeProvider>
         <div className="min-h-screen">
           <AppHeader title="강의 제작 페이지" />
 
@@ -32,7 +32,7 @@ export default function DashboardPage() {
             <ProjectGrid projects={projects} />
           </div>
         </div>
-      </StatusBadgeThemeProvider>
+      </TrafficLightThemeProvider>
     </BadgeThemeProvider>
   );
 }
