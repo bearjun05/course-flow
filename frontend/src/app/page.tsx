@@ -9,30 +9,27 @@ import { Separator } from "@/components/ui/separator";
 import { mockProjects } from "@/lib/mock-data";
 import type { Project } from "@/lib/types";
 import { BadgeThemeProvider } from "@/lib/badge-theme";
-import { TrafficLightThemeProvider } from "@/components/dashboard/project-grid/traffic-light-theme";
 
 export default function DashboardPage() {
   const [projects] = useState<Project[]>(mockProjects);
 
   return (
     <BadgeThemeProvider>
-      <TrafficLightThemeProvider>
-        <div className="min-h-screen">
-          <AppHeader title="강의 제작 페이지" />
+      <div className="min-h-screen">
+        <AppHeader title="강의 제작 페이지" />
 
-          <div className="space-y-6 px-6 py-6">
-            <SummaryMetrics projects={projects} />
+        <div className="space-y-6 px-6 py-6">
+          <SummaryMetrics projects={projects} />
 
-            <Separator />
+          <Separator />
 
-            <ProgressTable projects={projects} />
+          <ProgressTable projects={projects} />
 
-            <Separator />
+          <Separator />
 
-            <ProjectGrid projects={projects} />
-          </div>
+          <ProjectGrid projects={projects} />
         </div>
-      </TrafficLightThemeProvider>
+      </div>
     </BadgeThemeProvider>
   );
 }

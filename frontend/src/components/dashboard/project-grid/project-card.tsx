@@ -12,7 +12,6 @@ import {
 } from "@/lib/utils";
 import { ChapterPipeline } from "@/components/dashboard/chapter-pipeline";
 import { useBadgeTheme } from "@/lib/badge-theme";
-import { useTrafficLightTheme } from "./traffic-light-theme";
 
 interface ProjectCardProps {
   project: Project;
@@ -27,7 +26,6 @@ function getCompletionRate(project: Project): number {
 
 export function ProjectCard({ project }: ProjectCardProps) {
   const { theme } = useBadgeTheme();
-  const { colors: tlColors } = useTrafficLightTheme();
   const dday = getDday(project.rolloutDate);
   const isOverdue = dday < 0 && project.status !== "완료";
   const completion = getCompletionRate(project);
@@ -109,7 +107,11 @@ export function ProjectCard({ project }: ProjectCardProps) {
         <span
           className={cn(
             "inline-block w-2.5 h-2.5 rounded-full shrink-0",
-            tlColors[trafficLight],
+            trafficLight === "green"
+              ? "bg-[#6ECC9A]"
+              : trafficLight === "yellow"
+                ? "bg-[#F5C842]"
+                : "bg-[#F47A8A]",
           )}
         />
         <span className="flex items-center gap-1">

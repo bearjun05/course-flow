@@ -41,7 +41,6 @@ function ProjectRow({ project }: { project: Project }) {
       className={cn(
         "flex items-center gap-3 px-4 py-3 hover:bg-muted/30 transition-colors",
         isOverdue && "bg-[#FCF2F4] hover:bg-[#FCF2F4]/80",
-        isCompleted && "opacity-60",
       )}
     >
       <Video className="w-3.5 h-3.5 text-neutral-300 shrink-0" />
