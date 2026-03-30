@@ -15,6 +15,7 @@ import type { Project, ProjectStatus, BusinessUnit } from "@/lib/types";
 import { PROJECT_STATUSES, BUSINESS_UNITS, KDT_TRACKS } from "@/lib/constants";
 import { DeadlineListView } from "./deadline-list-view";
 import { cn } from "@/lib/utils";
+import { STATUS_BADGE_THEMES, useStatusBadgeTheme } from "./status-badge-theme";
 
 interface ProjectGridProps {
   projects: Project[];
@@ -196,6 +197,9 @@ export function ProjectGrid({ projects }: ProjectGridProps) {
             </Select>
           )}
         </div>
+
+        {/* 상태 배지 색상 디버그 */}
+        <StatusBadgeToggle />
       </div>
 
       {/* 목록 */}
@@ -211,6 +215,39 @@ export function ProjectGrid({ projects }: ProjectGridProps) {
       ) : (
         <DeadlineListView projects={displayProjects} flat={tab === "all"} />
       )}
+    </div>
+  );
+}
+
+function StatusBadgeToggle() {
+  const { themeKey, setThemeKey } = useStatusBadgeTheme();
+  return (
+    <div className="flex items-center gap-1.5">
+      <span className="text-[10px] text-muted-foreground">배지색</span>
+      <div className="flex items-center rounded-md border border-border p-0.5 gap-0.5">
+        {STATUS_BADGE_THEMES.map((t) => (
+          <button
+            key={t.key}
+            onClick={() => setThemeKey(t.key)}
+            className={cn(
+              "rounded px-2 py-0.5 text-[10px] transition-colors",
+              themeKey === t.key
+                ? "bg-background shadow-sm text-foreground font-medium"
+                : "text-muted-foreground hover:text-foreground",
+            )}
+          >
+            <span className="flex items-center gap-1">
+              <span
+                className={cn(
+                  "inline-block w-2 h-2 rounded-full",
+                  t.style.split(" ")[0],
+                )}
+              />
+              {t.label}
+            </span>
+          </button>
+        ))}
+      </div>
     </div>
   );
 }

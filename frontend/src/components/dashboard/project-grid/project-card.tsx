@@ -10,9 +10,10 @@ import {
   getAutoTrafficLight,
   cn,
 } from "@/lib/utils";
-import { STATUS_BADGE_VARIANT, TRAFFIC_LIGHT_COLORS } from "@/lib/constants";
+import { TRAFFIC_LIGHT_COLORS } from "@/lib/constants";
 import { ChapterPipeline } from "@/components/dashboard/chapter-pipeline";
 import { useBadgeTheme } from "@/lib/badge-theme";
+import { useStatusBadgeTheme } from "./status-badge-theme";
 
 interface ProjectCardProps {
   project: Project;
@@ -27,6 +28,7 @@ function getCompletionRate(project: Project): number {
 
 export function ProjectCard({ project }: ProjectCardProps) {
   const { theme } = useBadgeTheme();
+  const { style: statusStyle } = useStatusBadgeTheme();
   const dday = getDday(project.rolloutDate);
   const isOverdue = dday < 0 && project.status !== "완료";
   const completion = getCompletionRate(project);
@@ -48,7 +50,12 @@ export function ProjectCard({ project }: ProjectCardProps) {
           <p className="text-[13.5px] font-semibold text-neutral-800 leading-snug line-clamp-2">
             {project.title}
           </p>
-          <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-md shrink-0 bg-[#E8EDF5] text-[#5A6A8A]">
+          <span
+            className={cn(
+              "text-[10px] font-medium px-1.5 py-0.5 rounded-md shrink-0",
+              statusStyle,
+            )}
+          >
             {project.status}
           </span>
         </div>

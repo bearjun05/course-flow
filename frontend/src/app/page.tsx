@@ -9,27 +9,30 @@ import { Separator } from "@/components/ui/separator";
 import { mockProjects } from "@/lib/mock-data";
 import type { Project } from "@/lib/types";
 import { BadgeThemeProvider } from "@/lib/badge-theme";
+import { StatusBadgeThemeProvider } from "@/components/dashboard/project-grid/status-badge-theme";
 
 export default function DashboardPage() {
   const [projects] = useState<Project[]>(mockProjects);
 
   return (
     <BadgeThemeProvider>
-      <div className="min-h-screen">
-        <AppHeader title="강의 제작 페이지" />
+      <StatusBadgeThemeProvider>
+        <div className="min-h-screen">
+          <AppHeader title="강의 제작 페이지" />
 
-        <div className="space-y-6 px-6 py-6">
-          <SummaryMetrics projects={projects} />
+          <div className="space-y-6 px-6 py-6">
+            <SummaryMetrics projects={projects} />
 
-          <Separator />
+            <Separator />
 
-          <ProgressTable projects={projects} />
+            <ProgressTable projects={projects} />
 
-          <Separator />
+            <Separator />
 
-          <ProjectGrid projects={projects} />
+            <ProjectGrid projects={projects} />
+          </div>
         </div>
-      </div>
+      </StatusBadgeThemeProvider>
     </BadgeThemeProvider>
   );
 }
