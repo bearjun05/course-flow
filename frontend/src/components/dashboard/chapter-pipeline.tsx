@@ -3,7 +3,14 @@
 import type { Project, TaskType } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
-const PIPELINE_STAGE_NAMES = ["교안", "촬영", "편집", "자막", "검수"] as const;
+const PIPELINE_STAGE_NAMES = [
+  "교안",
+  "촬영",
+  "편집",
+  "자막",
+  "검수",
+  "승인",
+] as const;
 type PipelineStageName = (typeof PIPELINE_STAGE_NAMES)[number];
 
 const PIPELINE_TASK_TYPES: TaskType[] = [
@@ -12,6 +19,7 @@ const PIPELINE_TASK_TYPES: TaskType[] = [
   "편집",
   "자막",
   "검수",
+  "승인",
 ];
 
 const SLOT_FILLED_COLORS = [
@@ -20,6 +28,7 @@ const SLOT_FILLED_COLORS = [
   "bg-[#CCDC9F]",
   "bg-[#BACE80]",
   "bg-[#A8BE60]",
+  "bg-[#8AAE50]",
 ];
 
 function getChapterProgress(
@@ -30,7 +39,7 @@ function getChapterProgress(
   if (tasks.length === 0) return { filledCount: 0, stageName: "교안" };
 
   // 가장 진행된 단계 찾기 (역순 탐색)
-  for (let i = 4; i >= 0; i--) {
+  for (let i = 5; i >= 0; i--) {
     const taskType = PIPELINE_TASK_TYPES[i];
     const task = tasks.find((t) => t.taskType === taskType);
     if (
@@ -98,7 +107,7 @@ export function ChapterPipeline({ project }: ChapterPipelineProps) {
       {chapterData.map(({ ch, filledCount, stageName }) => (
         <div key={ch} className="flex-1 flex flex-col gap-1">
           <div className="flex gap-[2px]">
-            {Array.from({ length: 5 }, (_, i) => (
+            {Array.from({ length: 6 }, (_, i) => (
               <div
                 key={i}
                 className={cn(

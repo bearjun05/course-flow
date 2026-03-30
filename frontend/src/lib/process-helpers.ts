@@ -61,6 +61,7 @@ const TASK_TYPE_TO_KANBAN: Record<TaskType, KanbanColumn> = {
   편집: "편집·검수",
   자막: "편집·검수",
   검수: "편집·검수",
+  승인: "롤아웃",
   업로드: "롤아웃",
   롤아웃: "롤아웃",
 };
@@ -71,6 +72,7 @@ const CHAPTER_TASK_TYPES: TaskType[] = [
   "편집",
   "자막",
   "검수",
+  "승인",
 ];
 
 /**
@@ -83,13 +85,6 @@ export function getChapterKanbanColumn(
 ): KanbanColumn {
   const tasks = project.tasks.filter((t) => t.chapter === chapter);
   if (tasks.length === 0) return "교안";
-
-  // 장의 모든 공정이 완료이면 롤아웃 단계
-  const allDone = CHAPTER_TASK_TYPES.every((tt) => {
-    const t = tasks.find((t) => t.taskType === tt);
-    return t && t.status === "완료";
-  });
-  if (allDone) return "롤아웃";
 
   for (let i = CHAPTER_TASK_TYPES.length - 1; i >= 0; i--) {
     const taskType = CHAPTER_TASK_TYPES[i];
@@ -139,12 +134,6 @@ export function getChapterDetailedStage(
   const tasks = project.tasks.filter((t) => t.chapter === chapter);
   if (tasks.length === 0) return "교안";
 
-  const allDone = CHAPTER_TASK_TYPES.every((tt) => {
-    const t = tasks.find((t) => t.taskType === tt);
-    return t && t.status === "완료";
-  });
-  if (allDone) return "롤아웃";
-
   for (let i = CHAPTER_TASK_TYPES.length - 1; i >= 0; i--) {
     const taskType = CHAPTER_TASK_TYPES[i];
     const task = tasks.find((t) => t.taskType === taskType);
@@ -154,6 +143,7 @@ export function getChapterDetailedStage(
         task.status === "진행" ||
         task.status === "리뷰")
     ) {
+      if (taskType === "승인") return "승인";
       if (taskType === "편집") return "편집";
       if (taskType === "자막") return "자막";
       if (taskType === "검수") return "검수";

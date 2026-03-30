@@ -18,7 +18,7 @@ const COL_LABEL: Record<KanbanColumn, string> = {
   교안: "교안",
   촬영: "촬영",
   "편집·검수": "편집",
-  롤아웃: "롤아웃",
+  롤아웃: "승인",
 };
 
 const COL_STYLE: Record<KanbanColumn, string> = {

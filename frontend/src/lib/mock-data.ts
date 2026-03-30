@@ -14,6 +14,7 @@ const TASK_TYPES_PER_CHAPTER: TaskType[] = [
   "편집",
   "자막",
   "검수",
+  "승인",
 ];
 
 function createChapterTasks(

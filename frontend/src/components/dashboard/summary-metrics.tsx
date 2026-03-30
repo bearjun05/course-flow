@@ -123,12 +123,12 @@ function MetricCard({
     ? "bg-[#FFBAC4]/80"
     : isGood
       ? "bg-[#DDE8C0]/70"
-      : "bg-slate-100";
+      : "bg-neutral-100";
   const iconColor = isDanger
     ? "text-[#FA0030]"
     : isGood
       ? "text-[#8AAE50]"
-      : "text-slate-400";
+      : "text-neutral-400";
   const titleColor = isDanger
     ? "text-[#D90B32]"
     : isGood
@@ -143,17 +143,17 @@ function MetricCard({
     ? "text-[#FC6F8C]"
     : isGood
       ? "text-[#A8BE60]"
-      : "text-slate-400";
+      : "text-neutral-400";
   const borderColor = isDanger
     ? "border-[#FFD6DC]"
     : isGood
       ? "border-[#DDE8C0]"
-      : "border-slate-200";
+      : "border-neutral-200";
   const dividerColor = isDanger
     ? "border-[#FFBAC4]/60"
     : isGood
       ? "border-[#CCDC9F]/50"
-      : "border-slate-200/60";
+      : "border-neutral-200/60";
 
   return (
     <div
@@ -201,7 +201,7 @@ function MetricCard({
                   ? "text-[#FFBAC4]"
                   : isGood
                     ? "text-[#CCDC9F]"
-                    : "text-slate-300",
+                    : "text-neutral-300",
                 expanded && "rotate-180",
               )}
             />
