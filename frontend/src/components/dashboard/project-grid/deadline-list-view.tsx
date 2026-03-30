@@ -142,7 +142,7 @@ export function DeadlineListView({
     const sorted = [...projects].sort((a, b) =>
       sortBy === "name"
         ? a.title.localeCompare(b.title, "ko")
-        : getDday(a.rolloutDate) - getDday(b.rolloutDate),
+        : getDday(b.rolloutDate) - getDday(a.rolloutDate),
     );
     return (
       <div>
