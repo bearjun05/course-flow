@@ -11,37 +11,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type {
-  Project,
-  ProjectStatus,
-  TrafficLight,
-  BusinessUnit,
-} from "@/lib/types";
+import type { Project, ProjectStatus, BusinessUnit } from "@/lib/types";
 import { PROJECT_STATUSES, BUSINESS_UNITS, KDT_TRACKS } from "@/lib/constants";
 import { DeadlineListView } from "./deadline-list-view";
 import { cn } from "@/lib/utils";
 
 interface ProjectGridProps {
   projects: Project[];
-  onStatusChange: (projectId: string, status: ProjectStatus) => void;
-  onTrafficLightChange: (projectId: string, light: TrafficLight) => void;
-  onRolloutChange: (projectId: string, date: string) => void;
-  onDelete: (projectId: string) => void;
-  onDuplicate: (projectId: string) => void;
-  onHide: (projectId: string) => void;
 }
 
 type TabMode = "active" | "all";
 
-export function ProjectGrid({
-  projects,
-  onStatusChange,
-  onTrafficLightChange,
-  onRolloutChange,
-  onDelete,
-  onDuplicate,
-  onHide,
-}: ProjectGridProps) {
+export function ProjectGrid({ projects }: ProjectGridProps) {
   const [tab, setTab] = useState<TabMode>("active");
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<ProjectStatus | "all">(
@@ -228,16 +209,7 @@ export function ProjectGrid({
           </p>
         </div>
       ) : (
-        <DeadlineListView
-          projects={displayProjects}
-          onStatusChange={onStatusChange}
-          onTrafficLightChange={onTrafficLightChange}
-          onRolloutChange={onRolloutChange}
-          onDelete={onDelete}
-          onDuplicate={onDuplicate}
-          onHide={onHide}
-          flat={tab === "all"}
-        />
+        <DeadlineListView projects={displayProjects} flat={tab === "all"} />
       )}
     </div>
   );

@@ -1,42 +1,21 @@
 "use client";
 
 import { useState } from "react";
-import type { Project, ProjectStatus, TrafficLight } from "@/lib/types";
+import type { Project } from "@/lib/types";
 import { getDday, cn } from "@/lib/utils";
 import { DDAY_GROUPS } from "@/lib/constants";
 import { ProjectCard } from "./project-card";
 
 interface DeadlineListViewProps {
   projects: Project[];
-  onStatusChange: (projectId: string, status: ProjectStatus) => void;
-  onTrafficLightChange: (projectId: string, light: TrafficLight) => void;
-  onRolloutChange: (projectId: string, date: string) => void;
-  onDelete: (projectId: string) => void;
-  onDuplicate: (projectId: string) => void;
-  onHide: (projectId: string) => void;
   flat?: boolean;
 }
 
 export function DeadlineListView({
   projects,
-  onStatusChange,
-  onTrafficLightChange,
-  onRolloutChange,
-  onDelete,
-  onDuplicate,
-  onHide,
   flat = false,
 }: DeadlineListViewProps) {
   const [sortBy, setSortBy] = useState<"deadline" | "name">("deadline");
-
-  const cardProps = {
-    onStatusChange,
-    onTrafficLightChange,
-    onRolloutChange,
-    onDelete,
-    onDuplicate,
-    onHide,
-  };
 
   if (flat) {
     const sorted = [...projects].sort((a, b) =>
@@ -79,9 +58,9 @@ export function DeadlineListView({
             </button>
           </div>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+        <div className="flex flex-col gap-3">
           {sorted.map((project) => (
-            <ProjectCard key={project.id} project={project} {...cardProps} />
+            <ProjectCard key={project.id} project={project} />
           ))}
         </div>
       </div>
@@ -112,9 +91,9 @@ export function DeadlineListView({
             </span>
             <div className="flex-1 h-px bg-border" />
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+          <div className="flex flex-col gap-3">
             {section.projects.map((project) => (
-              <ProjectCard key={project.id} project={project} {...cardProps} />
+              <ProjectCard key={project.id} project={project} />
             ))}
           </div>
         </div>

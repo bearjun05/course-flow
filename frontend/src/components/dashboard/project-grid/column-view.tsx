@@ -1,29 +1,15 @@
 "use client";
 
-import type { Project, ProjectStatus, TrafficLight } from "@/lib/types";
+import type { Project } from "@/lib/types";
 import { getDday } from "@/lib/utils";
 import { DDAY_GROUPS } from "@/lib/constants";
 import { ProjectCard } from "./project-card";
 
 interface ColumnViewProps {
   projects: Project[];
-  onStatusChange: (projectId: string, status: ProjectStatus) => void;
-  onTrafficLightChange: (projectId: string, light: TrafficLight) => void;
-  onRolloutChange: (projectId: string, date: string) => void;
-  onDelete: (projectId: string) => void;
-  onDuplicate: (projectId: string) => void;
-  onHide: (projectId: string) => void;
 }
 
-export function ColumnView({
-  projects,
-  onStatusChange,
-  onTrafficLightChange,
-  onRolloutChange,
-  onDelete,
-  onDuplicate,
-  onHide,
-}: ColumnViewProps) {
+export function ColumnView({ projects }: ColumnViewProps) {
   const groups = DDAY_GROUPS.map((group) => ({
     ...group,
     projects: projects
@@ -48,16 +34,7 @@ export function ColumnView({
           </div>
           <div className="flex flex-col gap-3">
             {group.projects.map((project) => (
-              <ProjectCard
-                key={project.id}
-                project={project}
-                onStatusChange={onStatusChange}
-                onTrafficLightChange={onTrafficLightChange}
-                onRolloutChange={onRolloutChange}
-                onDelete={onDelete}
-                onDuplicate={onDuplicate}
-                onHide={onHide}
-              />
+              <ProjectCard key={project.id} project={project} />
             ))}
           </div>
         </div>
