@@ -15,16 +15,13 @@ interface DotMatrixTableProps {
 function ProjectRows({ project }: { project: Project }) {
   const [open, setOpen] = useState(false);
   const dday = getDday(project.rolloutDate);
-  const isOverdue = dday < 0;
   const chapters = Array.from(
     { length: project.chapterCount },
     (_, i) => i + 1,
   );
 
   return (
-    <tbody
-      className={cn("border-b border-border", isOverdue && "bg-[#FCF2F4]")}
-    >
+    <tbody className="border-b border-border">
       {/* 프로젝트 헤더 행 (토글) */}
       <tr
         className="bg-muted/15 cursor-pointer select-none"

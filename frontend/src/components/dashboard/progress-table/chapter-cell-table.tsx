@@ -36,15 +36,11 @@ export function ChapterCellTable({ projects }: ChapterCellTableProps) {
           {projects.map((project) => {
             const grouped = getChaptersGroupedByColumn(project);
             const dday = getDday(project.rolloutDate);
-            const isOverdue = dday < 0;
 
             return (
               <tr
                 key={project.id}
-                className={cn(
-                  "transition-colors hover:bg-muted/20",
-                  isOverdue && "bg-[#FCF2F4] hover:bg-[#FCF2F4]/80",
-                )}
+                className="transition-colors hover:bg-muted/20"
               >
                 <td className="px-4 py-3">
                   <Link
