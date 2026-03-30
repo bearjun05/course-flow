@@ -24,7 +24,7 @@ export function FlatView({
   onHide,
 }: FlatViewProps) {
   const sorted = [...projects].sort(
-    (a, b) => getDday(a.rolloutDate) - getDday(b.rolloutDate)
+    (a, b) => getDday(b.rolloutDate) - getDday(a.rolloutDate),
   );
 
   return (

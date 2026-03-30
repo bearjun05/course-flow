@@ -133,12 +133,12 @@ function MetricCard({
     ? "text-[#D90B32]"
     : isGood
       ? "text-[#6E8A3A]"
-      : "text-neutral-600";
+      : "text-black";
   const valueColor = isDanger
     ? "text-[#FA0030]"
     : isGood
       ? "text-[#8AAE50]"
-      : "text-neutral-500";
+      : "text-black";
   const detailColor = isDanger
     ? "text-[#FC6F8C]"
     : isGood
