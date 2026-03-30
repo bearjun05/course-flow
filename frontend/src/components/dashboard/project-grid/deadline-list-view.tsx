@@ -1,142 +1,42 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
-import { Video } from "lucide-react";
 import type { Project, ProjectStatus, TrafficLight } from "@/lib/types";
-import {
-  getDday,
-  formatDday,
-  getDdayColor,
-  getAutoTrafficLight,
-  cn,
-} from "@/lib/utils";
+import { getDday, cn } from "@/lib/utils";
 import { DDAY_GROUPS } from "@/lib/constants";
-import { useBadgeTheme } from "@/lib/badge-theme";
+import { ProjectCard } from "./project-card";
 
 interface DeadlineListViewProps {
   projects: Project[];
   onStatusChange: (projectId: string, status: ProjectStatus) => void;
   onTrafficLightChange: (projectId: string, light: TrafficLight) => void;
-  flat?: boolean; // true = 섹션 없이 DB 스타일 전체 목록
-}
-
-const STATUS_COLORS: Record<string, string> = {
-  교안: "bg-[#EDF2DC] text-[#7A9445]",
-  촬영: "bg-[#E5EDCF] text-[#728A3E]",
-  "편집·검수": "bg-[#DDE9C2] text-[#6A8438]",
-  롤아웃: "bg-[#E5F0D0] text-[#7A9445]",
-};
-
-const TRAFFIC_LIGHT_COLORS: Record<string, string> = {
-  green: "bg-[#6ECC9A]",
-  yellow: "bg-[#F5C842]",
-  red: "bg-[#F47A8A]",
-};
-
-function ProjectRow({
-  project,
-  simple = false,
-}: {
-  project: Project;
-  simple?: boolean;
-}) {
-  const { theme } = useBadgeTheme();
-  const dday = getDday(project.rolloutDate);
-  const isOverdue = dday < 0 && project.status !== "완료";
-  const isCompleted = project.status === "완료";
-  const light = getAutoTrafficLight(project);
-
-  return (
-    <Link
-      href={`/projects/${project.id}`}
-      className={cn(
-        "flex items-center gap-3 px-4 py-3 hover:bg-muted/30 transition-colors",
-        !simple && isOverdue && "bg-[#FCF2F4] hover:bg-[#FCF2F4]/80",
-        isCompleted && !simple && "opacity-60",
-      )}
-    >
-      {/* 신호등 (전체 탭에서는 숨김) */}
-      {!simple && (
-        <span
-          className={cn(
-            "inline-block w-2 h-2 rounded-full shrink-0",
-            TRAFFIC_LIGHT_COLORS[light] ?? "bg-neutral-300",
-          )}
-        />
-      )}
-
-      {/* 아이콘 실루엣 */}
-      <Video className="w-3.5 h-3.5 text-neutral-300 shrink-0" />
-
-      {/* 제목 + 버전 */}
-      <div className="flex items-baseline gap-1.5 flex-1 min-w-0">
-        <span className="text-[13px] font-medium text-foreground truncate">
-          {project.title}
-        </span>
-        {project.version && (
-          <span
-            className={cn(
-              "text-[10px] font-medium px-1.5 py-0.5 rounded-md shrink-0",
-              theme.versionBadge,
-            )}
-          >
-            {project.version}
-          </span>
-        )}
-      </div>
-
-      {/* 배지 그룹 */}
-      <div className="flex items-center gap-1 shrink-0">
-        {/* 사업부 */}
-        <span
-          className={cn(
-            "text-[10px] font-medium px-1.5 py-0.5 rounded-md",
-            theme.listUnitBadge,
-          )}
-        >
-          {[project.businessUnit, project.trackName]
-            .filter(Boolean)
-            .join(" · ")}
-        </span>
-        {/* 상태 */}
-        <span
-          className={cn(
-            "text-[10px] font-medium px-1.5 py-0.5 rounded-md",
-            STATUS_COLORS[project.status] ?? theme.typeBadge,
-          )}
-        >
-          {project.status}
-        </span>
-      </div>
-
-      {/* 날짜 */}
-      {isCompleted ? (
-        <span className="text-[11px] text-muted-foreground shrink-0 w-32 text-right">
-          {project.rolloutDate.slice(5).replace("-", "/")} 출시
-        </span>
-      ) : (
-        <span
-          className={cn(
-            "text-[12px] font-medium shrink-0 w-32 text-right",
-            getDdayColor(dday),
-          )}
-        >
-          {formatDday(dday)}
-          <span className="ml-1.5 text-[11px] text-muted-foreground font-normal">
-            ({project.rolloutDate.slice(5).replace("-", "/")})
-          </span>
-        </span>
-      )}
-    </Link>
-  );
+  onRolloutChange: (projectId: string, date: string) => void;
+  onDelete: (projectId: string) => void;
+  onDuplicate: (projectId: string) => void;
+  onHide: (projectId: string) => void;
+  flat?: boolean;
 }
 
 export function DeadlineListView({
   projects,
+  onStatusChange,
+  onTrafficLightChange,
+  onRolloutChange,
+  onDelete,
+  onDuplicate,
+  onHide,
   flat = false,
 }: DeadlineListViewProps) {
   const [sortBy, setSortBy] = useState<"deadline" | "name">("deadline");
+
+  const cardProps = {
+    onStatusChange,
+    onTrafficLightChange,
+    onRolloutChange,
+    onDelete,
+    onDuplicate,
+    onHide,
+  };
 
   if (flat) {
     const sorted = [...projects].sort((a, b) =>
@@ -146,7 +46,7 @@ export function DeadlineListView({
     );
     return (
       <div>
-        <div className="flex items-center gap-2 mb-2 px-1">
+        <div className="flex items-center gap-2 mb-3 px-1">
           <span className="text-xs font-semibold text-muted-foreground">
             전체
           </span>
@@ -179,9 +79,9 @@ export function DeadlineListView({
             </button>
           </div>
         </div>
-        <div className="rounded-xl border border-border overflow-hidden divide-y divide-border">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
           {sorted.map((project) => (
-            <ProjectRow key={project.id} project={project} simple />
+            <ProjectCard key={project.id} project={project} {...cardProps} />
           ))}
         </div>
       </div>
@@ -203,7 +103,7 @@ export function DeadlineListView({
     <div className="space-y-6">
       {sections.map((section) => (
         <div key={section.label}>
-          <div className="flex items-center gap-2 mb-2 px-1">
+          <div className="flex items-center gap-2 mb-3 px-1">
             <span className="text-xs font-semibold text-muted-foreground">
               {section.label}
             </span>
@@ -212,9 +112,9 @@ export function DeadlineListView({
             </span>
             <div className="flex-1 h-px bg-border" />
           </div>
-          <div className="rounded-xl border border-border overflow-hidden divide-y divide-border">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
             {section.projects.map((project) => (
-              <ProjectRow key={project.id} project={project} />
+              <ProjectCard key={project.id} project={project} {...cardProps} />
             ))}
           </div>
         </div>

@@ -3,7 +3,7 @@
 import { useState, useCallback } from "react";
 import { AppHeader } from "@/components/layout/app-header";
 import { SummaryMetrics } from "@/components/dashboard/summary-metrics";
-import { KanbanBoard } from "@/components/dashboard/kanban/kanban-board";
+import { ProgressTable } from "@/components/dashboard/progress-table/progress-table";
 import { ProjectGrid } from "@/components/dashboard/project-grid/project-grid";
 import { Separator } from "@/components/ui/separator";
 import { mockProjects } from "@/lib/mock-data";
@@ -128,10 +128,7 @@ function DashboardContent({
 
         <Separator />
 
-        <KanbanBoard
-          projects={projects}
-          onStatusChange={onKanbanStatusChange}
-        />
+        <ProgressTable projects={projects} />
 
         <Separator />
 

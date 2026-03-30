@@ -37,6 +37,10 @@ export function ProjectGrid({
   projects,
   onStatusChange,
   onTrafficLightChange,
+  onRolloutChange,
+  onDelete,
+  onDuplicate,
+  onHide,
 }: ProjectGridProps) {
   const [tab, setTab] = useState<TabMode>("active");
   const [search, setSearch] = useState("");
@@ -228,6 +232,10 @@ export function ProjectGrid({
           projects={displayProjects}
           onStatusChange={onStatusChange}
           onTrafficLightChange={onTrafficLightChange}
+          onRolloutChange={onRolloutChange}
+          onDelete={onDelete}
+          onDuplicate={onDuplicate}
+          onHide={onHide}
           flat={tab === "all"}
         />
       )}
