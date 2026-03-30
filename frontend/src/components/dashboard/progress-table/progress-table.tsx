@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import type { Project } from "@/lib/types";
-import { isProjectActive } from "@/lib/utils";
+import { isProjectActive, getDday } from "@/lib/utils";
 import { getEffectiveKanbanColumn } from "@/lib/process-helpers";
 import { ChapterCellTable } from "./chapter-cell-table";
 import { DotMatrixTable } from "./dot-matrix-table";
@@ -18,9 +18,9 @@ interface ProgressTableProps {
 export function ProgressTable({ projects }: ProgressTableProps) {
   const [viewMode, setViewMode] = useState<ViewMode>("chapters");
 
-  const activeProjects = projects.filter(
-    (p) => isProjectActive(p.status) && getEffectiveKanbanColumn(p),
-  );
+  const activeProjects = projects
+    .filter((p) => isProjectActive(p.status) && getEffectiveKanbanColumn(p))
+    .sort((a, b) => getDday(a.rolloutDate) - getDday(b.rolloutDate));
 
   return (
     <div>
