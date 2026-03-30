@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import type { Project, KanbanColumn } from "@/lib/types";
 import { KANBAN_COLUMNS } from "@/lib/constants";
@@ -35,25 +34,21 @@ function ProjectRows({ project }: { project: Project }) {
   );
 
   return (
-    <div className="border-b border-border/60 last:border-b-0">
-      {/* 프로젝트 헤더 */}
+    <div className={cn("border-b border-border/40 last:border-b-0")}>
+      {/* 프로젝트 헤더 — 전체 클릭으로 토글 */}
       <div
         className="flex items-center px-5 py-3.5 cursor-pointer select-none hover:bg-accent/30 transition-colors"
         onClick={() => setOpen(!open)}
       >
         <ChevronRight
           className={cn(
-            "w-3.5 h-3.5 text-muted-foreground/60 transition-transform mr-2.5 shrink-0",
+            "w-3.5 h-3.5 text-muted-foreground/50 transition-transform mr-3 shrink-0",
             open && "rotate-90",
           )}
         />
-        <Link
-          href={`/projects/${project.id}`}
-          className="text-[13.5px] font-medium text-foreground hover:underline flex-1 min-w-0 truncate"
-          onClick={(e) => e.stopPropagation()}
-        >
+        <span className="text-[13.5px] font-medium text-foreground flex-1 min-w-0 truncate">
           {project.title}
-        </Link>
+        </span>
         <span
           className={cn(
             "text-[12.5px] font-medium whitespace-nowrap ml-4",
@@ -66,41 +61,43 @@ function ProjectRows({ project }: { project: Project }) {
 
       {/* 장별 공정 표시 */}
       {open && (
-        <div className="px-5 pb-4 pt-0.5">
-          <div
-            className="grid gap-2"
-            style={{
-              gridTemplateColumns: `60px repeat(${KANBAN_COLUMNS.length}, 1fr)`,
-            }}
-          >
-            {chapters.map((ch) => {
-              const col = getChapterKanbanColumn(project, ch);
-              return (
-                <div key={ch} className="contents">
-                  <span className="text-[11.5px] text-muted-foreground/70 py-1 pl-1">
-                    {ch}장
-                  </span>
-                  {KANBAN_COLUMNS.map((kanbanCol) => (
-                    <div
-                      key={kanbanCol.id}
-                      className="flex items-center justify-center py-1"
-                    >
-                      {kanbanCol.id === col && (
-                        <span
-                          className={cn(
-                            "inline-block rounded-full px-2.5 py-0.5 text-[10px] font-medium",
-                            COL_STYLE[col],
-                          )}
-                        >
-                          {COL_LABEL[col]}
-                        </span>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              );
-            })}
-          </div>
+        <div className="mx-5 mb-4 rounded-xl border border-border/40 overflow-hidden bg-muted/10">
+          {chapters.map((ch, idx) => {
+            const col = getChapterKanbanColumn(project, ch);
+            return (
+              <div
+                key={ch}
+                className={cn(
+                  "grid items-center py-2.5 px-4",
+                  idx > 0 && "border-t border-border/30",
+                )}
+                style={{
+                  gridTemplateColumns: `48px repeat(${KANBAN_COLUMNS.length}, 1fr)`,
+                }}
+              >
+                <span className="text-[11.5px] font-medium text-muted-foreground/70">
+                  {ch}장
+                </span>
+                {KANBAN_COLUMNS.map((kanbanCol) => (
+                  <div
+                    key={kanbanCol.id}
+                    className="flex items-center justify-center"
+                  >
+                    {kanbanCol.id === col && (
+                      <span
+                        className={cn(
+                          "inline-block rounded-full px-3 py-[3px] text-[10.5px] font-medium",
+                          COL_STYLE[col],
+                        )}
+                      >
+                        {COL_LABEL[col]}
+                      </span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            );
+          })}
         </div>
       )}
     </div>

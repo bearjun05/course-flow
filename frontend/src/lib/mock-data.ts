@@ -500,4 +500,46 @@ export const mockProjects: Project[] = [
     videoFeedbacks: [],
     createdAt: "2026-01-01T09:00:00Z",
   },
+  {
+    id: "proj-10",
+    title: "풀스택 프로젝트로 배우는 Next.js",
+    version: "v1.0",
+    status: "편집·검수",
+    businessUnit: "KDT",
+    trackName: "커머스 Spring",
+    productionType: "신규",
+    rolloutDate: "2026-04-25",
+    paymentDate: "2026-05-25",
+    chapterCount: 5,
+    chapterDurations: [2.0, 2.5, 2.0, 2.5, 2.0],
+    tutor: "오승환",
+    curriculumManager: "이수빈",
+    editor: "김하늘",
+    reviewer: "정예린",
+    slackChannel: "#courseflow-nextjs",
+    trafficLight: "yellow",
+    tasks: createChapterTasks("proj-10", 5, (ch, type) => {
+      if (ch === 0) return type === "리허설" ? "완료" : "대기";
+      if (ch === 1) return "완료";
+      if (ch === 2) {
+        if (type === "교안제작" || type === "촬영" || type === "편집")
+          return "완료";
+        if (type === "자막") return "진행";
+        return "대기";
+      }
+      if (ch === 3) {
+        if (type === "교안제작") return "완료";
+        if (type === "촬영") return "진행";
+        return "대기";
+      }
+      if (ch === 4) {
+        if (type === "교안제작") return "진행";
+        return "대기";
+      }
+      return "대기";
+    }),
+    lectures: createLectures("proj-10", [2.0, 2.5, 2.0, 2.5, 2.0]),
+    videoFeedbacks: [],
+    createdAt: "2026-02-10T09:00:00Z",
+  },
 ];
