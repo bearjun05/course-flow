@@ -3,16 +3,33 @@
 import { useState } from "react";
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
-import type { Project } from "@/lib/types";
+import type { Project, KanbanColumn } from "@/lib/types";
 import { KANBAN_COLUMNS } from "@/lib/constants";
 import { getDday, formatDday, getDdayColor, cn } from "@/lib/utils";
 import { getChapterKanbanColumn } from "@/lib/process-helpers";
 
+export type DotStyle = "dot" | "label";
+
 interface DotMatrixTableProps {
   projects: Project[];
+  dotStyle: DotStyle;
 }
 
-function ProjectRows({ project }: { project: Project }) {
+/** 칸반 열의 짧은 라벨 */
+const COL_SHORT_LABEL: Record<KanbanColumn, string> = {
+  교안: "교안",
+  촬영: "촬영",
+  "편집·검수": "편집",
+  롤아웃: "롤아웃",
+};
+
+function ProjectRows({
+  project,
+  dotStyle,
+}: {
+  project: Project;
+  dotStyle: DotStyle;
+}) {
   const [open, setOpen] = useState(false);
   const dday = getDday(project.rolloutDate);
   const chapters = Array.from(
@@ -70,9 +87,14 @@ function ProjectRows({ project }: { project: Project }) {
               </td>
               {KANBAN_COLUMNS.map((kanbanCol) => (
                 <td key={kanbanCol.id} className="px-4 py-1.5 text-center">
-                  {kanbanCol.id === col && (
-                    <span className="inline-block h-3 w-3 rounded-full bg-[#DDE8C0]" />
-                  )}
+                  {kanbanCol.id === col &&
+                    (dotStyle === "dot" ? (
+                      <span className="inline-block h-3 w-3 rounded-full bg-[#DDE8C0]" />
+                    ) : (
+                      <span className="inline-block rounded-md bg-[#EDF2DC] px-1.5 py-0.5 text-[10px] font-medium text-[#7A9445]">
+                        {COL_SHORT_LABEL[col]}
+                      </span>
+                    ))}
                 </td>
               ))}
               <td />
@@ -83,7 +105,7 @@ function ProjectRows({ project }: { project: Project }) {
   );
 }
 
-export function DotMatrixTable({ projects }: DotMatrixTableProps) {
+export function DotMatrixTable({ projects, dotStyle }: DotMatrixTableProps) {
   return (
     <div className="overflow-x-auto rounded-xl border border-border">
       <table className="w-full text-[13px]">
@@ -106,7 +128,7 @@ export function DotMatrixTable({ projects }: DotMatrixTableProps) {
           </tr>
         </thead>
         {projects.map((project) => (
-          <ProjectRows key={project.id} project={project} />
+          <ProjectRows key={project.id} project={project} dotStyle={dotStyle} />
         ))}
       </table>
     </div>
