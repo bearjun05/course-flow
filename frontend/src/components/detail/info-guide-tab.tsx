@@ -162,7 +162,7 @@ export default function InfoGuideTab({
             if (v && onStatusChange) onStatusChange(v as ProjectStatus);
           }}
         >
-          <SelectTrigger className="h-6 w-auto gap-1 rounded-md border-none px-2.5 text-[11px] font-medium shadow-none bg-[#E8EDF5] text-[#5B6B82]">
+          <SelectTrigger className="h-6 w-auto gap-1 rounded-full border-none px-2.5 text-[11px] font-medium shadow-none bg-[#E6EBE0] text-[#7B8972]">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
