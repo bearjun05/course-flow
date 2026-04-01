@@ -12,21 +12,21 @@ import type { ChapterTask, TaskStatus } from "@/lib/types";
 /* ------------------------------------------------------------------ */
 
 const GROUP_COLORS = [
-  "#FF642E", // CH0 사전
-  "#579BFC", // CH1
-  "#00C875", // CH2
-  "#FDAB3D", // CH3
-  "#A25DDC", // CH4
-  "#FF642E", // CH5
-  "#579BFC", // CH6
-  "#00C875", // CH7
+  "#B0B0B0", // CH0 사전 (neutral)
+  "#8AAE50", // CH1 olive
+  "#6ECC9A", // CH2 green
+  "#F5C842", // CH3 amber
+  "#A8BE60", // CH4 olive-light
+  "#E8A87C", // CH5 peach
+  "#8AAE50", // CH6
+  "#6ECC9A", // CH7
 ];
 
 const STATUS_STYLES: Record<TaskStatus, { bg: string; text: string }> = {
-  완료: { bg: "bg-[#00C875]", text: "text-white" },
-  진행: { bg: "bg-[#579BFC]", text: "text-white" },
-  리뷰: { bg: "bg-[#A25DDC]", text: "text-white" },
-  대기: { bg: "bg-[#C4C4C4]", text: "text-white" },
+  완료: { bg: "bg-[#6ECC9A]", text: "text-white" },
+  진행: { bg: "bg-[#8AAE50]", text: "text-white" },
+  리뷰: { bg: "bg-[#F5C842]", text: "text-white" },
+  대기: { bg: "bg-neutral-200", text: "text-neutral-500" },
 };
 
 /* ------------------------------------------------------------------ */
@@ -94,10 +94,10 @@ function TimelineBar({ task }: { task: ChapterTask }) {
     task.status !== "완료";
 
   const barColor = isOverdue
-    ? "bg-[#E2445C]"
+    ? "bg-[#F47A8A]"
     : task.status === "완료"
-      ? "bg-[#00C875]"
-      : "bg-[#579BFC]";
+      ? "bg-[#6ECC9A]"
+      : "bg-[#8AAE50]";
 
   const startStr = format(start, "M/d", { locale: ko });
   const endStr = format(end, "M/d", { locale: ko });
@@ -193,9 +193,9 @@ export default function MondayBoard({
   );
 
   return (
-    <div className="rounded-lg border border-border bg-card overflow-hidden">
+    <div className="rounded-2xl border border-neutral-100 bg-white shadow-sm overflow-hidden">
       {/* Column headers */}
-      <div className="grid grid-cols-[minmax(220px,2fr)_90px_100px_minmax(160px,1fr)] border-b border-border bg-[#FAFAFA] text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+      <div className="grid grid-cols-[minmax(220px,2fr)_90px_100px_minmax(160px,1fr)] border-b border-neutral-100 bg-neutral-50/50 text-[11px] font-medium text-neutral-400 uppercase tracking-wider">
         <div className="px-4 py-2">공정</div>
         <div className="px-2 py-2 text-center">상태</div>
         <div className="px-2 py-2 text-center">담당자</div>
@@ -210,7 +210,7 @@ export default function MondayBoard({
             {/* Group header */}
             <button
               onClick={() => toggleGroup(group.chapter)}
-              className="w-full grid grid-cols-[minmax(220px,2fr)_90px_100px_minmax(160px,1fr)] items-center border-b border-border hover:bg-accent/30 transition-colors"
+              className="w-full grid grid-cols-[minmax(220px,2fr)_90px_100px_minmax(160px,1fr)] items-center border-b border-neutral-100 hover:bg-accent/30 transition-colors"
               style={{ borderLeft: `3px solid ${group.color}` }}
             >
               <div className="px-4 py-2 flex items-center gap-2">
@@ -242,7 +242,7 @@ export default function MondayBoard({
               group.tasks.map((task) => (
                 <div
                   key={task.id}
-                  className="grid grid-cols-[minmax(220px,2fr)_90px_100px_minmax(160px,1fr)] items-center border-b border-border/50 hover:bg-accent/20 transition-colors group"
+                  className="grid grid-cols-[minmax(220px,2fr)_90px_100px_minmax(160px,1fr)] items-center border-b border-neutral-100/50 hover:bg-accent/20 transition-colors group"
                   style={{ borderLeft: `3px solid ${group.color}20` }}
                 >
                   {/* Task name */}
@@ -253,7 +253,7 @@ export default function MondayBoard({
                       className={cn(
                         "h-4 w-4 rounded border flex items-center justify-center shrink-0 transition-colors",
                         task.status === "완료"
-                          ? "bg-[#00C875] border-[#00C875] text-white"
+                          ? "bg-[#6ECC9A] border-[#6ECC9A] text-white"
                           : "border-neutral-300 hover:border-[#00C875]",
                       )}
                     >

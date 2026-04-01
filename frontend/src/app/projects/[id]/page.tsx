@@ -8,6 +8,7 @@ import type { ChapterTask, ProjectStatus, TrafficLight } from "@/lib/types";
 import DetailHeader from "@/components/detail/detail-header";
 import InfoGuideTab from "@/components/detail/info-guide-tab";
 import MondayBoard from "@/components/detail/monday-board";
+import { Separator } from "@/components/ui/separator";
 
 export default function ProjectDetailPage() {
   const params = useParams<{ id: string }>();
@@ -47,24 +48,26 @@ export default function ProjectDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <DetailHeader project={project} activeTab="info" />
+    <div className="min-h-screen">
+      <DetailHeader project={project} />
 
-      <div className="px-6 py-5 space-y-5">
-        {/* 강의 정보 카드 그리드 */}
+      <div className="space-y-6 px-6 py-6">
+        {/* 강의 핵심 지표 + 상세 (접기/펼치기) */}
         <InfoGuideTab
           project={project}
           onStatusChange={setStatus}
           onTrafficLightChange={setTrafficLight}
         />
 
+        <Separator />
+
         {/* 제작 일정 보드 */}
-        <div>
+        <section>
           <h2 className="text-sm font-semibold text-foreground mb-3">
             제작 일정
           </h2>
           <MondayBoard tasks={tasks} onTasksChange={handleTasksChange} />
-        </div>
+        </section>
       </div>
     </div>
   );
