@@ -44,6 +44,7 @@ interface InfoGuideTabProps {
   onRolloutDateChange?: (date: string) => void;
   onPaymentDateChange?: (date: string) => void;
   onChapterDurationsChange?: (durations: number[]) => void;
+  onNoteChange?: (note: string) => void;
 }
 
 /* ------------------------------------------------------------------ */
@@ -238,9 +239,12 @@ export default function InfoGuideTab({
   onRolloutDateChange,
   onPaymentDateChange,
   onChapterDurationsChange,
+  onNoteChange,
 }: InfoGuideTabProps) {
   const [editingDurations, setEditingDurations] = useState(false);
   const [draftDurations, setDraftDurations] = useState<number[]>([]);
+  const [editingNote, setEditingNote] = useState(false);
+  const [draftNote, setDraftNote] = useState("");
   const prodTypeLabel =
     PRODUCTION_TYPES.find((p) => p.value === project.productionType)?.label ??
     project.productionType;
@@ -501,11 +505,38 @@ export default function InfoGuideTab({
             <span className="text-xs font-semibold text-neutral-500 uppercase tracking-wider">
               메모
             </span>
-            <div className="mt-1.5 min-h-[36px] rounded-lg bg-neutral-50 px-3 py-2 text-[12px] text-neutral-600 leading-relaxed">
-              {project.note || (
-                <span className="text-neutral-300">메모를 입력하세요...</span>
-              )}
-            </div>
+            {editingNote ? (
+              <textarea
+                autoFocus
+                value={draftNote}
+                onChange={(e) => setDraftNote(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    onNoteChange?.(draftNote);
+                    setEditingNote(false);
+                  }
+                }}
+                onBlur={() => {
+                  onNoteChange?.(draftNote);
+                  setEditingNote(false);
+                }}
+                className="mt-1.5 w-full min-h-[60px] rounded-lg bg-neutral-50 border border-neutral-200 px-3 py-2 text-[12px] text-neutral-700 leading-relaxed focus:border-neutral-300 focus:outline-none focus:ring-1 focus:ring-neutral-200 resize-none"
+                placeholder="메모를 입력하세요... (Enter 저장, Shift+Enter 줄바꿈)"
+              />
+            ) : (
+              <div
+                onClick={() => {
+                  setDraftNote(project.note || "");
+                  setEditingNote(true);
+                }}
+                className="mt-1.5 min-h-[36px] rounded-lg bg-neutral-50 px-3 py-2 text-[12px] text-neutral-600 leading-relaxed cursor-text hover:bg-neutral-100/70 transition-colors whitespace-pre-wrap"
+              >
+                {project.note || (
+                  <span className="text-neutral-300">메모를 입력하세요...</span>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>

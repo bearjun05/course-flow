@@ -35,6 +35,7 @@ export default function ProjectDetailPage() {
   const [chapterDurations, setChapterDurations] = useState<number[]>(
     baseProject?.chapterDurations ?? [],
   );
+  const [note, setNote] = useState(baseProject?.note ?? "");
 
   const project = useMemo(() => {
     if (!baseProject) return null;
@@ -46,6 +47,7 @@ export default function ProjectDetailPage() {
       rolloutDate,
       paymentDate,
       chapterDurations,
+      note,
     };
   }, [
     baseProject,
@@ -55,6 +57,7 @@ export default function ProjectDetailPage() {
     rolloutDate,
     paymentDate,
     chapterDurations,
+    note,
   ]);
 
   const handleTasksChange = useCallback((newTasks: ChapterTask[]) => {
@@ -84,6 +87,7 @@ export default function ProjectDetailPage() {
           onRolloutDateChange={setRolloutDate}
           onPaymentDateChange={setPaymentDate}
           onChapterDurationsChange={setChapterDurations}
+          onNoteChange={setNote}
         />
 
         <Separator />
