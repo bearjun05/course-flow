@@ -297,11 +297,11 @@ export default function InfoGuideTab({
                     className="flex flex-col items-center rounded-lg bg-neutral-50 py-1.5 px-1"
                   >
                     <span className="text-[10px] text-neutral-400 font-medium">
-                      CH{i + 1}
+                      {i + 1}장
                     </span>
                     <span className="text-sm font-semibold text-neutral-700 tabular-nums">
                       {d}
-                      <span className="text-[10px] text-neutral-400 font-normal">
+                      <span className="text-[10px] text-neutral-400 font-normal ml-0.5">
                         h
                       </span>
                     </span>
