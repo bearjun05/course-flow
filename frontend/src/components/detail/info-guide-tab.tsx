@@ -317,13 +317,16 @@ export default function InfoGuideTab({
           <span className="text-xs font-semibold text-neutral-500 uppercase tracking-wider">
             담당자
           </span>
-          <div className="mt-2 space-y-0">
+          <div className="mt-2 grid grid-cols-2 gap-x-4">
             <PersonRow label="튜터" value={project.tutor} />
-            <PersonRow label="커기매" value={project.curriculumManager} />
+            <PersonRow label="편집 담당자" value={project.editor} />
+            <PersonRow
+              label="커리큘럼 기획 매니저"
+              value={project.curriculumManager}
+            />
+            <PersonRow label="자막 담당자" />
             <PersonRow label="PM" value="박진영" />
-            <PersonRow label="편집" value={project.editor} />
-            <PersonRow label="자막" />
-            <PersonRow label="검수" value={project.reviewer} />
+            <PersonRow label="검수 담당자" value={project.reviewer} />
           </div>
         </div>
 
