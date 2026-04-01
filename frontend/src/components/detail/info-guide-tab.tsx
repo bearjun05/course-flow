@@ -69,18 +69,23 @@ function TrafficLightPicker({
   onChange?: (v: TrafficLight) => void;
 }) {
   return (
-    <div className="inline-flex items-center gap-1 rounded-full bg-neutral-50 px-1.5 py-1">
+    <div className="inline-flex items-center gap-1.5 rounded-full bg-neutral-700 px-2 py-1.5">
       {TRAFFIC_LIGHTS.map((tl) => (
         <button
           key={tl.value}
           onClick={() => onChange?.(tl.value)}
           title={tl.label}
           className={cn(
-            "h-3 w-3 rounded-full transition-all",
-            value === tl.value
-              ? cn(tl.active, "ring-2 ring-offset-1 ring-neutral-200 scale-110")
-              : tl.inactive,
+            "h-2.5 w-2.5 rounded-full transition-all",
+            value === tl.value ? cn(tl.active, "scale-125") : tl.inactive,
           )}
+          style={
+            value === tl.value
+              ? {
+                  boxShadow: `0 0 6px 1px ${tl.value === "green" ? "#6ECC9A" : tl.value === "yellow" ? "#F5C842" : "#F47A8A"}`,
+                }
+              : undefined
+          }
         />
       ))}
     </div>
@@ -180,7 +185,7 @@ export default function InfoGuideTab({
         <div className="flex items-center gap-2">
           <div className="h-1.5 w-24 rounded-full bg-neutral-100 overflow-hidden">
             <div
-              className="h-full rounded-full bg-[#5B9BD5] transition-all"
+              className="h-full rounded-full bg-[#C4956A] transition-all"
               style={{ width: `${progressPct}%` }}
             />
           </div>
@@ -201,13 +206,16 @@ export default function InfoGuideTab({
         {/* 스프링 */}
         <div className="flex-1" />
 
-        {/* 사업부 · 유형 */}
-        <span className="text-[11px] text-neutral-400">
-          {project.businessUnit}
-          {project.trackName && ` · ${project.trackName}`}
-          {" · "}
-          {prodTypeLabel}
-        </span>
+        {/* 사업부 · 유형 — 배지 */}
+        <div className="flex items-center gap-1.5">
+          <span className="inline-flex items-center h-5 px-2 rounded-full bg-[#F0EDE8] text-[10px] font-medium text-[#8A7E6B]">
+            {project.businessUnit}
+            {project.trackName && ` · ${project.trackName}`}
+          </span>
+          <span className="inline-flex items-center h-5 px-2 rounded-full bg-[#EDE8F0] text-[10px] font-medium text-[#7B6B8A]">
+            {prodTypeLabel}
+          </span>
+        </div>
 
         <div className="w-px h-4 bg-neutral-100" />
 
