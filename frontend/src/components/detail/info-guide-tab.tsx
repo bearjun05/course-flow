@@ -162,7 +162,7 @@ export default function InfoGuideTab({
             if (v && onStatusChange) onStatusChange(v as ProjectStatus);
           }}
         >
-          <SelectTrigger className="h-6 w-auto gap-1 rounded-full border-none px-2.5 text-[11px] font-medium shadow-none bg-[#E6EBE0] text-[#7B8972]">
+          <SelectTrigger className="h-6 w-auto gap-1 rounded-full border-none px-2.5 text-[11px] font-medium shadow-none bg-[#E8EEF4] text-[#6B839E]">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -180,7 +180,7 @@ export default function InfoGuideTab({
         <div className="flex items-center gap-2">
           <div className="h-1.5 w-24 rounded-full bg-neutral-100 overflow-hidden">
             <div
-              className="h-full rounded-full bg-[#6ECC9A] transition-all"
+              className="h-full rounded-full bg-[#5B9BD5] transition-all"
               style={{ width: `${progressPct}%` }}
             />
           </div>
