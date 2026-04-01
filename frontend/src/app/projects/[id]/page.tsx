@@ -32,6 +32,9 @@ export default function ProjectDetailPage() {
   const [paymentDate, setPaymentDate] = useState(
     baseProject?.paymentDate ?? "",
   );
+  const [chapterDurations, setChapterDurations] = useState<number[]>(
+    baseProject?.chapterDurations ?? [],
+  );
 
   const project = useMemo(() => {
     if (!baseProject) return null;
@@ -42,8 +45,17 @@ export default function ProjectDetailPage() {
       trafficLight,
       rolloutDate,
       paymentDate,
+      chapterDurations,
     };
-  }, [baseProject, tasks, status, trafficLight, rolloutDate, paymentDate]);
+  }, [
+    baseProject,
+    tasks,
+    status,
+    trafficLight,
+    rolloutDate,
+    paymentDate,
+    chapterDurations,
+  ]);
 
   const handleTasksChange = useCallback((newTasks: ChapterTask[]) => {
     setTasks(newTasks);
@@ -71,6 +83,7 @@ export default function ProjectDetailPage() {
           onStatusChange={setStatus}
           onRolloutDateChange={setRolloutDate}
           onPaymentDateChange={setPaymentDate}
+          onChapterDurationsChange={setChapterDurations}
         />
 
         <Separator />

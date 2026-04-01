@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import {
   FileText,
@@ -11,6 +12,8 @@ import {
   Plus,
   UserPlus,
   BookOpen,
+  Pencil,
+  Check,
 } from "lucide-react";
 import {
   Select,
@@ -39,6 +42,7 @@ interface InfoGuideTabProps {
   onStatusChange?: (status: ProjectStatus) => void;
   onRolloutDateChange?: (date: string) => void;
   onPaymentDateChange?: (date: string) => void;
+  onChapterDurationsChange?: (durations: number[]) => void;
 }
 
 /* ------------------------------------------------------------------ */
@@ -162,7 +166,10 @@ export default function InfoGuideTab({
   onStatusChange,
   onRolloutDateChange,
   onPaymentDateChange,
+  onChapterDurationsChange,
 }: InfoGuideTabProps) {
+  const [editingDurations, setEditingDurations] = useState(false);
+  const [draftDurations, setDraftDurations] = useState<number[]>([]);
   const prodTypeLabel =
     PRODUCTION_TYPES.find((p) => p.value === project.productionType)?.label ??
     project.productionType;
@@ -293,9 +300,36 @@ export default function InfoGuideTab({
           </div>
           {project.chapterDurations.length > 0 && (
             <div className="mt-3 pt-3 border-t border-neutral-100">
-              <p className="text-xs text-neutral-500 mb-2">챕터별 분량</p>
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-xs text-neutral-500">챕터별 분량</p>
+                {editingDurations ? (
+                  <button
+                    onClick={() => {
+                      onChapterDurationsChange?.(draftDurations);
+                      setEditingDurations(false);
+                    }}
+                    className="inline-flex items-center gap-1 text-[11px] text-[#6E8A50] hover:text-[#5A7340] transition-colors"
+                  >
+                    <Check className="h-3 w-3" />
+                    완료
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => {
+                      setDraftDurations([...project.chapterDurations]);
+                      setEditingDurations(true);
+                    }}
+                    className="inline-flex items-center gap-1 text-[11px] text-neutral-400 hover:text-neutral-600 transition-colors"
+                  >
+                    <Pencil className="h-3 w-3" />
+                  </button>
+                )}
+              </div>
               <div className="grid grid-cols-5 gap-1.5">
-                {project.chapterDurations.map((d, i) => (
+                {(editingDurations
+                  ? draftDurations
+                  : project.chapterDurations
+                ).map((d, i) => (
                   <div
                     key={i}
                     className="flex flex-col items-center justify-center rounded-lg bg-neutral-50 py-2 px-1.5 gap-0.5"
@@ -303,12 +337,32 @@ export default function InfoGuideTab({
                     <span className="text-[10px] text-neutral-400 font-medium">
                       {i + 1}장
                     </span>
-                    <span className="text-sm font-semibold text-neutral-700 tabular-nums">
-                      {d}
-                      <span className="text-[10px] text-neutral-400 font-normal ml-0.5">
-                        h
+                    {editingDurations ? (
+                      <div className="flex items-center">
+                        <input
+                          type="number"
+                          value={d}
+                          step={0.5}
+                          min={0}
+                          onChange={(e) => {
+                            const next = [...draftDurations];
+                            next[i] = parseFloat(e.target.value) || 0;
+                            setDraftDurations(next);
+                          }}
+                          className="w-8 text-sm font-semibold text-neutral-700 tabular-nums text-center bg-white border border-neutral-200 rounded focus:border-neutral-400 focus:outline-none"
+                        />
+                        <span className="text-[10px] text-neutral-400 ml-0.5">
+                          h
+                        </span>
+                      </div>
+                    ) : (
+                      <span className="text-sm font-semibold text-neutral-700 tabular-nums">
+                        {d}
+                        <span className="text-[10px] text-neutral-400 font-normal ml-0.5">
+                          h
+                        </span>
                       </span>
-                    </span>
+                    )}
                   </div>
                 ))}
               </div>
