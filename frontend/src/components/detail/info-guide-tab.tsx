@@ -129,19 +129,86 @@ function PersonRow({ label, value }: { label: string; value?: string }) {
   );
 }
 
+/* Brand icons */
+function GoogleDriveIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none">
+      <path d="M8.627 2L2 13.5h5.373L14 2H8.627z" fill="#0066DA" />
+      <path d="M16.627 13.5H22L15.373 2H10l6.627 11.5z" fill="#00AC47" />
+      <path
+        d="M2 13.5l2.687 4.667L7.373 22h9.254l2.686-4.5H8.687L2 13.5z"
+        fill="#EA4335"
+      />
+      <path d="M8.687 17.5l-1.314-4L2 13.5l2.687 4h4z" fill="#00832D" />
+      <path d="M15.313 17.5l1.314-4H22l-2.687 4.5h-4z" fill="#2684FC" />
+      <path
+        d="M8.627 2L7.373 6l3.314 7.5H22L15.373 2H8.627z"
+        fill="#FFBA00"
+        opacity="0.001"
+      />
+    </svg>
+  );
+}
+
+function VercelIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M12 2L2 20h20L12 2z" />
+    </svg>
+  );
+}
+
+function SlackIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none">
+      <path
+        d="M5.042 15.165a2.528 2.528 0 01-2.52 2.523A2.528 2.528 0 010 15.165a2.527 2.527 0 012.522-2.52h2.52v2.52zm1.271 0a2.527 2.527 0 012.521-2.52 2.527 2.527 0 012.521 2.52v6.313A2.528 2.528 0 018.834 24a2.528 2.528 0 01-2.521-2.522v-6.313z"
+        fill="#E01E5A"
+      />
+      <path
+        d="M8.834 5.042a2.528 2.528 0 01-2.521-2.52A2.528 2.528 0 018.834 0a2.528 2.528 0 012.521 2.522v2.52H8.834zm0 1.271a2.528 2.528 0 012.521 2.521 2.528 2.528 0 01-2.521 2.521H2.522A2.528 2.528 0 010 8.834a2.528 2.528 0 012.522-2.521h6.312z"
+        fill="#36C5F0"
+      />
+      <path
+        d="M18.956 8.834a2.528 2.528 0 012.522-2.521A2.528 2.528 0 0124 8.834a2.528 2.528 0 01-2.522 2.521h-2.522V8.834zm-1.27 0a2.528 2.528 0 01-2.522 2.521 2.528 2.528 0 01-2.522-2.521V2.522A2.528 2.528 0 0115.164 0a2.528 2.528 0 012.522 2.522v6.312z"
+        fill="#2EB67D"
+      />
+      <path
+        d="M15.164 18.956a2.528 2.528 0 012.522 2.522A2.528 2.528 0 0115.164 24a2.528 2.528 0 01-2.522-2.522v-2.522h2.522zm0-1.27a2.528 2.528 0 01-2.522-2.522 2.528 2.528 0 012.522-2.522h6.313A2.528 2.528 0 0124 15.164a2.528 2.528 0 01-2.523 2.522h-6.313z"
+        fill="#ECB22E"
+      />
+    </svg>
+  );
+}
+
+function GoogleSheetsIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none">
+      <path
+        d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z"
+        fill="#0F9D58"
+      />
+      <path d="M14 2v6h6" fill="#87CEAC" />
+      <rect x="8" y="12" width="8" height="1" rx="0.5" fill="white" />
+      <rect x="8" y="14.5" width="8" height="1" rx="0.5" fill="white" />
+      <rect x="8" y="17" width="5" height="1" rx="0.5" fill="white" />
+    </svg>
+  );
+}
+
 function LinkChip({
-  icon: Icon,
+  icon,
   label,
   href,
 }: {
-  icon: React.ComponentType<{ className?: string }>;
+  icon: React.ReactNode;
   label: string;
   href?: string;
 }) {
   if (!href)
     return (
-      <button className="inline-flex items-center gap-1.5 h-7 px-2.5 text-[11px] rounded-lg border border-dashed border-neutral-200 text-neutral-400 hover:border-neutral-300 hover:text-neutral-500 transition-colors">
-        <Plus className="h-3 w-3" />
+      <button className="inline-flex items-center gap-2 h-9 px-3.5 text-xs rounded-xl border border-dashed border-neutral-200 text-neutral-400 hover:border-neutral-300 hover:text-neutral-500 transition-all">
+        <Plus className="h-3.5 w-3.5" />
         {label}
       </button>
     );
@@ -150,11 +217,13 @@ function LinkChip({
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className="inline-flex items-center gap-1.5 h-7 px-2.5 text-[11px] rounded-lg border border-neutral-200 text-neutral-500 hover:bg-neutral-50 hover:text-neutral-700 transition-colors"
+      className="group relative inline-flex items-center gap-2 h-9 px-3.5 text-xs font-medium rounded-xl border border-neutral-200 bg-white text-neutral-600 transition-all duration-300 hover:border-transparent hover:shadow-[0_0_0_1px_rgba(0,0,0,0.02),_-3px_0_12px_-2px_rgba(34,197,94,0.35),_0_-3px_12px_-2px_rgba(239,68,68,0.25),_3px_0_12px_-2px_rgba(59,130,246,0.35),_0_3px_12px_-2px_rgba(168,85,247,0.25)] hover:text-neutral-800"
     >
-      <Icon className="h-3 w-3" />
+      <span className="h-4 w-4 shrink-0 [&>svg]:h-full [&>svg]:w-full">
+        {icon}
+      </span>
       {label}
-      <ExternalLink className="h-2.5 w-2.5 opacity-40" />
+      <ExternalLink className="h-3 w-3 opacity-30 group-hover:opacity-50 transition-opacity" />
     </a>
   );
 }
@@ -397,27 +466,27 @@ export default function InfoGuideTab({
             </span>
             <div className="mt-2.5 flex flex-wrap gap-1.5">
               <LinkChip
-                icon={FileText}
+                icon={<span className="text-sm">📕</span>}
                 label="교안"
                 href={project.lessonPlanLink}
               />
               <LinkChip
-                icon={HardDrive}
+                icon={<GoogleDriveIcon />}
                 label="드라이브"
                 href={project.driveLink}
               />
               <LinkChip
-                icon={LayoutDashboard}
+                icon={<VercelIcon />}
                 label="백오피스"
                 href={project.backofficeLink}
               />
               <LinkChip
-                icon={Sheet}
+                icon={<GoogleSheetsIcon />}
                 label="커리큘럼"
                 href={project.curriculumSheetLink}
               />
               <LinkChip
-                icon={Hash}
+                icon={<SlackIcon />}
                 label={project.slackChannel ?? "슬랙"}
                 href={
                   project.slackChannel
