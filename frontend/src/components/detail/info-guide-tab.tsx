@@ -466,27 +466,27 @@ export default function InfoGuideTab({
             </span>
             <div className="mt-2.5 flex flex-wrap gap-1.5">
               <LinkChip
-                icon={<span className="text-sm">📕</span>}
+                icon={<FileText className="h-4 w-4" />}
                 label="교안"
                 href={project.lessonPlanLink}
               />
               <LinkChip
-                icon={<GoogleDriveIcon />}
+                icon={<HardDrive className="h-4 w-4" />}
                 label="드라이브"
                 href={project.driveLink}
               />
               <LinkChip
-                icon={<VercelIcon />}
+                icon={<LayoutDashboard className="h-4 w-4" />}
                 label="백오피스"
                 href={project.backofficeLink}
               />
               <LinkChip
-                icon={<GoogleSheetsIcon />}
+                icon={<Sheet className="h-4 w-4" />}
                 label="커리큘럼"
                 href={project.curriculumSheetLink}
               />
               <LinkChip
-                icon={<SlackIcon />}
+                icon={<Hash className="h-4 w-4" />}
                 label={project.slackChannel ?? "슬랙"}
                 href={
                   project.slackChannel
