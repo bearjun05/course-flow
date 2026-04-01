@@ -6,9 +6,8 @@ import Link from "next/link";
 import { mockProjects } from "@/lib/mock-data";
 import type { ChapterTask, ProjectStatus, TrafficLight } from "@/lib/types";
 import DetailHeader from "@/components/detail/detail-header";
-import ScheduleTaskTab from "@/components/detail/schedule-task-tab";
 import InfoGuideTab from "@/components/detail/info-guide-tab";
-import { Separator } from "@/components/ui/separator";
+import MondayBoard from "@/components/detail/monday-board";
 
 export default function ProjectDetailPage() {
   const params = useParams<{ id: string }>();
@@ -48,32 +47,24 @@ export default function ProjectDetailPage() {
   }
 
   return (
-    <div className="min-h-screen">
-      <DetailHeader
-        project={project}
-        activeTab="info"
-        onStatusChange={setStatus}
-        onTrafficLightChange={setTrafficLight}
-      />
+    <div className="min-h-screen bg-background">
+      <DetailHeader project={project} activeTab="info" />
 
-      <div className="px-6 py-6 space-y-8">
-        {/* 강의 정보 */}
-        <section>
-          <h2 className="text-sm font-semibold text-foreground mb-4">
-            강의 정보
-          </h2>
-          <InfoGuideTab project={project} />
-        </section>
+      <div className="px-6 py-5 space-y-5">
+        {/* 강의 정보 카드 그리드 */}
+        <InfoGuideTab
+          project={project}
+          onStatusChange={setStatus}
+          onTrafficLightChange={setTrafficLight}
+        />
 
-        <Separator />
-
-        {/* 제작 일정 */}
-        <section>
-          <h2 className="text-sm font-semibold text-foreground mb-4">
+        {/* 제작 일정 보드 */}
+        <div>
+          <h2 className="text-sm font-semibold text-foreground mb-3">
             제작 일정
           </h2>
-          <ScheduleTaskTab tasks={tasks} onTasksChange={handleTasksChange} />
-        </section>
+          <MondayBoard tasks={tasks} onTasksChange={handleTasksChange} />
+        </div>
       </div>
     </div>
   );
