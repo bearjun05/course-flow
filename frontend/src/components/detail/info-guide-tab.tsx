@@ -186,7 +186,7 @@ export default function InfoGuideTab({
         <div className="flex items-center gap-2">
           <div className="h-1.5 w-24 rounded-full bg-neutral-100 overflow-hidden">
             <div
-              className="h-full rounded-full bg-[#B8A9D4] transition-all"
+              className="h-full rounded-full bg-[#E8967D] transition-all"
               style={{ width: `${progressPct}%` }}
             />
           </div>
@@ -207,9 +207,9 @@ export default function InfoGuideTab({
         {/* 스프링 */}
         <div className="flex-1" />
 
-        {/* 사업부 · 유형 — 배지 (메인 화면과 동일) */}
-        <div className="flex items-center gap-1">
-          <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-md bg-neutral-100 text-neutral-500">
+        {/* 사업부 · 유형 — 버전 배지와 동일 크기 */}
+        <div className="flex items-center gap-1.5">
+          <span className="inline-flex items-center h-6 px-2 rounded-md bg-[#F5F0E8] text-[11px] font-medium text-[#8B7E6B] shrink-0">
             {project.businessUnit}
             {project.trackName && (
               <>
@@ -218,7 +218,7 @@ export default function InfoGuideTab({
               </>
             )}
           </span>
-          <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-md bg-neutral-100 text-neutral-400">
+          <span className="inline-flex items-center h-6 px-2 rounded-md bg-[#F2EDE6] text-[11px] font-medium text-[#9B8E7B] shrink-0">
             {prodTypeLabel}
           </span>
         </div>
