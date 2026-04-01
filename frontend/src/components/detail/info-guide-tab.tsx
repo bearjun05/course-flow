@@ -168,7 +168,7 @@ export default function InfoGuideTab({
             if (v && onStatusChange) onStatusChange(v as ProjectStatus);
           }}
         >
-          <SelectTrigger className="h-6 w-auto gap-1 rounded-full border-none px-2.5 text-[11px] font-medium shadow-none bg-[#E8EEF4] text-[#6B839E]">
+          <SelectTrigger className="h-6 w-auto gap-1 rounded-full border-none px-2.5 text-[11px] font-medium shadow-none bg-[#FDF5E6] text-[#A89060]">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -218,7 +218,7 @@ export default function InfoGuideTab({
               </>
             )}
           </span>
-          <span className="inline-flex items-center h-6 px-2 rounded-md bg-[#F2EDE6] text-[11px] font-medium text-[#9B8E7B] shrink-0">
+          <span className="inline-flex items-center h-6 px-2 rounded-md bg-[#EDF2E4] text-[11px] font-medium text-[#6E8A50] shrink-0">
             {prodTypeLabel}
           </span>
         </div>
