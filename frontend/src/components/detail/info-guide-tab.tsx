@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import {
   FileText,
   HardDrive,
@@ -103,12 +104,15 @@ function TrafficLightPicker({
 
 function PersonRow({ label, value }: { label: string; value?: string }) {
   return (
-    <div className="flex items-center justify-between py-1">
+    <div className="flex items-center justify-between py-1.5">
       <span className="text-xs text-neutral-500">{label}</span>
       {value ? (
-        <span className="text-[12px] font-medium text-neutral-700">
+        <Link
+          href={`/people/${encodeURIComponent(value)}`}
+          className="text-[12px] font-medium text-neutral-700 hover:text-neutral-900 hover:underline transition-colors"
+        >
           {value}
-        </span>
+        </Link>
       ) : (
         <button className="inline-flex items-center gap-1 text-[11px] text-neutral-400 hover:text-neutral-600 transition-colors">
           <UserPlus className="h-3 w-3" />
@@ -294,7 +298,7 @@ export default function InfoGuideTab({
                 {project.chapterDurations.map((d, i) => (
                   <div
                     key={i}
-                    className="flex flex-col items-center rounded-lg bg-neutral-50 py-1.5 px-1"
+                    className="flex flex-col items-center justify-center rounded-lg bg-neutral-50 py-2 px-1.5 gap-0.5"
                   >
                     <span className="text-[10px] text-neutral-400 font-medium">
                       {i + 1}장
