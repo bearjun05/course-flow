@@ -69,7 +69,7 @@ function TrafficLightPicker({
   onChange?: (v: TrafficLight) => void;
 }) {
   return (
-    <div className="inline-flex items-center gap-1.5 rounded-full bg-neutral-700 px-2 py-1.5">
+    <div className="inline-flex items-center gap-1.5 rounded-full bg-neutral-900/60 px-2 py-1.5 backdrop-blur-sm">
       {TRAFFIC_LIGHTS.map((tl) => (
         <button
           key={tl.value}
