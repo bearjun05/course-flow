@@ -217,9 +217,9 @@ function LinkChip({
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className="group relative inline-flex items-center gap-2 h-9 px-3.5 text-xs font-medium rounded-xl border border-neutral-200 bg-white text-neutral-600 transition-all duration-300 hover:border-transparent hover:shadow-[0_0_0_1px_rgba(0,0,0,0.02),_-3px_0_12px_-2px_rgba(34,197,94,0.35),_0_-3px_12px_-2px_rgba(239,68,68,0.25),_3px_0_12px_-2px_rgba(59,130,246,0.35),_0_3px_12px_-2px_rgba(168,85,247,0.25)] hover:text-neutral-800"
+      className="group relative inline-flex items-center gap-2 h-9 px-3.5 text-xs font-medium rounded-xl border border-neutral-200 bg-white text-neutral-600 transition-all duration-300 hover:border-neutral-100 hover:shadow-[0_0_20px_4px_rgba(255,255,255,0.9),_0_0_6px_0px_rgba(0,0,0,0.06)] hover:text-neutral-700"
     >
-      <span className="h-4 w-4 shrink-0 [&>svg]:h-full [&>svg]:w-full">
+      <span className="h-3.5 w-3.5 shrink-0 text-neutral-300 group-hover:text-neutral-400 transition-colors [&>svg]:h-full [&>svg]:w-full">
         {icon}
       </span>
       {label}
