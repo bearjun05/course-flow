@@ -264,7 +264,7 @@ export default function InfoGuideTab({
       </div>
 
       {/* ━━━ 상세 패널 (항상 펼침) ━━━ */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 items-start">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         {/* 일정 */}
         <div className="rounded-2xl border border-neutral-100 bg-white p-4 shadow-sm">
           <div className="flex items-center justify-between">
