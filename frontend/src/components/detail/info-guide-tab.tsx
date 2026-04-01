@@ -29,7 +29,6 @@ import { getProgressPercent, getProgressText, cn } from "@/lib/utils";
 interface InfoGuideTabProps {
   project: Project;
   onStatusChange?: (status: ProjectStatus) => void;
-  onTrafficLightChange?: (light: TrafficLight) => void;
 }
 
 /* ------------------------------------------------------------------ */
@@ -148,7 +147,6 @@ function LinkChip({
 export default function InfoGuideTab({
   project,
   onStatusChange,
-  onTrafficLightChange,
 }: InfoGuideTabProps) {
   const prodTypeLabel =
     PRODUCTION_TYPES.find((p) => p.value === project.productionType)?.label ??
@@ -195,14 +193,6 @@ export default function InfoGuideTab({
             <span className="ml-0.5 opacity-70">({progressTxt})</span>
           </span>
         </div>
-
-        <div className="w-px h-4 bg-neutral-100" />
-
-        {/* 신호등 — 3색 동시 표시 */}
-        <TrafficLightPicker
-          value={project.trafficLight}
-          onChange={onTrafficLightChange}
-        />
 
         {/* 스프링 */}
         <div className="flex-1" />

@@ -49,15 +49,11 @@ export default function ProjectDetailPage() {
 
   return (
     <div className="min-h-screen">
-      <DetailHeader project={project} />
+      <DetailHeader project={project} onTrafficLightChange={setTrafficLight} />
 
       <div className="space-y-6 px-6 py-6">
-        {/* 강의 핵심 지표 + 상세 (접기/펼치기) */}
-        <InfoGuideTab
-          project={project}
-          onStatusChange={setStatus}
-          onTrafficLightChange={setTrafficLight}
-        />
+        {/* 강의 핵심 지표 + 상세 */}
+        <InfoGuideTab project={project} onStatusChange={setStatus} />
 
         <Separator />
 

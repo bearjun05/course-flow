@@ -16,7 +16,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
-import type { Project } from "@/lib/types";
+import type { Project, TrafficLight } from "@/lib/types";
 import { mockProjects } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
 
@@ -24,12 +24,44 @@ interface DetailHeaderProps {
   project: Project;
   onDelete?: () => void;
   onSuspend?: () => void;
+  onTrafficLightChange?: (light: TrafficLight) => void;
 }
+
+const TRAFFIC_LIGHTS: {
+  value: TrafficLight;
+  label: string;
+  active: string;
+  inactive: string;
+  glow: string;
+}[] = [
+  {
+    value: "green",
+    label: "정상",
+    active: "bg-[#6ECC9A]",
+    inactive: "bg-[#6ECC9A]/20",
+    glow: "#6ECC9A",
+  },
+  {
+    value: "yellow",
+    label: "주의",
+    active: "bg-[#F5C842]",
+    inactive: "bg-[#F5C842]/20",
+    glow: "#F5C842",
+  },
+  {
+    value: "red",
+    label: "위험",
+    active: "bg-[#F47A8A]",
+    inactive: "bg-[#F47A8A]/20",
+    glow: "#F47A8A",
+  },
+];
 
 export default function DetailHeader({
   project,
   onDelete,
   onSuspend,
+  onTrafficLightChange,
 }: DetailHeaderProps) {
   const versionNum = parseFloat(project.version.replace("v", ""));
   const hasVersionHistory = versionNum >= 2.0;
@@ -41,7 +73,7 @@ export default function DetailHeader({
 
   return (
     <header className="sticky top-0 z-10 flex items-center justify-between border-b border-border bg-card/80 px-6 py-4 backdrop-blur-sm">
-      {/* Left: Back + Title + Version */}
+      {/* Left: Back + Title + Version + Traffic Light */}
       <div className="flex items-center gap-3 min-w-0">
         <Link
           href="/"
@@ -98,6 +130,28 @@ export default function DetailHeader({
             {project.version}
           </span>
         )}
+
+        {/* Traffic Light */}
+        <div className="inline-flex items-center gap-1.5 rounded-full bg-neutral-200/50 px-2 py-1.5 shrink-0">
+          {TRAFFIC_LIGHTS.map((tl) => (
+            <button
+              key={tl.value}
+              onClick={() => onTrafficLightChange?.(tl.value)}
+              title={tl.label}
+              className={cn(
+                "h-2.5 w-2.5 rounded-full transition-all",
+                project.trafficLight === tl.value
+                  ? cn(tl.active, "scale-125")
+                  : tl.inactive,
+              )}
+              style={
+                project.trafficLight === tl.value
+                  ? { boxShadow: `0 0 6px 1px ${tl.glow}` }
+                  : undefined
+              }
+            />
+          ))}
+        </div>
       </div>
 
       {/* Right: Actions */}
