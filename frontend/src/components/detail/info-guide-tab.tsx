@@ -187,17 +187,34 @@ export default function InfoGuideTab({
 
         <div className="w-px h-4 bg-neutral-100" />
 
-        {/* 진행률 */}
-        <div className="flex items-center gap-2">
-          <div className="h-1.5 w-24 rounded-full bg-neutral-100 overflow-hidden">
-            <div
-              className="h-full rounded-full bg-[#8AAE50] transition-all"
-              style={{ width: `${progressPct}%` }}
+        {/* 진행률 — 도넛 + 숫자 */}
+        <div className="flex items-center gap-1.5">
+          <svg className="h-5 w-5" viewBox="0 0 20 20">
+            <circle
+              cx="10"
+              cy="10"
+              r="8"
+              fill="none"
+              stroke="#F0F0F0"
+              strokeWidth="2.5"
             />
-          </div>
-          <span className="text-[11px] text-neutral-400 tabular-nums">
+            <circle
+              cx="10"
+              cy="10"
+              r="8"
+              fill="none"
+              stroke="#8AAE50"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeDasharray={`${(progressPct / 100) * 50.27} 50.27`}
+              transform="rotate(-90 10 10)"
+            />
+          </svg>
+          <span className="text-[12px] font-semibold text-neutral-600 tabular-nums">
             {progressPct}%
-            <span className="ml-0.5 opacity-70">({progressTxt})</span>
+          </span>
+          <span className="text-[11px] text-neutral-400 tabular-nums">
+            {progressTxt}
           </span>
         </div>
 
