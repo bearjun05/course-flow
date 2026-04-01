@@ -20,7 +20,14 @@ import {
 } from "@/components/ui/select";
 import type { Project, ProjectStatus, TrafficLight } from "@/lib/types";
 import { PROJECT_STATUSES, PRODUCTION_TYPES } from "@/lib/constants";
-import { getProgressPercent, getProgressText, cn } from "@/lib/utils";
+import {
+  getDday,
+  formatDday,
+  getDdayColor,
+  getProgressPercent,
+  getProgressText,
+  cn,
+} from "@/lib/utils";
 
 /* ------------------------------------------------------------------ */
 /*  Props                                                              */
@@ -158,8 +165,8 @@ export default function InfoGuideTab({
   return (
     <div className="space-y-3">
       {/* ━━━ 핵심 지표 스트립 ━━━ */}
-      <div className="flex items-center gap-5 rounded-2xl border border-neutral-100 bg-white px-5 py-3.5 shadow-sm">
-        {/* 상태 배지 — 슬레이트블루 빈티지 */}
+      <div className="flex items-center gap-3 rounded-2xl border border-neutral-100 bg-white px-5 py-3.5 shadow-sm">
+        {/* 상태 배지 */}
         <Select
           value={project.status}
           onValueChange={(v) => {
@@ -184,7 +191,7 @@ export default function InfoGuideTab({
         <div className="flex items-center gap-2">
           <div className="h-1.5 w-24 rounded-full bg-neutral-100 overflow-hidden">
             <div
-              className="h-full rounded-full bg-[#E8967D] transition-all"
+              className="h-full rounded-full bg-[#8AAE50] transition-all"
               style={{ width: `${progressPct}%` }}
             />
           </div>
@@ -226,9 +233,19 @@ export default function InfoGuideTab({
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         {/* 일정 */}
         <div className="rounded-2xl border border-neutral-100 bg-white p-4 shadow-sm">
-          <span className="text-[11px] font-medium text-neutral-400 uppercase tracking-wider">
-            일정
-          </span>
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-medium text-neutral-400 uppercase tracking-wider">
+              일정
+            </span>
+            <span
+              className={cn(
+                "text-lg font-black tabular-nums tracking-tight",
+                getDdayColor(getDday(project.rolloutDate)),
+              )}
+            >
+              {formatDday(getDday(project.rolloutDate))}
+            </span>
+          </div>
           <div className="mt-2.5 space-y-1.5 text-[12px]">
             <div className="flex justify-between">
               <span className="text-neutral-400">롤아웃</span>
