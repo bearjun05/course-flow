@@ -69,7 +69,7 @@ function TrafficLightPicker({
   onChange?: (v: TrafficLight) => void;
 }) {
   return (
-    <div className="inline-flex items-center gap-1.5 rounded-full bg-neutral-900/60 px-2 py-1.5 backdrop-blur-sm">
+    <div className="inline-flex items-center gap-1.5 rounded-full bg-neutral-200/50 px-2 py-1.5">
       {TRAFFIC_LIGHTS.map((tl) => (
         <button
           key={tl.value}
@@ -185,7 +185,7 @@ export default function InfoGuideTab({
         <div className="flex items-center gap-2">
           <div className="h-1.5 w-24 rounded-full bg-neutral-100 overflow-hidden">
             <div
-              className="h-full rounded-full bg-[#C4956A] transition-all"
+              className="h-full rounded-full bg-[#B8A9D4] transition-all"
               style={{ width: `${progressPct}%` }}
             />
           </div>
@@ -206,13 +206,13 @@ export default function InfoGuideTab({
         {/* 스프링 */}
         <div className="flex-1" />
 
-        {/* 사업부 · 유형 — 배지 */}
+        {/* 사업부 · 유형 — 배지 (메인 화면과 동일) */}
         <div className="flex items-center gap-1.5">
-          <span className="inline-flex items-center h-5 px-2 rounded-full bg-[#F0EDE8] text-[10px] font-medium text-[#8A7E6B]">
+          <span className="inline-flex items-center h-5 px-2 rounded-full bg-neutral-100 text-[10px] font-medium text-neutral-500">
             {project.businessUnit}
             {project.trackName && ` · ${project.trackName}`}
           </span>
-          <span className="inline-flex items-center h-5 px-2 rounded-full bg-[#EDE8F0] text-[10px] font-medium text-[#7B6B8A]">
+          <span className="inline-flex items-center h-5 px-2 rounded-full bg-neutral-100 text-[10px] font-medium text-neutral-400">
             {prodTypeLabel}
           </span>
         </div>
