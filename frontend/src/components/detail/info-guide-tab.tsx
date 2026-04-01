@@ -11,6 +11,7 @@ import {
   ExternalLink,
   Plus,
   UserPlus,
+  User,
   BookOpen,
   Pencil,
   Check,
@@ -113,12 +114,13 @@ function PersonRow({ label, value }: { label: string; value?: string }) {
       {value ? (
         <Link
           href={`/people/${encodeURIComponent(value)}`}
-          className="text-[12px] font-medium text-neutral-700 hover:text-neutral-900 hover:underline transition-colors"
+          className="inline-flex items-center gap-1.5 h-6 px-2 rounded-full bg-neutral-50 text-[12px] font-medium text-neutral-700 hover:bg-neutral-100 transition-colors"
         >
+          <User className="h-3 w-3 text-neutral-400" />
           {value}
         </Link>
       ) : (
-        <button className="inline-flex items-center gap-1 text-[11px] text-neutral-400 hover:text-neutral-600 transition-colors">
+        <button className="inline-flex items-center gap-1 h-6 px-2 rounded-full border border-dashed border-neutral-200 text-[11px] text-neutral-400 hover:border-neutral-300 hover:text-neutral-500 transition-colors">
           <UserPlus className="h-3 w-3" />
           배정
         </button>
@@ -262,7 +264,7 @@ export default function InfoGuideTab({
       </div>
 
       {/* ━━━ 상세 패널 (항상 펼침) ━━━ */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 items-start">
         {/* 일정 */}
         <div className="rounded-2xl border border-neutral-100 bg-white p-4 shadow-sm">
           <div className="flex items-center justify-between">
@@ -271,8 +273,7 @@ export default function InfoGuideTab({
             </span>
             <span
               className={cn(
-                "text-lg font-black tabular-nums tracking-tight",
-                getDdayColor(getDday(project.rolloutDate)),
+                "text-lg font-black tabular-nums tracking-tight text-neutral-800",
               )}
             >
               {formatDday(getDday(project.rolloutDate))}
