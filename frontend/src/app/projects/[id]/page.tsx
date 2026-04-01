@@ -26,11 +26,24 @@ export default function ProjectDetailPage() {
   const [trafficLight, setTrafficLight] = useState<TrafficLight>(
     baseProject?.trafficLight ?? "green",
   );
+  const [rolloutDate, setRolloutDate] = useState(
+    baseProject?.rolloutDate ?? "",
+  );
+  const [paymentDate, setPaymentDate] = useState(
+    baseProject?.paymentDate ?? "",
+  );
 
   const project = useMemo(() => {
     if (!baseProject) return null;
-    return { ...baseProject, tasks, status, trafficLight };
-  }, [baseProject, tasks, status, trafficLight]);
+    return {
+      ...baseProject,
+      tasks,
+      status,
+      trafficLight,
+      rolloutDate,
+      paymentDate,
+    };
+  }, [baseProject, tasks, status, trafficLight, rolloutDate, paymentDate]);
 
   const handleTasksChange = useCallback((newTasks: ChapterTask[]) => {
     setTasks(newTasks);
@@ -53,7 +66,12 @@ export default function ProjectDetailPage() {
 
       <div className="space-y-6 px-6 py-6">
         {/* 강의 핵심 지표 + 상세 */}
-        <InfoGuideTab project={project} onStatusChange={setStatus} />
+        <InfoGuideTab
+          project={project}
+          onStatusChange={setStatus}
+          onRolloutDateChange={setRolloutDate}
+          onPaymentDateChange={setPaymentDate}
+        />
 
         <Separator />
 

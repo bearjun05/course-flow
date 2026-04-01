@@ -36,6 +36,8 @@ import {
 interface InfoGuideTabProps {
   project: Project;
   onStatusChange?: (status: ProjectStatus) => void;
+  onRolloutDateChange?: (date: string) => void;
+  onPaymentDateChange?: (date: string) => void;
 }
 
 /* ------------------------------------------------------------------ */
@@ -154,6 +156,8 @@ function LinkChip({
 export default function InfoGuideTab({
   project,
   onStatusChange,
+  onRolloutDateChange,
+  onPaymentDateChange,
 }: InfoGuideTabProps) {
   const prodTypeLabel =
     PRODUCTION_TYPES.find((p) => p.value === project.productionType)?.label ??
@@ -263,33 +267,45 @@ export default function InfoGuideTab({
               {formatDday(getDday(project.rolloutDate))}
             </span>
           </div>
-          <div className="mt-2.5 space-y-1.5 text-[12px]">
-            <div className="flex justify-between">
+          <div className="mt-2.5 space-y-2 text-[12px]">
+            <div className="flex items-center justify-between">
               <span className="text-xs text-neutral-500">롤아웃</span>
-              <span className="text-neutral-700 font-medium">
-                {project.rolloutDate.slice(2).replace(/-/g, ".")}
-              </span>
+              <input
+                type="date"
+                value={project.rolloutDate}
+                onChange={(e) => onRolloutDateChange?.(e.target.value)}
+                className="text-sm font-medium text-neutral-700 bg-transparent border-b border-transparent hover:border-neutral-300 focus:border-neutral-400 focus:outline-none cursor-pointer transition-colors tabular-nums text-right"
+              />
             </div>
-            <div className="flex justify-between">
-              <span className="text-xs text-neutral-500">정산일</span>
-              <span className="text-neutral-700 font-medium">
-                {project.paymentDate.slice(2).replace(/-/g, ".")}
-              </span>
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-neutral-500">강의 지급일</span>
+              <input
+                type="date"
+                value={project.paymentDate}
+                onChange={(e) => onPaymentDateChange?.(e.target.value)}
+                className="text-sm font-medium text-neutral-700 bg-transparent border-b border-transparent hover:border-neutral-300 focus:border-neutral-400 focus:outline-none cursor-pointer transition-colors tabular-nums text-right"
+              />
             </div>
           </div>
           {project.chapterDurations.length > 0 && (
             <div className="mt-3 pt-3 border-t border-neutral-100">
-              <p className="text-xs text-neutral-500 mb-1.5">챕터별 분량</p>
-              <div className="flex flex-wrap gap-1">
+              <p className="text-xs text-neutral-500 mb-2">챕터별 분량</p>
+              <div className="grid grid-cols-5 gap-1.5">
                 {project.chapterDurations.map((d, i) => (
-                  <span
+                  <div
                     key={i}
-                    className="inline-flex items-center h-5 px-1.5 rounded bg-neutral-50 text-[10px] text-neutral-500 tabular-nums"
+                    className="flex flex-col items-center rounded-lg bg-neutral-50 py-1.5 px-1"
                   >
-                    {i + 1}
-                    <span className="text-neutral-300 mx-0.5">:</span>
-                    {d}h
-                  </span>
+                    <span className="text-[10px] text-neutral-400 font-medium">
+                      CH{i + 1}
+                    </span>
+                    <span className="text-sm font-semibold text-neutral-700 tabular-nums">
+                      {d}
+                      <span className="text-[10px] text-neutral-400 font-normal">
+                        h
+                      </span>
+                    </span>
+                  </div>
                 ))}
               </div>
             </div>
