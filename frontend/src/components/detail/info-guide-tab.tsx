@@ -9,6 +9,7 @@ import {
   ExternalLink,
   Plus,
   UserPlus,
+  BookOpen,
 } from "lucide-react";
 import {
   Select,
@@ -207,22 +208,27 @@ export default function InfoGuideTab({
         <div className="flex-1" />
 
         {/* 사업부 · 유형 — 배지 (메인 화면과 동일) */}
-        <div className="flex items-center gap-1.5">
-          <span className="inline-flex items-center h-5 px-2 rounded-full bg-neutral-100 text-[10px] font-medium text-neutral-500">
+        <div className="flex items-center gap-1">
+          <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-md bg-neutral-100 text-neutral-500">
             {project.businessUnit}
-            {project.trackName && ` · ${project.trackName}`}
+            {project.trackName && (
+              <>
+                <span className="mx-0.5 opacity-50">·</span>
+                {project.trackName}
+              </>
+            )}
           </span>
-          <span className="inline-flex items-center h-5 px-2 rounded-full bg-neutral-100 text-[10px] font-medium text-neutral-400">
+          <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-md bg-neutral-100 text-neutral-400">
             {prodTypeLabel}
           </span>
         </div>
 
         <div className="w-px h-4 bg-neutral-100" />
 
-        {/* 챕터 요약 */}
-        <span className="text-[11px] text-neutral-400">
+        {/* 챕터 */}
+        <span className="flex items-center gap-1 text-[11px] text-neutral-400">
+          <BookOpen className="h-3 w-3" />
           {project.chapterCount}챕터
-          {totalDuration > 0 && ` · ${totalDuration}h`}
         </span>
       </div>
 
