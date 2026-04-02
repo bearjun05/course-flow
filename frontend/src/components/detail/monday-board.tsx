@@ -102,10 +102,6 @@ function StageChip({
   const isActive = task.status === "진행";
   const isReview = task.status === "리뷰";
   const isWaiting = task.status === "대기";
-  const isOverdue =
-    !isComplete &&
-    task.endDate &&
-    differenceInDays(startOfDay(new Date()), parseISO(task.endDate)) > 0;
   const label = STAGE_SHORT[task.taskType] ?? task.taskType;
   const dateRange = formatDateRange(task);
 
@@ -117,24 +113,23 @@ function StageChip({
       }}
       className={cn(
         "group/chip relative flex items-center justify-center h-8 rounded-lg text-[11px] font-medium transition-all min-w-[52px] px-2",
-        isComplete && "bg-neutral-200 text-neutral-500",
-        isOverdue && "bg-red-400/90 text-white shadow-sm",
-        !isComplete && !isOverdue && isActive && "text-white shadow-sm",
-        !isComplete &&
-          !isOverdue &&
-          isReview &&
+        isComplete && "text-white shadow-sm",
+        isActive && "ring-2 ring-offset-1 text-white shadow-md",
+        isReview &&
           "bg-amber-100 text-amber-700 ring-2 ring-amber-300 ring-offset-1",
-        isWaiting && !isOverdue && "bg-neutral-100 text-neutral-400",
+        isWaiting && "bg-neutral-100 text-neutral-400",
       )}
       style={{
-        ...(!isComplete && !isOverdue && isActive
-          ? { backgroundColor: TODAY_COLOR }
+        ...(isComplete ? { backgroundColor: chapterColor } : {}),
+        ...(isActive
+          ? {
+              backgroundColor: chapterColor,
+              "--tw-ring-color": chapterColor,
+            }
           : {}),
       }}
     >
-      {isComplete && (
-        <Check className="h-3 w-3 mr-0.5 shrink-0 text-neutral-400" />
-      )}
+      {isComplete && <Check className="h-3 w-3 mr-0.5 shrink-0" />}
       {label}
       {/* 호버 시 기간 툴팁 — 글래스모피즘, 상단 */}
       {dateRange && (
@@ -640,15 +635,36 @@ export default function MondayBoard({
     [tasks, onTasksChange],
   );
 
-  function getCurrentStage(groupTasks: ChapterTask[]): string | null {
+  function getChapterStatus(groupTasks: ChapterTask[]): {
+    label: string | null;
+    type: "done" | "active" | "overdue" | null;
+  } {
+    const today = startOfDay(new Date());
+    const allDone = groupTasks.every((t) => t.status === "완료");
+    if (allDone && groupTasks.length > 0)
+      return { label: "완료", type: "done" };
+
+    // 지연 체크: 진행/리뷰/대기인데 마감이 지난 공정이 있으면 지연
+    const overdue = groupTasks.find(
+      (t) =>
+        t.status !== "완료" &&
+        t.endDate &&
+        differenceInDays(today, parseISO(t.endDate)) > 0,
+    );
+
     const active = groupTasks.find(
       (t) => t.status === "진행" || t.status === "리뷰",
     );
-    if (active)
-      return `${STAGE_SHORT[active.taskType] ?? active.taskType} ${active.status === "리뷰" ? "리뷰 중" : "진행 중"}`;
-    const allDone = groupTasks.every((t) => t.status === "완료");
-    if (allDone && groupTasks.length > 0) return "완료";
-    return null;
+
+    if (active) {
+      const stageLabel = `${STAGE_SHORT[active.taskType] ?? active.taskType} ${active.status === "리뷰" ? "리뷰 중" : "진행 중"}`;
+      return {
+        label: stageLabel,
+        type: overdue ? "overdue" : "active",
+      };
+    }
+
+    return { label: null, type: null };
   }
 
   return (
@@ -659,7 +675,7 @@ export default function MondayBoard({
         const allDone =
           group.tasks.length > 0 &&
           group.tasks.every((t) => t.status === "완료");
-        const currentStage = getCurrentStage(group.tasks);
+        const chapterStatus = getChapterStatus(group.tasks);
 
         const orderedTasks = [...group.tasks].sort((a, b) => {
           const ai = STAGE_ORDER.indexOf(a.taskType);
@@ -721,22 +737,35 @@ export default function MondayBoard({
               </div>
 
               <div className="flex items-center gap-3 shrink-0">
-                {currentStage && (
+                {chapterStatus.label && (
                   <span
                     className={cn(
                       "text-[11px] font-medium px-2 py-0.5 rounded-full whitespace-nowrap",
-                      allDone
-                        ? "bg-emerald-50 text-emerald-600"
-                        : "bg-neutral-100 text-neutral-500",
+                      chapterStatus.type === "done" &&
+                        "bg-neutral-100 text-neutral-400",
+                      chapterStatus.type === "active" && "text-white",
+                      chapterStatus.type === "overdue" &&
+                        "bg-red-50 text-red-500",
                     )}
+                    style={
+                      chapterStatus.type === "active"
+                        ? { backgroundColor: TODAY_COLOR }
+                        : {}
+                    }
                   >
-                    {currentStage}
+                    {chapterStatus.label}
                   </span>
                 )}
                 <ProgressBar
                   completed={group.completedCount}
                   total={group.tasks.length}
-                  color={group.color}
+                  color={
+                    chapterStatus.type === "done"
+                      ? "#C0C0C0"
+                      : chapterStatus.type === "overdue"
+                        ? "#E87070"
+                        : TODAY_COLOR
+                  }
                 />
               </div>
             </div>
