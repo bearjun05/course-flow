@@ -740,18 +740,14 @@ export default function MondayBoard({
                 {chapterStatus.label && (
                   <span
                     className={cn(
-                      "text-[11px] font-medium px-2 py-0.5 rounded-full whitespace-nowrap",
+                      "text-[10px] font-medium px-2 py-0.5 rounded-md whitespace-nowrap",
                       chapterStatus.type === "done" &&
                         "bg-neutral-100 text-neutral-400",
-                      chapterStatus.type === "active" && "text-white",
+                      chapterStatus.type === "active" &&
+                        "bg-[#E6F0E6] text-[#5A7A55]",
                       chapterStatus.type === "overdue" &&
-                        "bg-red-50 text-red-500",
+                        "bg-[#F5E0E0] text-[#9A4A4A]",
                     )}
-                    style={
-                      chapterStatus.type === "active"
-                        ? { backgroundColor: TODAY_COLOR }
-                        : {}
-                    }
                   >
                     {chapterStatus.label}
                   </span>
@@ -759,13 +755,7 @@ export default function MondayBoard({
                 <ProgressBar
                   completed={group.completedCount}
                   total={group.tasks.length}
-                  color={
-                    chapterStatus.type === "done"
-                      ? "#C0C0C0"
-                      : chapterStatus.type === "overdue"
-                        ? "#E87070"
-                        : TODAY_COLOR
-                  }
+                  color={group.color}
                 />
               </div>
             </div>
