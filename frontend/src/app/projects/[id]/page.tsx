@@ -3,12 +3,16 @@
 import { useParams } from "next/navigation";
 import { useState, useCallback, useMemo } from "react";
 import Link from "next/link";
+import { CalendarDays, ClipboardList } from "lucide-react";
 import { mockProjects } from "@/lib/mock-data";
 import type { ChapterTask, ProjectStatus, TrafficLight } from "@/lib/types";
 import DetailHeader from "@/components/detail/detail-header";
 import InfoGuideTab from "@/components/detail/info-guide-tab";
 import MondayBoard from "@/components/detail/monday-board";
+import WorkStatusTab from "@/components/detail/work-status-tab";
 import { Separator } from "@/components/ui/separator";
+
+type ScheduleTab = "schedule" | "work-status";
 
 export default function ProjectDetailPage() {
   const params = useParams<{ id: string }>();
@@ -36,6 +40,7 @@ export default function ProjectDetailPage() {
     baseProject?.chapterDurations ?? [],
   );
   const [note, setNote] = useState(baseProject?.note ?? "");
+  const [scheduleTab, setScheduleTab] = useState<ScheduleTab>("schedule");
 
   const project = useMemo(() => {
     if (!baseProject) return null;
@@ -94,10 +99,43 @@ export default function ProjectDetailPage() {
 
         {/* 제작 일정 보드 */}
         <section>
-          <h2 className="text-sm font-semibold text-foreground mb-3">
-            제작 일정
-          </h2>
-          <MondayBoard tasks={tasks} onTasksChange={handleTasksChange} />
+          <div className="flex items-center gap-3 mb-3">
+            <h2 className="text-sm font-semibold text-foreground">제작 일정</h2>
+            <div className="flex items-center gap-1 rounded-lg border border-border p-0.5 bg-muted/30">
+              <button
+                onClick={() => setScheduleTab("schedule")}
+                className={`flex items-center gap-1.5 h-7 px-3 rounded-md text-xs font-medium transition-colors ${
+                  scheduleTab === "schedule"
+                    ? "bg-white text-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <CalendarDays className="h-3.5 w-3.5" />
+                일정
+              </button>
+              <button
+                onClick={() => setScheduleTab("work-status")}
+                className={`flex items-center gap-1.5 h-7 px-3 rounded-md text-xs font-medium transition-colors ${
+                  scheduleTab === "work-status"
+                    ? "bg-white text-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <ClipboardList className="h-3.5 w-3.5" />
+                작업 현황
+              </button>
+            </div>
+          </div>
+
+          {scheduleTab === "schedule" ? (
+            <MondayBoard tasks={tasks} onTasksChange={handleTasksChange} />
+          ) : (
+            <WorkStatusTab
+              tasks={tasks}
+              lectures={project.lectures}
+              chapterCount={project.chapterCount}
+            />
+          )}
         </section>
       </div>
     </div>
