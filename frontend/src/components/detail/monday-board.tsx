@@ -173,7 +173,7 @@ function ProgressBar({
 
 const COL_W = 44; // 날짜 열 1칸 폭 (px)
 const TOTAL_RANGE = 60; // 전체 표시 범위 (일)
-const TODAY_COLOR = "#4EAE7A"; // 오늘 색상 (그린 계열)
+const TODAY_COLOR = "#8BA888"; // 오늘 색상 (빈티지 그린)
 
 function MiniGantt({
   tasks,
@@ -298,7 +298,7 @@ function MiniGantt({
           className="absolute left-2 top-1/2 -translate-y-1/2 z-30 h-8 w-8 rounded-full bg-white/80 backdrop-blur-sm border border-neutral-200 shadow-md flex items-center justify-center hover:bg-white transition-colors"
           title="오늘로 이동"
         >
-          <ChevronDown className="h-4 w-4 rotate-90 text-[#4EAE7A]" />
+          <ChevronDown className="h-4 w-4 rotate-90 text-[#8BA888]" />
         </button>
       )}
       {/* 오른쪽 화살표 */}
@@ -308,7 +308,7 @@ function MiniGantt({
           className="absolute right-2 top-1/2 -translate-y-1/2 z-30 h-8 w-8 rounded-full bg-white/80 backdrop-blur-sm border border-neutral-200 shadow-md flex items-center justify-center hover:bg-white transition-colors"
           title="오늘로 이동"
         >
-          <ChevronDown className="h-4 w-4 -rotate-90 text-[#4EAE7A]" />
+          <ChevronDown className="h-4 w-4 -rotate-90 text-[#8BA888]" />
         </button>
       )}
 
@@ -527,7 +527,20 @@ function MiniGantt({
               {unscheduled.map((task) => (
                 <div
                   key={task.id}
-                  className="relative h-9 border-b border-neutral-50 last:border-b-0"
+                  className="relative h-9 border-b border-neutral-50 last:border-b-0 cursor-pointer group/unsch hover:bg-neutral-50/50"
+                  onClick={(e) => {
+                    // 클릭한 위치의 날짜를 계산해서 3일짜리 일정 생성
+                    const rect = e.currentTarget.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const dayIndex = Math.floor(x / COL_W);
+                    const clickedDate = addDays(minDate, dayIndex);
+                    const endDate = addDays(clickedDate, 2);
+                    onTaskDateChange(
+                      task.id,
+                      format(clickedDate, "yyyy-MM-dd"),
+                      format(endDate, "yyyy-MM-dd"),
+                    );
+                  }}
                 >
                   <div
                     className="absolute top-0 bottom-0 w-px"
@@ -536,8 +549,11 @@ function MiniGantt({
                       backgroundColor: `${TODAY_COLOR}40`,
                     }}
                   />
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[11px] text-neutral-300">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[11px] text-neutral-300 group-hover/unsch:hidden">
                     일정 미정
+                  </span>
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[11px] text-neutral-500 hidden group-hover/unsch:inline">
+                    클릭하여 일정 지정
                   </span>
                 </div>
               ))}
