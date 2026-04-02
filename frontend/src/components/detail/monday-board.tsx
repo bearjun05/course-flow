@@ -131,9 +131,9 @@ function StageChip({
     >
       {isComplete && <Check className="h-3 w-3 mr-0.5 shrink-0" />}
       {label}
-      {/* 호버 시 기간 툴팁 — 글래스모피즘 */}
+      {/* 호버 시 기간 툴팁 — 글래스모피즘, 상단 */}
       {dateRange && (
-        <span className="pointer-events-none absolute -bottom-10 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-xl bg-white/70 backdrop-blur-md border border-white/50 px-3 py-1.5 text-xs font-semibold text-neutral-700 opacity-0 group-hover/chip:opacity-100 transition-opacity z-20 shadow-[0_4px_20px_rgba(0,0,0,0.08)]">
+        <span className="pointer-events-none absolute -top-10 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-xl bg-white/70 backdrop-blur-md border border-white/50 px-3 py-1.5 text-xs font-semibold text-neutral-700 opacity-0 group-hover/chip:opacity-100 transition-opacity z-20 shadow-[0_4px_20px_rgba(0,0,0,0.08)]">
           {dateRange}
         </span>
       )}
@@ -220,16 +220,19 @@ function MiniGantt({
   const todayOffset = differenceInDays(today, minDate);
   const todayPct = (todayOffset / totalDays) * 100;
 
-  /** 드래그로 바 양쪽 끝을 조절 */
+  /** 드래그 공통: edge="left"|"right"는 끝 조절, "move"는 통째 이동 */
   const handleDragStart = useCallback(
-    (e: React.MouseEvent, task: ChapterTask, edge: "left" | "right") => {
+    (
+      e: React.MouseEvent,
+      task: ChapterTask,
+      mode: "left" | "right" | "move",
+    ) => {
       e.stopPropagation();
       e.preventDefault();
       const barArea = containerRef.current;
       if (!barArea) return;
 
-      // 바 영역의 왼쪽에서 시작 (공정 라벨 제외)
-      const labelWidth = 80; // w-20 = 80px
+      const labelWidth = 80;
       const areaRect = barArea.getBoundingClientRect();
       const areaLeft = areaRect.left + labelWidth;
       const areaWidth = areaRect.width - labelWidth;
@@ -237,20 +240,29 @@ function MiniGantt({
 
       const origStart = parseISO(task.startDate!);
       const origEnd = task.endDate ? parseISO(task.endDate) : origStart;
+      const duration = differenceInDays(origEnd, origStart);
+      const startX = e.clientX;
 
       const onMove = (ev: MouseEvent) => {
-        const x = ev.clientX - areaLeft;
-        const dayIndex = Math.round(x / dayWidth);
-        const clampedDay = Math.max(0, Math.min(dayIndex, totalDays - 1));
-        const targetDate = addDays(minDate, clampedDay);
-
         let newStart = origStart;
         let newEnd = origEnd;
 
-        if (edge === "left") {
-          newStart = targetDate <= origEnd ? targetDate : origEnd;
+        if (mode === "move") {
+          // 통째 이동: 마우스 이동량을 일 수로 환산
+          const deltaDays = Math.round((ev.clientX - startX) / dayWidth);
+          newStart = addDays(origStart, deltaDays);
+          newEnd = addDays(origEnd, deltaDays);
         } else {
-          newEnd = targetDate >= origStart ? targetDate : origStart;
+          const x = ev.clientX - areaLeft;
+          const dayIndex = Math.round(x / dayWidth);
+          const clampedDay = Math.max(0, Math.min(dayIndex, totalDays - 1));
+          const targetDate = addDays(minDate, clampedDay);
+
+          if (mode === "left") {
+            newStart = targetDate <= origEnd ? targetDate : origEnd;
+          } else {
+            newEnd = targetDate >= origStart ? targetDate : origStart;
+          }
         }
 
         onTaskDateChange(
@@ -379,18 +391,23 @@ function MiniGantt({
                     ...(isActive ? { opacity: 0.9 } : {}),
                   }}
                 >
-                  {/* 왼쪽 드래그 핸들 */}
+                  {/* 왼쪽 리사이즈 핸들 */}
                   <div
-                    className="absolute left-0 top-0 bottom-0 w-2 cursor-col-resize opacity-0 group-hover/bar:opacity-100 transition-opacity rounded-l-md hover:bg-black/10"
+                    className="absolute left-0 top-0 bottom-0 w-2 cursor-col-resize z-10 opacity-0 group-hover/bar:opacity-100 transition-opacity rounded-l-md hover:bg-black/10"
                     onMouseDown={(ev) => handleDragStart(ev, task, "left")}
                   />
-                  {/* 바 내부 텍스트 */}
-                  <span className="truncate px-2 pointer-events-none select-none">
-                    {widthPct > 8 ? (task.assignee ?? label) : ""}
-                  </span>
-                  {/* 오른쪽 드래그 핸들 */}
+                  {/* 중앙: 잡고 통째 이동 */}
                   <div
-                    className="absolute right-0 top-0 bottom-0 w-2 cursor-col-resize opacity-0 group-hover/bar:opacity-100 transition-opacity rounded-r-md hover:bg-black/10"
+                    className="absolute left-2 right-2 top-0 bottom-0 cursor-grab active:cursor-grabbing flex items-center justify-center"
+                    onMouseDown={(ev) => handleDragStart(ev, task, "move")}
+                  >
+                    <span className="truncate px-1 pointer-events-none select-none">
+                      {widthPct > 8 ? (task.assignee ?? label) : ""}
+                    </span>
+                  </div>
+                  {/* 오른쪽 리사이즈 핸들 */}
+                  <div
+                    className="absolute right-0 top-0 bottom-0 w-2 cursor-col-resize z-10 opacity-0 group-hover/bar:opacity-100 transition-opacity rounded-r-md hover:bg-black/10"
                     onMouseDown={(ev) => handleDragStart(ev, task, "right")}
                   />
                 </div>
