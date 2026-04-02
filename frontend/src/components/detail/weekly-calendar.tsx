@@ -3,17 +3,24 @@
 import { useMemo } from "react";
 import {
   addDays,
+  addMonths,
+  startOfMonth,
+  endOfMonth,
   startOfWeek,
+  endOfWeek,
   format,
   parseISO,
   isWithinInterval,
   isToday,
+  isSameMonth,
 } from "date-fns";
 import { ko } from "date-fns/locale";
 import { ChevronLeft, ChevronRight, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { ChapterTask } from "@/lib/types";
+
+const TODAY_COLOR = "#8BA888";
 
 interface WeeklyCalendarProps {
   tasks: ChapterTask[];
@@ -33,11 +40,25 @@ export default function WeeklyCalendar({
   onWeekChange,
   onTaskToggle,
 }: WeeklyCalendarProps) {
-  const days = useMemo(() => {
-    const ws = startOfWeek(weekStart, { weekStartsOn: 1 });
-    return Array.from({ length: 7 }, (_, i) => addDays(ws, i));
-  }, [weekStart]);
+  const currentMonth = weekStart;
 
+  // 달력에 표시할 날짜 배열 (월요일 시작, 6주 = 42칸)
+  const days = useMemo(() => {
+    const monthStart = startOfMonth(currentMonth);
+    const monthEnd = endOfMonth(currentMonth);
+    const calStart = startOfWeek(monthStart, { weekStartsOn: 1 });
+    const calEnd = endOfWeek(monthEnd, { weekStartsOn: 1 });
+
+    const result: Date[] = [];
+    let day = calStart;
+    while (day <= calEnd) {
+      result.push(day);
+      day = addDays(day, 1);
+    }
+    return result;
+  }, [currentMonth]);
+
+  // 날짜별 태스크 매핑
   const tasksPerDay = useMemo(() => {
     return days.map((day) =>
       tasks.filter((t) => {
@@ -49,89 +70,137 @@ export default function WeeklyCalendar({
     );
   }, [days, tasks]);
 
-  const weekLabel = `${format(days[0], "M/d", { locale: ko })} ~ ${format(days[6], "M/d", { locale: ko })}`;
+  const monthLabel = format(currentMonth, "yyyy년 M월", { locale: ko });
+  const weekDays = ["월", "화", "수", "목", "금", "토", "일"];
 
   return (
     <div className="rounded-xl border border-border bg-card overflow-hidden">
-      {/* Navigation */}
+      {/* 네비게이션 */}
       <div className="flex items-center justify-between px-4 py-2.5 border-b border-border">
         <Button
           variant="ghost"
           size="sm"
           className="h-7 w-7 p-0"
-          onClick={() => onWeekChange(addDays(weekStart, -7))}
+          onClick={() => onWeekChange(addMonths(currentMonth, -1))}
         >
           <ChevronLeft className="h-4 w-4" />
         </Button>
-        <span className="text-sm font-medium">{weekLabel}</span>
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-semibold">{monthLabel}</span>
+          <button
+            onClick={() => onWeekChange(new Date())}
+            className="text-[10px] font-medium px-2 py-0.5 rounded-md bg-[#EEF4EE] text-[#7A9A72] hover:bg-[#E6F0E6] transition-colors"
+          >
+            오늘
+          </button>
+        </div>
         <Button
           variant="ghost"
           size="sm"
           className="h-7 w-7 p-0"
-          onClick={() => onWeekChange(addDays(weekStart, 7))}
+          onClick={() => onWeekChange(addMonths(currentMonth, 1))}
         >
           <ChevronRight className="h-4 w-4" />
         </Button>
       </div>
 
-      {/* Day columns */}
-      <div className="grid grid-cols-7 divide-x divide-border">
-        {days.map((day, idx) => (
-          <div key={idx} className="min-h-[140px]">
-            <div
-              className={cn(
-                "text-center py-1.5 border-b border-border text-xs",
-                isToday(day) && "bg-primary/5",
-              )}
-            >
-              <div
-                className={cn("font-medium", isToday(day) && "text-primary")}
-              >
-                {format(day, "EEE", { locale: ko })}
-              </div>
-              <div
-                className={cn(
-                  isToday(day)
-                    ? "bg-primary text-primary-foreground rounded-full inline-flex items-center justify-center h-5 w-5 text-[10px]"
-                    : "text-muted-foreground",
-                )}
-              >
-                {format(day, "d")}
-              </div>
-            </div>
-            <div className="p-1 space-y-1">
-              {tasksPerDay[idx].map((task) => {
-                const done = task.status === "완료";
-                return (
-                  <button
-                    key={task.id}
-                    onClick={() => onTaskToggle?.(task.id)}
-                    className={cn(
-                      "w-full text-left text-[10px] leading-tight px-1.5 py-1 rounded-md transition-colors",
-                      done
-                        ? "bg-muted text-muted-foreground line-through opacity-50"
-                        : "bg-primary/10 text-foreground hover:bg-primary/20",
-                    )}
-                  >
-                    <div className="flex items-center gap-1">
-                      <span
-                        className={cn(
-                          "h-3 w-3 rounded border flex items-center justify-center shrink-0",
-                          done
-                            ? "bg-primary border-primary text-primary-foreground"
-                            : "border-border",
-                        )}
-                      >
-                        {done && <Check className="h-2 w-2" />}
-                      </span>
-                      <span className="truncate">{taskLabel(task)}</span>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
+      {/* 요일 헤더 */}
+      <div className="grid grid-cols-7 border-b border-border">
+        {weekDays.map((wd) => (
+          <div
+            key={wd}
+            className="text-center py-1.5 text-[11px] font-medium text-muted-foreground"
+          >
+            {wd}
           </div>
         ))}
+      </div>
+
+      {/* 날짜 그리드 */}
+      <div className="grid grid-cols-7 divide-x divide-border">
+        {days.map((day, idx) => {
+          const isCurrentMonth = isSameMonth(day, currentMonth);
+          const todayFlag = isToday(day);
+          const dayTasks = tasksPerDay[idx];
+          const isWeekEnd = idx % 7 >= 5; // 토, 일
+
+          return (
+            <div
+              key={idx}
+              className={cn(
+                "min-h-[100px] border-b border-border",
+                !isCurrentMonth && "bg-neutral-50/50",
+                todayFlag && "bg-[#8BA888]/[0.04]",
+              )}
+            >
+              {/* 날짜 숫자 */}
+              <div className="px-1.5 pt-1 pb-0.5 flex items-start justify-between">
+                <div
+                  className={cn(
+                    "text-[11px]",
+                    !isCurrentMonth && "text-neutral-300",
+                    isCurrentMonth && !todayFlag && "text-neutral-500",
+                    isWeekEnd && isCurrentMonth && "text-neutral-400",
+                    todayFlag &&
+                      "inline-flex items-center justify-center h-5 w-5 rounded-full text-white text-[11px] font-bold",
+                  )}
+                  style={todayFlag ? { backgroundColor: TODAY_COLOR } : {}}
+                >
+                  {format(day, "d")}
+                </div>
+              </div>
+
+              {/* 태스크 카드 */}
+              <div className="px-0.5 pb-1 space-y-0.5">
+                {dayTasks.slice(0, 3).map((task) => {
+                  const done = task.status === "완료";
+                  return (
+                    <button
+                      key={task.id}
+                      onClick={() => onTaskToggle?.(task.id)}
+                      className={cn(
+                        "w-full text-left text-[9px] leading-tight px-1 py-0.5 rounded transition-colors truncate",
+                        done
+                          ? "bg-neutral-100 text-neutral-400 line-through"
+                          : "text-foreground hover:opacity-80",
+                      )}
+                      style={
+                        !done
+                          ? {
+                              backgroundColor: `${TODAY_COLOR}18`,
+                              color: "#5A7A55",
+                            }
+                          : {}
+                      }
+                    >
+                      <div className="flex items-center gap-0.5">
+                        <span
+                          className={cn(
+                            "h-2.5 w-2.5 rounded-sm border flex items-center justify-center shrink-0",
+                            done
+                              ? "border-neutral-300 bg-neutral-200 text-neutral-400"
+                              : "border-[#8BA888]/40",
+                          )}
+                          style={
+                            done ? {} : { backgroundColor: `${TODAY_COLOR}30` }
+                          }
+                        >
+                          {done && <Check className="h-1.5 w-1.5" />}
+                        </span>
+                        <span className="truncate">{taskLabel(task)}</span>
+                      </div>
+                    </button>
+                  );
+                })}
+                {dayTasks.length > 3 && (
+                  <span className="text-[9px] text-muted-foreground px-1">
+                    +{dayTasks.length - 3}건
+                  </span>
+                )}
+              </div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
