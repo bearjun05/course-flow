@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useCallback } from "react";
+import { useMemo, useState, useCallback, useRef } from "react";
 import {
   parseISO,
   format,
@@ -10,7 +10,7 @@ import {
   isToday,
 } from "date-fns";
 import { ko } from "date-fns/locale";
-import { ChevronDown, Check, Plus, User } from "lucide-react";
+import { ChevronDown, Check, Plus, Rocket } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { ChapterTask, TaskType } from "@/lib/types";
 
@@ -49,7 +49,7 @@ const STAGE_SHORT: Record<string, string> = {
   자막: "자막",
   검수: "검수",
   승인: "승인",
-  "커리큘럼 기획": "커기",
+  "커리큘럼 기획": "목차",
   롤아웃: "롤아웃",
   업로드: "업로드",
 };
@@ -73,10 +73,22 @@ interface ChapterGroup {
 }
 
 /* ------------------------------------------------------------------ */
+/*  Helpers                                                            */
+/* ------------------------------------------------------------------ */
+
+function formatDateRange(task: ChapterTask): string | null {
+  if (!task.startDate) return null;
+  const s = format(parseISO(task.startDate), "M/d");
+  if (!task.endDate) return `${s}~`;
+  const e = format(parseISO(task.endDate), "M/d");
+  return `${s}~${e}`;
+}
+
+/* ------------------------------------------------------------------ */
 /*  Sub-components                                                     */
 /* ------------------------------------------------------------------ */
 
-/** 하나의 공정 스테이지 칩 */
+/** 하나의 공정 스테이지 칩 — 호버 시 기간 표시 */
 function StageChip({
   task,
   chapterColor,
@@ -91,6 +103,7 @@ function StageChip({
   const isReview = task.status === "리뷰";
   const isWaiting = task.status === "대기";
   const label = STAGE_SHORT[task.taskType] ?? task.taskType;
+  const dateRange = formatDateRange(task);
 
   return (
     <button
@@ -99,7 +112,7 @@ function StageChip({
         onToggle();
       }}
       className={cn(
-        "relative flex items-center justify-center h-8 rounded-lg text-[11px] font-medium transition-all min-w-[52px] px-2",
+        "group/chip relative flex items-center justify-center h-8 rounded-lg text-[11px] font-medium transition-all min-w-[52px] px-2",
         isComplete && "text-white shadow-sm",
         isActive && "ring-2 ring-offset-1 text-white shadow-md",
         isReview &&
@@ -115,10 +128,15 @@ function StageChip({
             }
           : {}),
       }}
-      title={`${task.taskType}: ${task.status}${task.assignee ? ` (${task.assignee})` : ""}`}
     >
       {isComplete && <Check className="h-3 w-3 mr-0.5 shrink-0" />}
       {label}
+      {/* 호버 시 기간 툴팁 */}
+      {dateRange && (
+        <span className="pointer-events-none absolute -bottom-7 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-neutral-800 px-1.5 py-0.5 text-[10px] text-white opacity-0 group-hover/chip:opacity-100 transition-opacity z-20 shadow-lg">
+          {dateRange}
+        </span>
+      )}
     </button>
   );
 }
@@ -150,31 +168,34 @@ function ProgressBar({
 }
 
 /* ------------------------------------------------------------------ */
-/*  Mini Gantt (장 펼침 시 타임라인)                                     */
+/*  Mini Gantt (장 펼침 시 타임라인) + 드래그 리사이즈                      */
 /* ------------------------------------------------------------------ */
 
 function MiniGantt({
   tasks,
   chapterColor,
   onToggle,
+  onTaskDateChange,
 }: {
   tasks: ChapterTask[];
   chapterColor: string;
   onToggle: (taskId: string) => void;
+  onTaskDateChange: (
+    taskId: string,
+    startDate: string,
+    endDate: string,
+  ) => void;
 }) {
   const today = startOfDay(new Date());
+  const containerRef = useRef<HTMLDivElement>(null);
 
-  // 날짜가 있는 태스크만 타임라인에 표시
   const scheduled = tasks.filter((t) => t.startDate);
   const unscheduled = tasks.filter((t) => !t.startDate);
 
-  // 전체 날짜 범위 계산
-  const { minDate, maxDate, totalDays } = useMemo(() => {
+  const { minDate, totalDays } = useMemo(() => {
     if (scheduled.length === 0) {
-      // 일정이 없으면 오늘 기준 ±7일
       return {
         minDate: addDays(today, -3),
-        maxDate: addDays(today, 11),
         totalDays: 15,
       };
     }
@@ -188,27 +209,74 @@ function MiniGantt({
     mn = addDays(mn, -1);
     mx = addDays(mx, 2);
     const days = Math.max(differenceInDays(mx, mn) + 1, 7);
-    return { minDate: mn, maxDate: mx, totalDays: days };
+    return { minDate: mn, totalDays: days };
   }, [scheduled, today]);
 
-  // 날짜 헤더 배열
   const dates = useMemo(
     () => Array.from({ length: totalDays }, (_, i) => addDays(minDate, i)),
     [minDate, totalDays],
   );
 
-  // 오늘 위치 (%)
   const todayOffset = differenceInDays(today, minDate);
   const todayPct = (todayOffset / totalDays) * 100;
 
+  /** 드래그로 바 양쪽 끝을 조절 */
+  const handleDragStart = useCallback(
+    (e: React.MouseEvent, task: ChapterTask, edge: "left" | "right") => {
+      e.stopPropagation();
+      e.preventDefault();
+      const barArea = containerRef.current;
+      if (!barArea) return;
+
+      // 바 영역의 왼쪽에서 시작 (공정 라벨 제외)
+      const labelWidth = 80; // w-20 = 80px
+      const areaRect = barArea.getBoundingClientRect();
+      const areaLeft = areaRect.left + labelWidth;
+      const areaWidth = areaRect.width - labelWidth;
+      const dayWidth = areaWidth / totalDays;
+
+      const origStart = parseISO(task.startDate!);
+      const origEnd = task.endDate ? parseISO(task.endDate) : origStart;
+
+      const onMove = (ev: MouseEvent) => {
+        const x = ev.clientX - areaLeft;
+        const dayIndex = Math.round(x / dayWidth);
+        const clampedDay = Math.max(0, Math.min(dayIndex, totalDays - 1));
+        const targetDate = addDays(minDate, clampedDay);
+
+        let newStart = origStart;
+        let newEnd = origEnd;
+
+        if (edge === "left") {
+          newStart = targetDate <= origEnd ? targetDate : origEnd;
+        } else {
+          newEnd = targetDate >= origStart ? targetDate : origStart;
+        }
+
+        onTaskDateChange(
+          task.id,
+          format(newStart, "yyyy-MM-dd"),
+          format(newEnd, "yyyy-MM-dd"),
+        );
+      };
+
+      const onUp = () => {
+        window.removeEventListener("mousemove", onMove);
+        window.removeEventListener("mouseup", onUp);
+      };
+
+      window.addEventListener("mousemove", onMove);
+      window.addEventListener("mouseup", onUp);
+    },
+    [totalDays, minDate, onTaskDateChange],
+  );
+
   return (
-    <div className="px-4 pl-10 pb-3 pt-1">
+    <div className="px-4 pl-10 pb-3 pt-1" ref={containerRef}>
       <div className="rounded-xl border border-neutral-100 bg-white overflow-hidden">
         {/* 날짜 헤더 */}
         <div className="flex border-b border-neutral-100 bg-neutral-50/50 relative">
-          <div className="w-20 shrink-0 px-2 py-1.5 text-xs text-neutral-400 font-medium">
-            공정
-          </div>
+          <div className="w-20 shrink-0" />
           <div className="flex-1 relative">
             <div className="flex">
               {dates.map((d, i) => (
@@ -233,9 +301,9 @@ function MiniGantt({
         {scheduled.map((task) => {
           const s = parseISO(task.startDate!);
           const e = task.endDate ? parseISO(task.endDate) : s;
-          const startOffset = differenceInDays(s, minDate);
+          const startOff = differenceInDays(s, minDate);
           const span = differenceInDays(e, s) + 1;
-          const leftPct = (startOffset / totalDays) * 100;
+          const leftPct = (startOff / totalDays) * 100;
           const widthPct = (span / totalDays) * 100;
 
           const isComplete = task.status === "완료";
@@ -255,7 +323,6 @@ function MiniGantt({
                 isComplete && "opacity-50",
               )}
             >
-              {/* 공정 라벨 */}
               <div className="w-20 shrink-0 px-2 flex items-center gap-1.5">
                 <button
                   onClick={() => onToggle(task.id)}
@@ -280,18 +347,17 @@ function MiniGantt({
                 </span>
               </div>
 
-              {/* 바 영역 */}
               <div className="flex-1 relative h-full">
-                {/* 오늘 표시선 */}
                 {todayPct >= 0 && todayPct <= 100 && (
                   <div
                     className="absolute top-0 bottom-0 w-px bg-blue-400/40 z-10"
                     style={{ left: `${todayPct}%` }}
                   />
                 )}
+                {/* 간트 바 */}
                 <div
                   className={cn(
-                    "absolute top-1.5 h-7 rounded-md flex items-center justify-center text-[11px] font-medium transition-shadow cursor-pointer",
+                    "absolute top-1.5 h-7 rounded-md flex items-center justify-center text-[11px] font-medium transition-shadow group/bar",
                     isOverdue
                       ? "bg-red-400/80 text-white"
                       : isReview
@@ -312,12 +378,21 @@ function MiniGantt({
                       : {}),
                     ...(isActive ? { opacity: 0.9 } : {}),
                   }}
-                  onClick={() => onToggle(task.id)}
-                  title={`${task.taskType}: ${format(s, "M/d")} ~ ${format(e, "M/d")} (${task.status})`}
                 >
-                  {widthPct > 8 && (
-                    <span className="truncate px-1">{task.assignee ?? ""}</span>
-                  )}
+                  {/* 왼쪽 드래그 핸들 */}
+                  <div
+                    className="absolute left-0 top-0 bottom-0 w-2 cursor-col-resize opacity-0 group-hover/bar:opacity-100 transition-opacity rounded-l-md hover:bg-black/10"
+                    onMouseDown={(ev) => handleDragStart(ev, task, "left")}
+                  />
+                  {/* 바 내부 텍스트 */}
+                  <span className="truncate px-2 pointer-events-none select-none">
+                    {widthPct > 8 ? (task.assignee ?? label) : ""}
+                  </span>
+                  {/* 오른쪽 드래그 핸들 */}
+                  <div
+                    className="absolute right-0 top-0 bottom-0 w-2 cursor-col-resize opacity-0 group-hover/bar:opacity-100 transition-opacity rounded-r-md hover:bg-black/10"
+                    onMouseDown={(ev) => handleDragStart(ev, task, "right")}
+                  />
                 </div>
               </div>
             </div>
@@ -386,13 +461,22 @@ export default function MondayBoard({
 }: MondayBoardProps) {
   const [expandedGroups, setExpandedGroups] = useState<Set<number>>(new Set());
 
-  const groups: ChapterGroup[] = useMemo(() => {
+  // 사전 준비에서 롤아웃 분리
+  const { groups, rolloutTask } = useMemo(() => {
     const map = new Map<number, ChapterTask[]>();
+    let rollout: ChapterTask | null = null;
+
     for (const t of tasks) {
+      // 롤아웃은 따로 빼기
+      if (t.taskType === "롤아웃") {
+        rollout = t;
+        continue;
+      }
       if (!map.has(t.chapter)) map.set(t.chapter, []);
       map.get(t.chapter)!.push(t);
     }
-    return Array.from(map.entries())
+
+    const grps: ChapterGroup[] = Array.from(map.entries())
       .sort(([a], [b]) => a - b)
       .map(([ch, chTasks]) => ({
         chapter: ch,
@@ -401,6 +485,8 @@ export default function MondayBoard({
         tasks: chTasks,
         completedCount: chTasks.filter((t) => t.status === "완료").length,
       }));
+
+    return { groups: grps, rolloutTask: rollout };
   }, [tasks]);
 
   const toggleExpand = useCallback((ch: number) => {
@@ -425,6 +511,15 @@ export default function MondayBoard({
     [tasks, onTasksChange],
   );
 
+  const handleTaskDateChange = useCallback(
+    (taskId: string, startDate: string, endDate: string) => {
+      onTasksChange(
+        tasks.map((t) => (t.id === taskId ? { ...t, startDate, endDate } : t)),
+      );
+    },
+    [tasks, onTasksChange],
+  );
+
   function getCurrentStage(groupTasks: ChapterTask[]): string | null {
     const active = groupTasks.find(
       (t) => t.status === "진행" || t.status === "리뷰",
@@ -438,6 +533,7 @@ export default function MondayBoard({
 
   return (
     <div className="rounded-2xl border border-neutral-100 bg-white shadow-sm overflow-hidden">
+      {/* 장별 행 */}
       {groups.map((group) => {
         const expanded = expandedGroups.has(group.chapter);
         const allDone =
@@ -480,7 +576,7 @@ export default function MondayBoard({
                 </span>
               </div>
 
-              <div className="flex items-center gap-1 flex-1 min-w-0">
+              <div className="flex items-center gap-1 flex-1 min-w-0 relative">
                 {orderedTasks.map((task, i) => (
                   <div key={task.id} className="flex items-center">
                     {i > 0 && (
@@ -531,25 +627,71 @@ export default function MondayBoard({
                 tasks={orderedTasks}
                 chapterColor={group.color}
                 onToggle={toggleTask}
+                onTaskDateChange={handleTaskDateChange}
               />
             )}
           </div>
         );
       })}
 
+      {/* 장 추가 버튼 */}
+      {onAddChapter && (
+        <button
+          onClick={onAddChapter}
+          className="w-full flex items-center justify-center gap-1.5 py-2.5 text-xs text-muted-foreground hover:text-foreground hover:bg-accent/30 transition-colors border-b border-dashed border-neutral-200"
+        >
+          <Plus className="h-3.5 w-3.5" />장 추가
+        </button>
+      )}
+
+      {/* 강의 롤아웃 (맨 하단 고정) */}
+      {rolloutTask && (
+        <div
+          className="flex items-center gap-3 px-4 py-3 border-t border-neutral-100 bg-neutral-50/30"
+          style={{ borderLeft: "4px solid #7C8DBC" }}
+        >
+          <div className="flex items-center gap-2">
+            <Rocket className="h-4 w-4 text-[#7C8DBC]" />
+            <span className="text-sm font-semibold text-[#7C8DBC]">
+              강의 롤아웃
+            </span>
+          </div>
+          <div className="flex-1" />
+          <span
+            className={cn(
+              "text-[11px] font-medium px-2.5 py-1 rounded-full",
+              rolloutTask.status === "완료"
+                ? "bg-emerald-50 text-emerald-600"
+                : rolloutTask.status === "진행"
+                  ? "bg-blue-50 text-blue-600"
+                  : "bg-neutral-100 text-neutral-400",
+            )}
+          >
+            {rolloutTask.status}
+          </span>
+          {rolloutTask.startDate && (
+            <span className="text-[11px] text-muted-foreground">
+              {formatDateRange(rolloutTask)}
+            </span>
+          )}
+          <button
+            onClick={() => toggleTask(rolloutTask.id)}
+            className={cn(
+              "h-6 w-6 rounded-md border flex items-center justify-center shrink-0 transition-colors",
+              rolloutTask.status === "완료"
+                ? "bg-[#7C8DBC] border-[#7C8DBC] text-white"
+                : "border-neutral-300 hover:border-[#7C8DBC]",
+            )}
+          >
+            {rolloutTask.status === "완료" && <Check className="h-4 w-4" />}
+          </button>
+        </div>
+      )}
+
       {tasks.length === 0 && (
         <div className="flex items-center justify-center h-32 text-sm text-muted-foreground">
           등록된 공정이 없습니다.
         </div>
-      )}
-
-      {onAddChapter && (
-        <button
-          onClick={onAddChapter}
-          className="w-full flex items-center justify-center gap-1.5 py-3 text-xs text-muted-foreground hover:text-foreground hover:bg-accent/30 transition-colors border-t border-dashed border-neutral-200"
-        >
-          <Plus className="h-3.5 w-3.5" />장 추가
-        </button>
       )}
     </div>
   );
