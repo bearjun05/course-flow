@@ -37,13 +37,17 @@ function taskLabel(t: ChapterTask): string {
 }
 
 const CHAPTER_COLORS = [
-  "bg-primary/70",
-  "bg-chart-3/70",
-  "bg-chart-4/70",
-  "bg-primary/50",
-  "bg-chart-3/50",
-  "bg-chart-4/50",
-  "bg-primary/30",
+  "bg-[#E4A0A0]/70", // CH0→CH1 분홍
+  "bg-[#E4B89C]/70", // CH2 살구
+  "bg-[#E4CC9C]/70", // CH3 주황
+  "bg-[#E0D49C]/70", // CH4 노랑
+  "bg-[#C8D89C]/70", // CH5 연두
+  "bg-[#9CD4B0]/70", // CH6 초록
+  "bg-[#9CCCC8]/70", // CH7 민트
+  "bg-[#9CB8D8]/70", // CH8 하늘
+  "bg-[#B0A8D8]/70", // CH9 보라
+  "bg-[#D0A8C8]/70", // CH10 자주
+  "bg-[#C8BCB0]/70", // CH11 베이지
 ];
 
 export default function GanttChart({
@@ -64,7 +68,9 @@ export default function GanttChart({
       const unscheduled = tasks.filter((t) => !t.startDate);
 
       if (scheduled.length === 0) {
-        const ds = Array.from({ length: zoomDays }, (_, i) => addDays(today, i - Math.floor(zoomDays / 2)));
+        const ds = Array.from({ length: zoomDays }, (_, i) =>
+          addDays(today, i - Math.floor(zoomDays / 2)),
+        );
         return {
           scheduledTasks: [],
           unscheduledTasks: unscheduled,
@@ -81,18 +87,18 @@ export default function GanttChart({
 
       let minDate = allStarts.reduce((a, b) => (a < b ? a : b));
       let maxDate = [...allStarts, ...allEnds].reduce((a, b) =>
-        a > b ? a : b
+        a > b ? a : b,
       );
 
       minDate = addDays(minDate, -2);
       maxDate = addDays(maxDate, 2);
       const rangeDays = Math.max(
         differenceInDays(maxDate, minDate) + 1,
-        zoomDays
+        zoomDays,
       );
 
       const ds = Array.from({ length: rangeDays }, (_, i) =>
-        addDays(minDate, i)
+        addDays(minDate, i),
       );
 
       const sorted = [...scheduled].sort((a, b) => {
@@ -134,7 +140,7 @@ export default function GanttChart({
                 key={i}
                 className={cn(
                   "text-center text-[10px] py-2 border-r border-border/50",
-                  isToday(d) && "bg-primary/5 font-semibold text-primary"
+                  isToday(d) && "bg-primary/5 font-semibold text-primary",
                 )}
                 style={{ width: `${COL_W}px` }}
               >
@@ -163,7 +169,9 @@ export default function GanttChart({
           const span = differenceInDays(e, s) + 1;
           const isComplete = task.status === "완료";
           const isOverdue =
-            task.endDate && isBefore(parseISO(task.endDate), new Date()) && !isComplete;
+            task.endDate &&
+            isBefore(parseISO(task.endDate), new Date()) &&
+            !isComplete;
           const colorClass =
             CHAPTER_COLORS[task.chapter % CHAPTER_COLORS.length];
 
@@ -173,7 +181,7 @@ export default function GanttChart({
               className={cn(
                 "flex items-center border-b border-border/50 h-9 group",
                 isComplete && "opacity-40",
-                hoveredTask === task.id && "bg-accent/30"
+                hoveredTask === task.id && "bg-accent/30",
               )}
               onMouseEnter={() => setHoveredTask(task.id)}
               onMouseLeave={() => setHoveredTask(null)}
@@ -194,7 +202,7 @@ export default function GanttChart({
                     "h-4 w-4 rounded border flex items-center justify-center shrink-0",
                     isComplete
                       ? "bg-primary border-primary text-primary-foreground"
-                      : "border-border hover:border-primary"
+                      : "border-border hover:border-primary",
                   )}
                 >
                   {isComplete && <Check className="h-3 w-3" />}
@@ -213,7 +221,7 @@ export default function GanttChart({
                   <div
                     className={cn(
                       "absolute top-1.5 h-6 rounded-md flex items-center px-1.5 text-[10px] text-white cursor-pointer transition-shadow hover:shadow-md",
-                      isOverdue ? "bg-destructive/80" : colorClass
+                      isOverdue ? "bg-destructive/80" : colorClass,
                     )}
                     style={{
                       left: `${startCol * COL_W + 2}px`,
@@ -245,7 +253,7 @@ export default function GanttChart({
                 key={task.id}
                 className={cn(
                   "flex items-center border-b border-border/50 h-9",
-                  task.status === "완료" && "opacity-40"
+                  task.status === "완료" && "opacity-40",
                 )}
               >
                 <div className="w-[200px] shrink-0 px-3 flex items-center gap-2 text-xs border-r border-border">
@@ -263,7 +271,7 @@ export default function GanttChart({
                       "h-4 w-4 rounded border flex items-center justify-center shrink-0",
                       task.status === "완료"
                         ? "bg-primary border-primary text-primary-foreground"
-                        : "border-border hover:border-primary"
+                        : "border-border hover:border-primary",
                     )}
                   >
                     {task.status === "완료" && <Check className="h-3 w-3" />}

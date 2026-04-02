@@ -13,13 +13,17 @@ import type { ChapterTask, TaskStatus } from "@/lib/types";
 
 const GROUP_COLORS = [
   "#B0B0B0", // CH0 사전 (neutral)
-  "#8AAE50", // CH1 olive
-  "#6ECC9A", // CH2 green
-  "#F5C842", // CH3 amber
-  "#A8BE60", // CH4 olive-light
-  "#E8A87C", // CH5 peach
-  "#8AAE50", // CH6
-  "#6ECC9A", // CH7
+  "#E4A0A0", // CH1 분홍
+  "#E4B89C", // CH2 살구
+  "#E4CC9C", // CH3 주황
+  "#E0D49C", // CH4 노랑
+  "#C8D89C", // CH5 연두
+  "#9CD4B0", // CH6 초록
+  "#9CCCC8", // CH7 민트
+  "#9CB8D8", // CH8 하늘
+  "#B0A8D8", // CH9 보라
+  "#D0A8C8", // CH10 자주
+  "#C8BCB0", // CH11 베이지
 ];
 
 const STATUS_STYLES: Record<TaskStatus, { bg: string; text: string }> = {

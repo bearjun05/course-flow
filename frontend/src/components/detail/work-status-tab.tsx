@@ -55,14 +55,18 @@ const STATUS_INDICATOR: Record<
 };
 
 const GROUP_COLORS = [
-  "#B0B0B0",
-  "#8AAE50",
-  "#6ECC9A",
-  "#F5C842",
-  "#A8BE60",
-  "#E8A87C",
-  "#8AAE50",
-  "#6ECC9A",
+  "#B0B0B0", // CH0 사전 (neutral)
+  "#E4A0A0", // CH1 분홍
+  "#E4B89C", // CH2 살구
+  "#E4CC9C", // CH3 주황
+  "#E0D49C", // CH4 노랑
+  "#C8D89C", // CH5 연두
+  "#9CD4B0", // CH6 초록
+  "#9CCCC8", // CH7 민트
+  "#9CB8D8", // CH8 하늘
+  "#B0A8D8", // CH9 보라
+  "#D0A8C8", // CH10 자주
+  "#C8BCB0", // CH11 베이지
 ];
 
 /* ------------------------------------------------------------------ */
