@@ -131,9 +131,9 @@ function StageChip({
     >
       {isComplete && <Check className="h-3 w-3 mr-0.5 shrink-0" />}
       {label}
-      {/* 호버 시 기간 툴팁 */}
+      {/* 호버 시 기간 툴팁 — 글래스모피즘 */}
       {dateRange && (
-        <span className="pointer-events-none absolute -bottom-7 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-neutral-800 px-1.5 py-0.5 text-[10px] text-white opacity-0 group-hover/chip:opacity-100 transition-opacity z-20 shadow-lg">
+        <span className="pointer-events-none absolute -bottom-10 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-xl bg-white/70 backdrop-blur-md border border-white/50 px-3 py-1.5 text-xs font-semibold text-neutral-700 opacity-0 group-hover/chip:opacity-100 transition-opacity z-20 shadow-[0_4px_20px_rgba(0,0,0,0.08)]">
           {dateRange}
         </span>
       )}
