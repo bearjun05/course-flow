@@ -102,6 +102,10 @@ function StageChip({
   const isActive = task.status === "진행";
   const isReview = task.status === "리뷰";
   const isWaiting = task.status === "대기";
+  const isOverdue =
+    !isComplete &&
+    task.endDate &&
+    differenceInDays(startOfDay(new Date()), parseISO(task.endDate)) > 0;
   const label = STAGE_SHORT[task.taskType] ?? task.taskType;
   const dateRange = formatDateRange(task);
 
@@ -113,23 +117,24 @@ function StageChip({
       }}
       className={cn(
         "group/chip relative flex items-center justify-center h-8 rounded-lg text-[11px] font-medium transition-all min-w-[52px] px-2",
-        isComplete && "text-white shadow-sm",
-        isActive && "ring-2 ring-offset-1 text-white shadow-md",
-        isReview &&
+        isComplete && "bg-neutral-200 text-neutral-500",
+        isOverdue && "bg-red-400/90 text-white shadow-sm",
+        !isComplete && !isOverdue && isActive && "text-white shadow-sm",
+        !isComplete &&
+          !isOverdue &&
+          isReview &&
           "bg-amber-100 text-amber-700 ring-2 ring-amber-300 ring-offset-1",
-        isWaiting && "bg-neutral-100 text-neutral-400",
+        isWaiting && !isOverdue && "bg-neutral-100 text-neutral-400",
       )}
       style={{
-        ...(isComplete ? { backgroundColor: chapterColor } : {}),
-        ...(isActive
-          ? {
-              backgroundColor: chapterColor,
-              "--tw-ring-color": chapterColor,
-            }
+        ...(!isComplete && !isOverdue && isActive
+          ? { backgroundColor: TODAY_COLOR }
           : {}),
       }}
     >
-      {isComplete && <Check className="h-3 w-3 mr-0.5 shrink-0" />}
+      {isComplete && (
+        <Check className="h-3 w-3 mr-0.5 shrink-0 text-neutral-400" />
+      )}
       {label}
       {/* 호버 시 기간 툴팁 — 글래스모피즘, 상단 */}
       {dateRange && (
