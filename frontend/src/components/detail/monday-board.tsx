@@ -168,8 +168,12 @@ function ProgressBar({
 }
 
 /* ------------------------------------------------------------------ */
-/*  Mini Gantt (장 펼침 시 타임라인) + 드래그 리사이즈                      */
+/*  Mini Gantt (장 펼침 시 타임라인) + 가로스크롤 + 드래그 리사이즈          */
 /* ------------------------------------------------------------------ */
+
+const COL_W = 44; // 날짜 열 1칸 폭 (px)
+const TOTAL_RANGE = 60; // 전체 표시 범위 (일)
+const TODAY_COLOR = "#6B8DE3"; // 오늘 색상 (블루 계열)
 
 function MiniGantt({
   tasks,
@@ -188,39 +192,54 @@ function MiniGantt({
 }) {
   const today = startOfDay(new Date());
   const containerRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [showLeftArrow, setShowLeftArrow] = useState(false);
+  const [showRightArrow, setShowRightArrow] = useState(false);
 
   const scheduled = tasks.filter((t) => t.startDate);
   const unscheduled = tasks.filter((t) => !t.startDate);
 
-  const { minDate, totalDays } = useMemo(() => {
-    if (scheduled.length === 0) {
-      return {
-        minDate: addDays(today, -3),
-        totalDays: 15,
-      };
-    }
-    const starts = scheduled.map((t) => parseISO(t.startDate!));
-    const ends = scheduled
-      .filter((t) => t.endDate)
-      .map((t) => parseISO(t.endDate!));
-    const allDates = [...starts, ...ends, today];
-    let mn = allDates.reduce((a, b) => (a < b ? a : b));
-    let mx = allDates.reduce((a, b) => (a > b ? a : b));
-    mn = addDays(mn, -1);
-    mx = addDays(mx, 2);
-    const days = Math.max(differenceInDays(mx, mn) + 1, 7);
-    return { minDate: mn, totalDays: days };
-  }, [scheduled, today]);
+  // 오늘 기준 앞뒤로 넉넉하게 범위 설정
+  const minDate = useMemo(() => addDays(today, -20), [today]);
+  const totalDays = TOTAL_RANGE;
 
   const dates = useMemo(
     () => Array.from({ length: totalDays }, (_, i) => addDays(minDate, i)),
     [minDate, totalDays],
   );
 
-  const todayOffset = differenceInDays(today, minDate);
-  const todayPct = (todayOffset / totalDays) * 100;
+  const todayIndex = differenceInDays(today, minDate);
 
-  /** 드래그 공통: edge="left"|"right"는 끝 조절, "move"는 통째 이동 */
+  // 오늘을 1/3 위치에 놓도록 초기 스크롤
+  const scrollToToday = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const viewW = el.clientWidth;
+    const targetLeft = todayIndex * COL_W - viewW / 3;
+    el.scrollTo({ left: Math.max(0, targetLeft), behavior: "smooth" });
+  }, [todayIndex]);
+
+  // 마운트 시 + 오늘 위치 세팅
+  useState(() => {
+    // setTimeout으로 DOM 렌더 후 스크롤
+    setTimeout(() => scrollToToday(), 50);
+  });
+
+  // 스크롤 시 화살표 표시 여부 판단
+  const handleScroll = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const viewW = el.clientWidth;
+    const todayLeft = todayIndex * COL_W;
+    const scrollLeft = el.scrollLeft;
+    const scrollRight = scrollLeft + viewW;
+
+    // 오늘이 뷰포트 밖이면 화살표 표시
+    setShowLeftArrow(todayLeft < scrollLeft);
+    setShowRightArrow(todayLeft > scrollRight - COL_W);
+  }, [todayIndex]);
+
+  /** 드래그 공통 */
   const handleDragStart = useCallback(
     (
       e: React.MouseEvent,
@@ -229,40 +248,25 @@ function MiniGantt({
     ) => {
       e.stopPropagation();
       e.preventDefault();
-      const barArea = containerRef.current;
-      if (!barArea) return;
-
-      const labelWidth = 80;
-      const areaRect = barArea.getBoundingClientRect();
-      const areaLeft = areaRect.left + labelWidth;
-      const areaWidth = areaRect.width - labelWidth;
-      const dayWidth = areaWidth / totalDays;
 
       const origStart = parseISO(task.startDate!);
       const origEnd = task.endDate ? parseISO(task.endDate) : origStart;
-      const duration = differenceInDays(origEnd, origStart);
       const startX = e.clientX;
 
       const onMove = (ev: MouseEvent) => {
         let newStart = origStart;
         let newEnd = origEnd;
+        const deltaDays = Math.round((ev.clientX - startX) / COL_W);
 
         if (mode === "move") {
-          // 통째 이동: 마우스 이동량을 일 수로 환산
-          const deltaDays = Math.round((ev.clientX - startX) / dayWidth);
           newStart = addDays(origStart, deltaDays);
           newEnd = addDays(origEnd, deltaDays);
+        } else if (mode === "left") {
+          const candidate = addDays(origStart, deltaDays);
+          newStart = candidate <= origEnd ? candidate : origEnd;
         } else {
-          const x = ev.clientX - areaLeft;
-          const dayIndex = Math.round(x / dayWidth);
-          const clampedDay = Math.max(0, Math.min(dayIndex, totalDays - 1));
-          const targetDate = addDays(minDate, clampedDay);
-
-          if (mode === "left") {
-            newStart = targetDate <= origEnd ? targetDate : origEnd;
-          } else {
-            newEnd = targetDate >= origStart ? targetDate : origStart;
-          }
+          const candidate = addDays(origEnd, deltaDays);
+          newEnd = candidate >= origStart ? candidate : origStart;
         }
 
         onTaskDateChange(
@@ -280,211 +284,266 @@ function MiniGantt({
       window.addEventListener("mousemove", onMove);
       window.addEventListener("mouseup", onUp);
     },
-    [totalDays, minDate, onTaskDateChange],
+    [onTaskDateChange],
   );
 
+  const contentWidth = totalDays * COL_W;
+
   return (
-    <div className="px-4 pl-10 pb-3 pt-1" ref={containerRef}>
+    <div className="px-4 pl-10 pb-3 pt-1 relative" ref={containerRef}>
+      {/* 왼쪽 화살표: 오늘로 이동 */}
+      {showLeftArrow && (
+        <button
+          onClick={scrollToToday}
+          className="absolute left-2 top-1/2 -translate-y-1/2 z-30 h-8 w-8 rounded-full bg-white/80 backdrop-blur-sm border border-neutral-200 shadow-md flex items-center justify-center hover:bg-white transition-colors"
+          title="오늘로 이동"
+        >
+          <ChevronDown className="h-4 w-4 rotate-90 text-[#6B8DE3]" />
+        </button>
+      )}
+      {/* 오른쪽 화살표 */}
+      {showRightArrow && (
+        <button
+          onClick={scrollToToday}
+          className="absolute right-2 top-1/2 -translate-y-1/2 z-30 h-8 w-8 rounded-full bg-white/80 backdrop-blur-sm border border-neutral-200 shadow-md flex items-center justify-center hover:bg-white transition-colors"
+          title="오늘로 이동"
+        >
+          <ChevronDown className="h-4 w-4 -rotate-90 text-[#6B8DE3]" />
+        </button>
+      )}
+
       <div className="rounded-xl border border-neutral-100 bg-white overflow-hidden">
-        {/* 날짜 헤더 */}
-        <div className="flex border-b border-neutral-100 bg-neutral-50/50 relative">
-          <div className="w-20 shrink-0" />
-          <div className="flex-1 relative">
-            <div className="flex">
-              {dates.map((d, i) => {
-                const isTodayCol = isToday(d);
-                return (
-                  <div
-                    key={i}
-                    className={cn(
-                      "flex-1 text-center text-[11px] py-1.5 border-l border-neutral-100/50 relative",
-                      isTodayCol && "bg-rose-50/60",
-                    )}
-                  >
-                    {isTodayCol && (
-                      <span className="absolute -top-0.5 left-1/2 -translate-x-1/2 text-[8px] font-bold text-rose-400 tracking-wide uppercase">
-                        today
-                      </span>
-                    )}
-                    <div
-                      className={cn(
-                        "mt-1",
-                        isTodayCol
-                          ? "inline-flex items-center justify-center h-5 w-5 rounded-full bg-rose-400 text-white text-[11px] font-bold"
-                          : "",
-                      )}
-                    >
-                      {format(d, "d", { locale: ko })}
-                    </div>
-                    <div
-                      className={cn(
-                        isTodayCol
-                          ? "text-rose-400 font-semibold"
-                          : "text-neutral-400",
-                      )}
-                    >
-                      {format(d, "EEE", { locale: ko })}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-
-        {/* 공정별 바 */}
-        {scheduled.map((task) => {
-          const s = parseISO(task.startDate!);
-          const e = task.endDate ? parseISO(task.endDate) : s;
-          const startOff = differenceInDays(s, minDate);
-          const span = differenceInDays(e, s) + 1;
-          const leftPct = (startOff / totalDays) * 100;
-          const widthPct = (span / totalDays) * 100;
-
-          const isComplete = task.status === "완료";
-          const isActive = task.status === "진행";
-          const isReview = task.status === "리뷰";
-          const isOverdue =
-            task.endDate &&
-            differenceInDays(today, parseISO(task.endDate)) > 0 &&
-            !isComplete;
-          const label = STAGE_SHORT[task.taskType] ?? task.taskType;
-
-          return (
-            <div
-              key={task.id}
-              className={cn(
-                "flex items-center border-b border-neutral-50 h-10 group hover:bg-neutral-50/30",
-                isComplete && "opacity-50",
-              )}
-            >
-              <div className="w-20 shrink-0 px-2 flex items-center gap-1.5">
-                <button
-                  onClick={() => onToggle(task.id)}
-                  className={cn(
-                    "h-4 w-4 rounded border flex items-center justify-center shrink-0",
-                    isComplete
-                      ? "text-white border-transparent"
-                      : "border-neutral-300",
-                  )}
-                  style={isComplete ? { backgroundColor: chapterColor } : {}}
-                >
-                  {isComplete && <Check className="h-3 w-3" />}
-                </button>
-                <span
-                  className={cn(
-                    "text-xs truncate",
-                    isComplete && "line-through text-muted-foreground",
-                    isActive && "font-semibold",
-                  )}
-                >
-                  {label}
-                </span>
-              </div>
-
-              <div className="flex-1 relative h-full">
-                {todayPct >= 0 && todayPct <= 100 && (
-                  <div
-                    className="absolute top-0 bottom-0 w-px bg-rose-300/60 z-10"
-                    style={{ left: `${todayPct}%` }}
-                  />
-                )}
-                {/* 간트 바 */}
+        <div className="flex">
+          {/* 고정 라벨 열 */}
+          <div className="w-20 shrink-0 z-10 bg-white">
+            {/* 헤더 빈칸 */}
+            <div className="h-12 border-b border-neutral-100 bg-neutral-50/50" />
+            {/* 공정 라벨들 */}
+            {scheduled.map((task) => {
+              const isComplete = task.status === "완료";
+              const isActive = task.status === "진행";
+              const label = STAGE_SHORT[task.taskType] ?? task.taskType;
+              return (
                 <div
+                  key={task.id}
                   className={cn(
-                    "absolute top-1.5 h-7 rounded-md flex items-center justify-center text-[11px] font-medium transition-shadow group/bar",
-                    isOverdue
-                      ? "bg-red-400/80 text-white"
-                      : isReview
-                        ? "bg-amber-300 text-amber-800"
-                        : isComplete
-                          ? "text-white/90"
-                          : isActive
-                            ? "text-white shadow-sm"
-                            : "bg-neutral-200 text-neutral-500",
+                    "flex items-center h-10 px-2 gap-1.5 border-b border-neutral-50",
+                    isComplete && "opacity-50",
                   )}
-                  style={{
-                    left: `${Math.max(leftPct, 0)}%`,
-                    width: `${Math.max(widthPct, 3)}%`,
-                    ...(isComplete || isActive
-                      ? {
-                          backgroundColor: isOverdue ? undefined : chapterColor,
-                        }
-                      : {}),
-                    ...(isActive ? { opacity: 0.9 } : {}),
-                  }}
                 >
-                  {/* 왼쪽 리사이즈 핸들 */}
-                  <div
-                    className="absolute left-0 top-0 bottom-0 w-2 cursor-col-resize z-10 opacity-0 group-hover/bar:opacity-100 transition-opacity rounded-l-md hover:bg-black/10"
-                    onMouseDown={(ev) => handleDragStart(ev, task, "left")}
-                  />
-                  {/* 중앙: 잡고 통째 이동 */}
-                  <div
-                    className="absolute left-2 right-2 top-0 bottom-0 cursor-grab active:cursor-grabbing flex items-center justify-center"
-                    onMouseDown={(ev) => handleDragStart(ev, task, "move")}
+                  <button
+                    onClick={() => onToggle(task.id)}
+                    className={cn(
+                      "h-4 w-4 rounded border flex items-center justify-center shrink-0",
+                      isComplete
+                        ? "text-white border-transparent"
+                        : "border-neutral-300",
+                    )}
+                    style={isComplete ? { backgroundColor: chapterColor } : {}}
                   >
-                    <span className="truncate px-1 pointer-events-none select-none">
-                      {widthPct > 8 ? (task.assignee ?? label) : ""}
-                    </span>
-                  </div>
-                  {/* 오른쪽 리사이즈 핸들 */}
-                  <div
-                    className="absolute right-0 top-0 bottom-0 w-2 cursor-col-resize z-10 opacity-0 group-hover/bar:opacity-100 transition-opacity rounded-r-md hover:bg-black/10"
-                    onMouseDown={(ev) => handleDragStart(ev, task, "right")}
-                  />
+                    {isComplete && <Check className="h-3 w-3" />}
+                  </button>
+                  <span
+                    className={cn(
+                      "text-xs truncate",
+                      isComplete && "line-through text-muted-foreground",
+                      isActive && "font-semibold",
+                    )}
+                  >
+                    {label}
+                  </span>
                 </div>
-              </div>
-            </div>
-          );
-        })}
-
-        {/* 일정 미정 태스크 */}
-        {unscheduled.length > 0 && (
-          <div className="border-t border-neutral-100">
+              );
+            })}
+            {/* 일정 미정 라벨 */}
             {unscheduled.map((task) => {
               const isComplete = task.status === "완료";
               const label = STAGE_SHORT[task.taskType] ?? task.taskType;
               return (
                 <div
                   key={task.id}
-                  className="flex items-center h-9 border-b border-neutral-50 last:border-b-0"
+                  className="flex items-center h-9 px-2 gap-1.5 border-b border-neutral-50 last:border-b-0"
                 >
-                  <div className="w-20 shrink-0 px-2 flex items-center gap-1.5">
-                    <button
-                      onClick={() => onToggle(task.id)}
-                      className={cn(
-                        "h-4 w-4 rounded border flex items-center justify-center shrink-0",
-                        isComplete
-                          ? "text-white border-transparent"
-                          : "border-neutral-300",
-                      )}
-                      style={
-                        isComplete ? { backgroundColor: chapterColor } : {}
-                      }
-                    >
-                      {isComplete && <Check className="h-3 w-3" />}
-                    </button>
-                    <span className="text-xs text-muted-foreground truncate">
-                      {label}
-                    </span>
-                  </div>
-                  <div className="flex-1 px-2 relative">
-                    {todayPct >= 0 && todayPct <= 100 && (
-                      <div
-                        className="absolute top-0 bottom-0 w-px bg-rose-300/60"
-                        style={{ left: `${todayPct}%` }}
-                      />
+                  <button
+                    onClick={() => onToggle(task.id)}
+                    className={cn(
+                      "h-4 w-4 rounded border flex items-center justify-center shrink-0",
+                      isComplete
+                        ? "text-white border-transparent"
+                        : "border-neutral-300",
                     )}
-                    <span className="text-[11px] text-neutral-300">
-                      일정 미정
-                    </span>
-                  </div>
+                    style={isComplete ? { backgroundColor: chapterColor } : {}}
+                  >
+                    {isComplete && <Check className="h-3 w-3" />}
+                  </button>
+                  <span className="text-xs text-muted-foreground truncate">
+                    {label}
+                  </span>
                 </div>
               );
             })}
           </div>
-        )}
+
+          {/* 스크롤 가능한 타임라인 영역 */}
+          <div
+            ref={scrollRef}
+            className="flex-1 overflow-x-auto"
+            onScroll={handleScroll}
+          >
+            <div style={{ width: contentWidth, minWidth: contentWidth }}>
+              {/* 날짜 헤더 */}
+              <div className="flex border-b border-neutral-100 bg-neutral-50/50 h-12 relative">
+                {dates.map((d, i) => {
+                  const isTodayCol = isToday(d);
+                  return (
+                    <div
+                      key={i}
+                      className={cn(
+                        "text-center text-[11px] py-1 border-l border-neutral-100/50 relative",
+                        isTodayCol && "bg-[#6B8DE3]/[0.06]",
+                      )}
+                      style={{ width: COL_W }}
+                    >
+                      {isTodayCol && (
+                        <span
+                          className="absolute -top-0.5 left-1/2 -translate-x-1/2 text-[7px] font-bold tracking-wider uppercase"
+                          style={{ color: TODAY_COLOR }}
+                        >
+                          today
+                        </span>
+                      )}
+                      <div
+                        className={cn("mt-1")}
+                        style={isTodayCol ? {} : undefined}
+                      >
+                        {isTodayCol ? (
+                          <span
+                            className="inline-flex items-center justify-center h-5 w-5 rounded-full text-white text-[11px] font-bold"
+                            style={{ backgroundColor: TODAY_COLOR }}
+                          >
+                            {format(d, "d", { locale: ko })}
+                          </span>
+                        ) : (
+                          format(d, "d", { locale: ko })
+                        )}
+                      </div>
+                      <div
+                        className={cn(
+                          "text-[10px]",
+                          isTodayCol ? "font-semibold" : "text-neutral-400",
+                        )}
+                        style={isTodayCol ? { color: TODAY_COLOR } : {}}
+                      >
+                        {format(d, "EEE", { locale: ko })}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* 공정별 바 */}
+              {scheduled.map((task) => {
+                const s = parseISO(task.startDate!);
+                const e = task.endDate ? parseISO(task.endDate) : s;
+                const startOff = differenceInDays(s, minDate);
+                const span = differenceInDays(e, s) + 1;
+                const leftPx = startOff * COL_W;
+                const widthPx = span * COL_W;
+
+                const isComplete = task.status === "완료";
+                const isActive = task.status === "진행";
+                const isReview = task.status === "리뷰";
+                const isOverdue =
+                  task.endDate &&
+                  differenceInDays(today, parseISO(task.endDate)) > 0 &&
+                  !isComplete;
+                const label = STAGE_SHORT[task.taskType] ?? task.taskType;
+
+                return (
+                  <div
+                    key={task.id}
+                    className={cn(
+                      "relative border-b border-neutral-50 h-10 group hover:bg-neutral-50/30",
+                      isComplete && "opacity-50",
+                    )}
+                  >
+                    {/* 오늘 세로선 */}
+                    <div
+                      className="absolute top-0 bottom-0 w-px z-10"
+                      style={{
+                        left: todayIndex * COL_W + COL_W / 2,
+                        backgroundColor: `${TODAY_COLOR}40`,
+                      }}
+                    />
+                    {/* 간트 바 */}
+                    <div
+                      className={cn(
+                        "absolute top-1.5 h-7 rounded-md flex items-center justify-center text-[11px] font-medium transition-shadow group/bar",
+                        isOverdue
+                          ? "bg-red-400/80 text-white"
+                          : isReview
+                            ? "bg-amber-300 text-amber-800"
+                            : isComplete
+                              ? "text-white/90"
+                              : isActive
+                                ? "text-white shadow-sm"
+                                : "bg-neutral-200 text-neutral-500",
+                      )}
+                      style={{
+                        left: leftPx,
+                        width: Math.max(widthPx, COL_W * 0.6),
+                        ...(isComplete || isActive
+                          ? {
+                              backgroundColor: isOverdue
+                                ? undefined
+                                : chapterColor,
+                            }
+                          : {}),
+                        ...(isActive ? { opacity: 0.9 } : {}),
+                      }}
+                    >
+                      <div
+                        className="absolute left-0 top-0 bottom-0 w-2 cursor-col-resize z-10 opacity-0 group-hover/bar:opacity-100 transition-opacity rounded-l-md hover:bg-black/10"
+                        onMouseDown={(ev) => handleDragStart(ev, task, "left")}
+                      />
+                      <div
+                        className="absolute left-2 right-2 top-0 bottom-0 cursor-grab active:cursor-grabbing flex items-center justify-center"
+                        onMouseDown={(ev) => handleDragStart(ev, task, "move")}
+                      >
+                        <span className="truncate px-1 pointer-events-none select-none">
+                          {widthPx > COL_W * 2 ? (task.assignee ?? label) : ""}
+                        </span>
+                      </div>
+                      <div
+                        className="absolute right-0 top-0 bottom-0 w-2 cursor-col-resize z-10 opacity-0 group-hover/bar:opacity-100 transition-opacity rounded-r-md hover:bg-black/10"
+                        onMouseDown={(ev) => handleDragStart(ev, task, "right")}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+
+              {/* 일정 미정 */}
+              {unscheduled.map((task) => (
+                <div
+                  key={task.id}
+                  className="relative h-9 border-b border-neutral-50 last:border-b-0"
+                >
+                  <div
+                    className="absolute top-0 bottom-0 w-px"
+                    style={{
+                      left: todayIndex * COL_W + COL_W / 2,
+                      backgroundColor: `${TODAY_COLOR}40`,
+                    }}
+                  />
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[11px] text-neutral-300">
+                    일정 미정
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
