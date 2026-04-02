@@ -15,7 +15,7 @@ export type TrafficLight = "green" | "yellow" | "red";
 
 export type TaskType =
   | "교안제작"
-  | "리허설"
+  | "커리큘럼 기획"
   | "촬영"
   | "편집"
   | "자막"

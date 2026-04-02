@@ -31,7 +31,7 @@ function createChapterTasks(
 
   // Common tasks (chapter 0)
   const commonTasks: { type: TaskType }[] = [
-    { type: "리허설" },
+    { type: "커리큘럼 기획" },
     { type: "롤아웃" },
   ];
   for (const { type } of commonTasks) {
@@ -79,7 +79,7 @@ const project1Tasks = createChapterTasks(
   (ch, type) => {
     const day =
       ch === 0
-        ? type === "리허설"
+        ? type === "커리큘럼 기획"
           ? 5
           : 18
         : 10 + ch * 5 + TASK_TYPES_PER_CHAPTER.indexOf(type);
@@ -96,7 +96,7 @@ const project2Tasks = createChapterTasks(
   "proj-2",
   5,
   (ch, type) => {
-    if (ch === 0) return type === "리허설" ? "완료" : "대기";
+    if (ch === 0) return type === "커리큘럼 기획" ? "완료" : "대기";
     if (ch <= 2) {
       const idx = TASK_TYPES_PER_CHAPTER.indexOf(type);
       return idx <= 2 ? "완료" : idx === 3 ? "진행" : "대기";
@@ -108,12 +108,12 @@ const project2Tasks = createChapterTasks(
     return type === "교안제작" ? "완료" : type === "촬영" ? "진행" : "대기";
   },
   (ch, type) => {
-    if (ch === 0) return type === "리허설" ? "김선용" : undefined;
+    if (ch === 0) return type === "커리큘럼 기획" ? "김선용" : undefined;
     return type === "편집" ? "강태경" : type === "검수" ? "유재성" : undefined;
   },
   (ch, type) => {
     if (ch === 0)
-      return type === "리허설"
+      return type === "커리큘럼 기획"
         ? { start: "2026-02-10", end: "2026-02-12" }
         : {};
     const idx = TASK_TYPES_PER_CHAPTER.indexOf(type);
@@ -136,7 +136,7 @@ const project3Tasks = createChapterTasks(
   "proj-3",
   3,
   (ch, type) => {
-    if (ch === 0) return type === "리허설" ? "완료" : "대기";
+    if (ch === 0) return type === "커리큘럼 기획" ? "완료" : "대기";
     const idx = TASK_TYPES_PER_CHAPTER.indexOf(type);
     if (idx <= 2) return "완료"; // 교안, 촬영, 편집 done
     return idx === 3 ? "진행" : "대기"; // 자막 진행, 검수 대기
@@ -155,13 +155,13 @@ const project6Tasks = createChapterTasks(
   "proj-6",
   3,
   (ch, type) => {
-    if (ch === 0) return type === "리허설" ? "완료" : "진행";
+    if (ch === 0) return type === "커리큘럼 기획" ? "완료" : "진행";
     return "완료";
   },
   () => "김선우",
   (ch, type) => {
     if (ch === 0)
-      return type === "리허설"
+      return type === "커리큘럼 기획"
         ? { start: "2026-01-20", end: "2026-01-22" }
         : { start: "2026-03-27", end: undefined };
     return { start: "2026-02-01", end: "2026-03-20" };
@@ -435,7 +435,7 @@ export const mockProjects: Project[] = [
     slackChannel: "#courseflow-python-auto",
     trafficLight: "green",
     tasks: createChapterTasks("proj-7", 4, (ch, type) => {
-      if (ch === 0) return type === "리허설" ? "완료" : "대기";
+      if (ch === 0) return type === "커리큘럼 기획" ? "완료" : "대기";
       // 1장: 교안 단계
       if (ch === 1) {
         if (type === "교안제작") return "진행";
@@ -478,7 +478,7 @@ export const mockProjects: Project[] = [
     slackChannel: "#courseflow-sheets",
     trafficLight: "yellow",
     tasks: createChapterTasks("proj-8", 3, (ch, type) => {
-      if (ch === 0) return type === "리허설" ? "완료" : "대기";
+      if (ch === 0) return type === "커리큘럼 기획" ? "완료" : "대기";
       if (type === "교안제작" || type === "촬영") return "완료";
       if (type === "편집") return ch <= 2 ? "완료" : "진행";
       return "대기";
@@ -506,7 +506,7 @@ export const mockProjects: Project[] = [
     slackChannel: "#courseflow-sql",
     trafficLight: "yellow",
     tasks: createChapterTasks("proj-9", 4, (ch, type) => {
-      if (ch === 0) return type === "리허설" ? "완료" : "대기";
+      if (ch === 0) return type === "커리큘럼 기획" ? "완료" : "대기";
       if (
         type === "교안제작" ||
         type === "촬영" ||
@@ -540,7 +540,7 @@ export const mockProjects: Project[] = [
     slackChannel: "#courseflow-nextjs",
     trafficLight: "yellow",
     tasks: createChapterTasks("proj-10", 5, (ch, type) => {
-      if (ch === 0) return type === "리허설" ? "완료" : "대기";
+      if (ch === 0) return type === "커리큘럼 기획" ? "완료" : "대기";
       if (ch === 1) return "완료";
       if (ch === 2) {
         if (type === "교안제작" || type === "촬영" || type === "편집")

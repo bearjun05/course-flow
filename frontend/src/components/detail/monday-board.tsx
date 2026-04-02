@@ -3,7 +3,13 @@
 import { useMemo, useState, useCallback } from "react";
 import { parseISO, format, differenceInDays, startOfDay } from "date-fns";
 import { ko } from "date-fns/locale";
-import { ChevronDown, Check, AlertTriangle, GripVertical } from "lucide-react";
+import {
+  ChevronDown,
+  Check,
+  AlertTriangle,
+  GripVertical,
+  Plus,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { ChapterTask, TaskStatus } from "@/lib/types";
 
@@ -40,6 +46,7 @@ const STATUS_STYLES: Record<TaskStatus, { bg: string; text: string }> = {
 interface MondayBoardProps {
   tasks: ChapterTask[];
   onTasksChange: (tasks: ChapterTask[]) => void;
+  onAddChapter?: () => void;
 }
 
 interface ChapterGroup {
@@ -152,6 +159,7 @@ function GroupSummaryBar({ group }: { group: ChapterGroup }) {
 export default function MondayBoard({
   tasks,
   onTasksChange,
+  onAddChapter,
 }: MondayBoardProps) {
   const [collapsedGroups, setCollapsedGroups] = useState<Set<number>>(
     new Set(),
@@ -309,6 +317,16 @@ export default function MondayBoard({
         <div className="flex items-center justify-center h-32 text-sm text-muted-foreground">
           등록된 공정이 없습니다.
         </div>
+      )}
+
+      {/* 장 추가 버튼 */}
+      {onAddChapter && (
+        <button
+          onClick={onAddChapter}
+          className="w-full flex items-center justify-center gap-1.5 py-2.5 text-xs text-muted-foreground hover:text-foreground hover:bg-accent/30 transition-colors border-t border-dashed border-neutral-200"
+        >
+          <Plus className="h-3.5 w-3.5" />장 추가
+        </button>
       )}
     </div>
   );

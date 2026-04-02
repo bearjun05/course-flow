@@ -56,7 +56,7 @@ export function getEffectiveKanbanColumn(
 
 const TASK_TYPE_TO_KANBAN: Record<TaskType, KanbanColumn> = {
   교안제작: "교안",
-  리허설: "교안",
+  "커리큘럼 기획": "교안",
   촬영: "촬영",
   편집: "편집·검수",
   자막: "편집·검수",

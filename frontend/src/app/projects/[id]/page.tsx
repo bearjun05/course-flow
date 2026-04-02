@@ -5,7 +5,12 @@ import { useState, useCallback, useMemo } from "react";
 import Link from "next/link";
 import { CalendarDays, ClipboardList } from "lucide-react";
 import { mockProjects } from "@/lib/mock-data";
-import type { ChapterTask, ProjectStatus, TrafficLight } from "@/lib/types";
+import type {
+  ChapterTask,
+  ProjectStatus,
+  TrafficLight,
+  TaskType,
+} from "@/lib/types";
 import DetailHeader from "@/components/detail/detail-header";
 import InfoGuideTab from "@/components/detail/info-guide-tab";
 import MondayBoard from "@/components/detail/monday-board";
@@ -69,6 +74,28 @@ export default function ProjectDetailPage() {
     setTasks(newTasks);
   }, []);
 
+  const handleAddChapter = useCallback(() => {
+    const maxChapter = tasks.reduce((max, t) => Math.max(max, t.chapter), 0);
+    const newCh = maxChapter + 1;
+    const taskTypes: TaskType[] = [
+      "교안제작",
+      "촬영",
+      "편집",
+      "자막",
+      "검수",
+      "승인",
+    ];
+    const newTasks: ChapterTask[] = taskTypes.map((taskType) => ({
+      id: `${projectId}-c${newCh}-${taskType}`,
+      projectId: projectId!,
+      chapter: newCh,
+      taskType,
+      status: "대기" as const,
+    }));
+    setTasks((prev) => [...prev, ...newTasks]);
+    setChapterDurations((prev) => [...prev, 0]);
+  }, [tasks, projectId]);
+
   if (!project) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen text-sm text-muted-foreground">
@@ -127,7 +154,11 @@ export default function ProjectDetailPage() {
           </div>
 
           {scheduleTab === "schedule" ? (
-            <MondayBoard tasks={tasks} onTasksChange={handleTasksChange} />
+            <MondayBoard
+              tasks={tasks}
+              onTasksChange={handleTasksChange}
+              onAddChapter={handleAddChapter}
+            />
           ) : (
             <WorkStatusTab
               tasks={tasks}
