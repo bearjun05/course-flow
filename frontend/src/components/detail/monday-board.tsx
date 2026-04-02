@@ -173,7 +173,7 @@ function ProgressBar({
 
 const COL_W = 44; // 날짜 열 1칸 폭 (px)
 const TOTAL_RANGE = 60; // 전체 표시 범위 (일)
-const TODAY_COLOR = "#6B8DE3"; // 오늘 색상 (블루 계열)
+const TODAY_COLOR = "#4EAE7A"; // 오늘 색상 (그린 계열)
 
 function MiniGantt({
   tasks,
@@ -298,7 +298,7 @@ function MiniGantt({
           className="absolute left-2 top-1/2 -translate-y-1/2 z-30 h-8 w-8 rounded-full bg-white/80 backdrop-blur-sm border border-neutral-200 shadow-md flex items-center justify-center hover:bg-white transition-colors"
           title="오늘로 이동"
         >
-          <ChevronDown className="h-4 w-4 rotate-90 text-[#6B8DE3]" />
+          <ChevronDown className="h-4 w-4 rotate-90 text-[#4EAE7A]" />
         </button>
       )}
       {/* 오른쪽 화살표 */}
@@ -308,7 +308,7 @@ function MiniGantt({
           className="absolute right-2 top-1/2 -translate-y-1/2 z-30 h-8 w-8 rounded-full bg-white/80 backdrop-blur-sm border border-neutral-200 shadow-md flex items-center justify-center hover:bg-white transition-colors"
           title="오늘로 이동"
         >
-          <ChevronDown className="h-4 w-4 -rotate-90 text-[#6B8DE3]" />
+          <ChevronDown className="h-4 w-4 -rotate-90 text-[#4EAE7A]" />
         </button>
       )}
 
@@ -387,7 +387,7 @@ function MiniGantt({
           {/* 스크롤 가능한 타임라인 영역 */}
           <div
             ref={scrollRef}
-            className="flex-1 overflow-x-auto"
+            className="flex-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
             onScroll={handleScroll}
           >
             <div style={{ width: contentWidth, minWidth: contentWidth }}>
