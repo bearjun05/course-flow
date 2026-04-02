@@ -1,6 +1,15 @@
 "use client";
 
 import { useMemo, useState, useCallback } from "react";
+import {
+  parseISO,
+  format,
+  differenceInDays,
+  startOfDay,
+  addDays,
+  isToday,
+} from "date-fns";
+import { ko } from "date-fns/locale";
 import { ChevronDown, Check, Plus, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { ChapterTask, TaskType } from "@/lib/types";
@@ -24,7 +33,6 @@ const GROUP_COLORS = [
   "#C8BCB0", // CH11 베이지
 ];
 
-/** 공정 순서 (파이프라인 표시 순서) */
 const STAGE_ORDER: TaskType[] = [
   "교안제작",
   "촬영",
@@ -103,7 +111,6 @@ function StageChip({
         ...(isActive
           ? {
               backgroundColor: chapterColor,
-              ringColor: chapterColor,
               "--tw-ring-color": chapterColor,
             }
           : {}),
@@ -142,84 +149,228 @@ function ProgressBar({
   );
 }
 
-/** 펼쳤을 때 보이는 상세 행 */
-function TaskDetailRow({
-  task,
+/* ------------------------------------------------------------------ */
+/*  Mini Gantt (장 펼침 시 타임라인)                                     */
+/* ------------------------------------------------------------------ */
+
+function MiniGantt({
+  tasks,
   chapterColor,
   onToggle,
 }: {
-  task: ChapterTask;
+  tasks: ChapterTask[];
   chapterColor: string;
-  onToggle: () => void;
+  onToggle: (taskId: string) => void;
 }) {
-  const isComplete = task.status === "완료";
-  const isActive = task.status === "진행";
-  const isReview = task.status === "리뷰";
+  const today = startOfDay(new Date());
+
+  // 날짜가 있는 태스크만 타임라인에 표시
+  const scheduled = tasks.filter((t) => t.startDate);
+  const unscheduled = tasks.filter((t) => !t.startDate);
+
+  // 전체 날짜 범위 계산
+  const { minDate, maxDate, totalDays } = useMemo(() => {
+    if (scheduled.length === 0) {
+      // 일정이 없으면 오늘 기준 ±7일
+      return {
+        minDate: addDays(today, -3),
+        maxDate: addDays(today, 11),
+        totalDays: 15,
+      };
+    }
+    const starts = scheduled.map((t) => parseISO(t.startDate!));
+    const ends = scheduled
+      .filter((t) => t.endDate)
+      .map((t) => parseISO(t.endDate!));
+    const allDates = [...starts, ...ends, today];
+    let mn = allDates.reduce((a, b) => (a < b ? a : b));
+    let mx = allDates.reduce((a, b) => (a > b ? a : b));
+    mn = addDays(mn, -1);
+    mx = addDays(mx, 2);
+    const days = Math.max(differenceInDays(mx, mn) + 1, 7);
+    return { minDate: mn, maxDate: mx, totalDays: days };
+  }, [scheduled, today]);
+
+  // 날짜 헤더 배열
+  const dates = useMemo(
+    () => Array.from({ length: totalDays }, (_, i) => addDays(minDate, i)),
+    [minDate, totalDays],
+  );
+
+  // 오늘 위치 (%)
+  const todayOffset = differenceInDays(today, minDate);
+  const todayPct = (todayOffset / totalDays) * 100;
 
   return (
-    <div className="flex items-center gap-3 py-1.5 px-4 pl-12 border-b border-neutral-50 hover:bg-neutral-50/50 transition-colors">
-      {/* 상태 아이콘 */}
-      <button
-        onClick={onToggle}
-        className={cn(
-          "h-5 w-5 rounded-md border flex items-center justify-center shrink-0 transition-colors",
-          isComplete
-            ? "text-white border-transparent"
-            : isActive
-              ? "border-2"
-              : isReview
-                ? "border-amber-400 bg-amber-50"
-                : "border-neutral-200",
-        )}
-        style={{
-          ...(isComplete ? { backgroundColor: chapterColor } : {}),
-          ...(isActive ? { borderColor: chapterColor } : {}),
-        }}
-      >
-        {isComplete && <Check className="h-3 w-3" />}
-        {isActive && (
-          <div
-            className="h-2 w-2 rounded-full"
-            style={{ backgroundColor: chapterColor }}
-          />
-        )}
-      </button>
+    <div className="px-4 pl-10 pb-3 pt-1">
+      <div className="rounded-xl border border-neutral-100 bg-white overflow-hidden">
+        {/* 날짜 헤더 */}
+        <div className="flex border-b border-neutral-100 bg-neutral-50/50 relative">
+          <div className="w-16 shrink-0 px-2 py-1.5 text-[10px] text-neutral-400 font-medium">
+            공정
+          </div>
+          <div className="flex-1 relative">
+            <div className="flex">
+              {dates.map((d, i) => (
+                <div
+                  key={i}
+                  className={cn(
+                    "flex-1 text-center text-[9px] py-1.5 border-l border-neutral-100/50",
+                    isToday(d) && "bg-blue-50/50 font-semibold text-blue-600",
+                  )}
+                >
+                  <div>{format(d, "d", { locale: ko })}</div>
+                  <div className="text-neutral-400">
+                    {format(d, "EEE", { locale: ko })}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
 
-      {/* 공정명 */}
-      <span
-        className={cn(
-          "text-xs w-16 shrink-0",
-          isComplete && "text-muted-foreground line-through",
-          isActive && "font-semibold",
-        )}
-      >
-        {task.taskType}
-      </span>
+        {/* 공정별 바 */}
+        {scheduled.map((task) => {
+          const s = parseISO(task.startDate!);
+          const e = task.endDate ? parseISO(task.endDate) : s;
+          const startOffset = differenceInDays(s, minDate);
+          const span = differenceInDays(e, s) + 1;
+          const leftPct = (startOffset / totalDays) * 100;
+          const widthPct = (span / totalDays) * 100;
 
-      {/* 상태 뱃지 */}
-      <span
-        className={cn(
-          "text-[10px] font-medium px-2 py-0.5 rounded-full",
-          isComplete && "bg-emerald-50 text-emerald-600",
-          isActive && "text-white",
-          isReview && "bg-amber-50 text-amber-600",
-          !isComplete &&
-            !isActive &&
-            !isReview &&
-            "bg-neutral-100 text-neutral-400",
-        )}
-        style={isActive ? { backgroundColor: chapterColor } : {}}
-      >
-        {task.status}
-      </span>
+          const isComplete = task.status === "완료";
+          const isActive = task.status === "진행";
+          const isReview = task.status === "리뷰";
+          const isOverdue =
+            task.endDate &&
+            differenceInDays(today, parseISO(task.endDate)) > 0 &&
+            !isComplete;
+          const label = STAGE_SHORT[task.taskType] ?? task.taskType;
 
-      {/* 담당자 */}
-      {task.assignee && (
-        <span className="flex items-center gap-1 text-[11px] text-muted-foreground ml-auto">
-          <User className="h-3 w-3" />
-          {task.assignee}
-        </span>
-      )}
+          return (
+            <div
+              key={task.id}
+              className={cn(
+                "flex items-center border-b border-neutral-50 h-9 group hover:bg-neutral-50/30",
+                isComplete && "opacity-50",
+              )}
+            >
+              {/* 공정 라벨 */}
+              <div className="w-16 shrink-0 px-2 flex items-center gap-1">
+                <button
+                  onClick={() => onToggle(task.id)}
+                  className={cn(
+                    "h-3.5 w-3.5 rounded border flex items-center justify-center shrink-0",
+                    isComplete
+                      ? "text-white border-transparent"
+                      : "border-neutral-300",
+                  )}
+                  style={isComplete ? { backgroundColor: chapterColor } : {}}
+                >
+                  {isComplete && <Check className="h-2.5 w-2.5" />}
+                </button>
+                <span
+                  className={cn(
+                    "text-[10px] truncate",
+                    isComplete && "line-through text-muted-foreground",
+                    isActive && "font-semibold",
+                  )}
+                >
+                  {label}
+                </span>
+              </div>
+
+              {/* 바 영역 */}
+              <div className="flex-1 relative h-full">
+                {/* 오늘 표시선 */}
+                {todayPct >= 0 && todayPct <= 100 && (
+                  <div
+                    className="absolute top-0 bottom-0 w-px bg-blue-400/40 z-10"
+                    style={{ left: `${todayPct}%` }}
+                  />
+                )}
+                <div
+                  className={cn(
+                    "absolute top-1.5 h-6 rounded-md flex items-center justify-center text-[9px] font-medium transition-shadow cursor-pointer",
+                    isOverdue
+                      ? "bg-red-400/80 text-white"
+                      : isReview
+                        ? "bg-amber-300 text-amber-800"
+                        : isComplete
+                          ? "text-white/90"
+                          : isActive
+                            ? "text-white shadow-sm"
+                            : "bg-neutral-200 text-neutral-500",
+                  )}
+                  style={{
+                    left: `${Math.max(leftPct, 0)}%`,
+                    width: `${Math.max(widthPct, 3)}%`,
+                    ...(isComplete || isActive
+                      ? {
+                          backgroundColor: isOverdue ? undefined : chapterColor,
+                        }
+                      : {}),
+                    ...(isActive ? { opacity: 0.9 } : {}),
+                  }}
+                  onClick={() => onToggle(task.id)}
+                  title={`${task.taskType}: ${format(s, "M/d")} ~ ${format(e, "M/d")} (${task.status})`}
+                >
+                  {widthPct > 8 && (
+                    <span className="truncate px-1">{task.assignee ?? ""}</span>
+                  )}
+                </div>
+              </div>
+            </div>
+          );
+        })}
+
+        {/* 일정 미정 태스크 */}
+        {unscheduled.length > 0 && (
+          <div className="border-t border-neutral-100">
+            {unscheduled.map((task) => {
+              const isComplete = task.status === "완료";
+              const label = STAGE_SHORT[task.taskType] ?? task.taskType;
+              return (
+                <div
+                  key={task.id}
+                  className="flex items-center h-7 border-b border-neutral-50 last:border-b-0"
+                >
+                  <div className="w-16 shrink-0 px-2 flex items-center gap-1">
+                    <button
+                      onClick={() => onToggle(task.id)}
+                      className={cn(
+                        "h-3.5 w-3.5 rounded border flex items-center justify-center shrink-0",
+                        isComplete
+                          ? "text-white border-transparent"
+                          : "border-neutral-300",
+                      )}
+                      style={
+                        isComplete ? { backgroundColor: chapterColor } : {}
+                      }
+                    >
+                      {isComplete && <Check className="h-2.5 w-2.5" />}
+                    </button>
+                    <span className="text-[10px] text-muted-foreground truncate">
+                      {label}
+                    </span>
+                  </div>
+                  <div className="flex-1 px-2 relative">
+                    {todayPct >= 0 && todayPct <= 100 && (
+                      <div
+                        className="absolute top-0 bottom-0 w-px bg-blue-400/40"
+                        style={{ left: `${todayPct}%` }}
+                      />
+                    )}
+                    <span className="text-[9px] text-neutral-300">
+                      일정 미정
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -274,24 +425,19 @@ export default function MondayBoard({
     [tasks, onTasksChange],
   );
 
-  /** 현재 진행 중인 단계 텍스트 */
   function getCurrentStage(groupTasks: ChapterTask[]): string | null {
-    // 진행 or 리뷰 상태인 공정 찾기
     const active = groupTasks.find(
       (t) => t.status === "진행" || t.status === "리뷰",
     );
     if (active)
       return `${STAGE_SHORT[active.taskType] ?? active.taskType} ${active.status === "리뷰" ? "리뷰 중" : "진행 중"}`;
-
     const allDone = groupTasks.every((t) => t.status === "완료");
     if (allDone && groupTasks.length > 0) return "완료";
-
     return null;
   }
 
   return (
     <div className="rounded-2xl border border-neutral-100 bg-white shadow-sm overflow-hidden">
-      {/* 장별 행 */}
       {groups.map((group) => {
         const expanded = expandedGroups.has(group.chapter);
         const allDone =
@@ -299,7 +445,6 @@ export default function MondayBoard({
           group.tasks.every((t) => t.status === "완료");
         const currentStage = getCurrentStage(group.tasks);
 
-        // 공정 순서대로 정렬
         const orderedTasks = [...group.tasks].sort((a, b) => {
           const ai = STAGE_ORDER.indexOf(a.taskType);
           const bi = STAGE_ORDER.indexOf(b.taskType);
@@ -311,7 +456,7 @@ export default function MondayBoard({
             key={group.chapter}
             className={cn(expanded && "bg-neutral-50/30")}
           >
-            {/* 메인 행: 장 라벨 + 파이프라인 + 진행률 */}
+            {/* 메인 행 */}
             <div
               className={cn(
                 "flex items-center gap-3 px-4 py-3 border-b border-neutral-100 transition-colors hover:bg-neutral-50/50 cursor-pointer",
@@ -320,7 +465,6 @@ export default function MondayBoard({
               style={{ borderLeft: `4px solid ${group.color}` }}
               onClick={() => toggleExpand(group.chapter)}
             >
-              {/* 장 라벨 */}
               <div className="flex items-center gap-2 w-20 shrink-0">
                 <ChevronDown
                   className={cn(
@@ -336,7 +480,6 @@ export default function MondayBoard({
                 </span>
               </div>
 
-              {/* 파이프라인 칩들 */}
               <div className="flex items-center gap-1 flex-1 min-w-0">
                 {orderedTasks.map((task, i) => (
                   <div key={task.id} className="flex items-center">
@@ -355,16 +498,12 @@ export default function MondayBoard({
                     <StageChip
                       task={task}
                       chapterColor={group.color}
-                      onToggle={() => {
-                        // 클릭 이벤트 전파 방지 (부모의 expand 토글 방지는 StageChip 내부에서)
-                        toggleTask(task.id);
-                      }}
+                      onToggle={() => toggleTask(task.id)}
                     />
                   </div>
                 ))}
               </div>
 
-              {/* 현재 단계 + 진행률 */}
               <div className="flex items-center gap-3 shrink-0">
                 {currentStage && (
                   <span
@@ -386,18 +525,13 @@ export default function MondayBoard({
               </div>
             </div>
 
-            {/* 펼침: 상세 공정 목록 */}
+            {/* 펼침: 미니 간트 타임라인 */}
             {expanded && (
-              <div className="bg-white">
-                {orderedTasks.map((task) => (
-                  <TaskDetailRow
-                    key={task.id}
-                    task={task}
-                    chapterColor={group.color}
-                    onToggle={() => toggleTask(task.id)}
-                  />
-                ))}
-              </div>
+              <MiniGantt
+                tasks={orderedTasks}
+                chapterColor={group.color}
+                onToggle={toggleTask}
+              />
             )}
           </div>
         );
@@ -409,7 +543,6 @@ export default function MondayBoard({
         </div>
       )}
 
-      {/* 장 추가 버튼 */}
       {onAddChapter && (
         <button
           onClick={onAddChapter}
