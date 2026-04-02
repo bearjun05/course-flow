@@ -291,20 +291,43 @@ function MiniGantt({
           <div className="w-20 shrink-0" />
           <div className="flex-1 relative">
             <div className="flex">
-              {dates.map((d, i) => (
-                <div
-                  key={i}
-                  className={cn(
-                    "flex-1 text-center text-[11px] py-1.5 border-l border-neutral-100/50",
-                    isToday(d) && "bg-blue-50/50 font-semibold text-blue-600",
-                  )}
-                >
-                  <div>{format(d, "d", { locale: ko })}</div>
-                  <div className="text-neutral-400">
-                    {format(d, "EEE", { locale: ko })}
+              {dates.map((d, i) => {
+                const isTodayCol = isToday(d);
+                return (
+                  <div
+                    key={i}
+                    className={cn(
+                      "flex-1 text-center text-[11px] py-1.5 border-l border-neutral-100/50 relative",
+                      isTodayCol && "bg-rose-50/60",
+                    )}
+                  >
+                    {isTodayCol && (
+                      <span className="absolute -top-0.5 left-1/2 -translate-x-1/2 text-[8px] font-bold text-rose-400 tracking-wide uppercase">
+                        today
+                      </span>
+                    )}
+                    <div
+                      className={cn(
+                        "mt-1",
+                        isTodayCol
+                          ? "inline-flex items-center justify-center h-5 w-5 rounded-full bg-rose-400 text-white text-[11px] font-bold"
+                          : "",
+                      )}
+                    >
+                      {format(d, "d", { locale: ko })}
+                    </div>
+                    <div
+                      className={cn(
+                        isTodayCol
+                          ? "text-rose-400 font-semibold"
+                          : "text-neutral-400",
+                      )}
+                    >
+                      {format(d, "EEE", { locale: ko })}
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </div>
@@ -362,7 +385,7 @@ function MiniGantt({
               <div className="flex-1 relative h-full">
                 {todayPct >= 0 && todayPct <= 100 && (
                   <div
-                    className="absolute top-0 bottom-0 w-px bg-blue-400/40 z-10"
+                    className="absolute top-0 bottom-0 w-px bg-rose-300/60 z-10"
                     style={{ left: `${todayPct}%` }}
                   />
                 )}
@@ -449,7 +472,7 @@ function MiniGantt({
                   <div className="flex-1 px-2 relative">
                     {todayPct >= 0 && todayPct <= 100 && (
                       <div
-                        className="absolute top-0 bottom-0 w-px bg-blue-400/40"
+                        className="absolute top-0 bottom-0 w-px bg-rose-300/60"
                         style={{ left: `${todayPct}%` }}
                       />
                     )}
