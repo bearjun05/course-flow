@@ -206,7 +206,7 @@ function MiniGantt({
       <div className="rounded-xl border border-neutral-100 bg-white overflow-hidden">
         {/* 날짜 헤더 */}
         <div className="flex border-b border-neutral-100 bg-neutral-50/50 relative">
-          <div className="w-16 shrink-0 px-2 py-1.5 text-[10px] text-neutral-400 font-medium">
+          <div className="w-20 shrink-0 px-2 py-1.5 text-xs text-neutral-400 font-medium">
             공정
           </div>
           <div className="flex-1 relative">
@@ -215,7 +215,7 @@ function MiniGantt({
                 <div
                   key={i}
                   className={cn(
-                    "flex-1 text-center text-[9px] py-1.5 border-l border-neutral-100/50",
+                    "flex-1 text-center text-[11px] py-1.5 border-l border-neutral-100/50",
                     isToday(d) && "bg-blue-50/50 font-semibold text-blue-600",
                   )}
                 >
@@ -251,27 +251,27 @@ function MiniGantt({
             <div
               key={task.id}
               className={cn(
-                "flex items-center border-b border-neutral-50 h-9 group hover:bg-neutral-50/30",
+                "flex items-center border-b border-neutral-50 h-10 group hover:bg-neutral-50/30",
                 isComplete && "opacity-50",
               )}
             >
               {/* 공정 라벨 */}
-              <div className="w-16 shrink-0 px-2 flex items-center gap-1">
+              <div className="w-20 shrink-0 px-2 flex items-center gap-1.5">
                 <button
                   onClick={() => onToggle(task.id)}
                   className={cn(
-                    "h-3.5 w-3.5 rounded border flex items-center justify-center shrink-0",
+                    "h-4 w-4 rounded border flex items-center justify-center shrink-0",
                     isComplete
                       ? "text-white border-transparent"
                       : "border-neutral-300",
                   )}
                   style={isComplete ? { backgroundColor: chapterColor } : {}}
                 >
-                  {isComplete && <Check className="h-2.5 w-2.5" />}
+                  {isComplete && <Check className="h-3 w-3" />}
                 </button>
                 <span
                   className={cn(
-                    "text-[10px] truncate",
+                    "text-xs truncate",
                     isComplete && "line-through text-muted-foreground",
                     isActive && "font-semibold",
                   )}
@@ -291,7 +291,7 @@ function MiniGantt({
                 )}
                 <div
                   className={cn(
-                    "absolute top-1.5 h-6 rounded-md flex items-center justify-center text-[9px] font-medium transition-shadow cursor-pointer",
+                    "absolute top-1.5 h-7 rounded-md flex items-center justify-center text-[11px] font-medium transition-shadow cursor-pointer",
                     isOverdue
                       ? "bg-red-400/80 text-white"
                       : isReview
@@ -333,13 +333,13 @@ function MiniGantt({
               return (
                 <div
                   key={task.id}
-                  className="flex items-center h-7 border-b border-neutral-50 last:border-b-0"
+                  className="flex items-center h-9 border-b border-neutral-50 last:border-b-0"
                 >
-                  <div className="w-16 shrink-0 px-2 flex items-center gap-1">
+                  <div className="w-20 shrink-0 px-2 flex items-center gap-1.5">
                     <button
                       onClick={() => onToggle(task.id)}
                       className={cn(
-                        "h-3.5 w-3.5 rounded border flex items-center justify-center shrink-0",
+                        "h-4 w-4 rounded border flex items-center justify-center shrink-0",
                         isComplete
                           ? "text-white border-transparent"
                           : "border-neutral-300",
@@ -348,9 +348,9 @@ function MiniGantt({
                         isComplete ? { backgroundColor: chapterColor } : {}
                       }
                     >
-                      {isComplete && <Check className="h-2.5 w-2.5" />}
+                      {isComplete && <Check className="h-3 w-3" />}
                     </button>
-                    <span className="text-[10px] text-muted-foreground truncate">
+                    <span className="text-xs text-muted-foreground truncate">
                       {label}
                     </span>
                   </div>
@@ -361,7 +361,7 @@ function MiniGantt({
                         style={{ left: `${todayPct}%` }}
                       />
                     )}
-                    <span className="text-[9px] text-neutral-300">
+                    <span className="text-[11px] text-neutral-300">
                       일정 미정
                     </span>
                   </div>
