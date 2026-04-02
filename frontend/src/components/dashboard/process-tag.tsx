@@ -34,11 +34,7 @@ export function ProcessTag({
       {...(interactive && onClick ? { onClick } : {})}
       className={cn(
         "inline-flex items-center gap-1.5 rounded-full border px-2 py-[3px] text-[10px] leading-none transition-all",
-        info.allDone && [
-          accent.doneBg,
-          accent.doneText,
-          "border-emerald-200",
-        ],
+        info.allDone && [accent.doneBg, accent.doneText, "border-emerald-200"],
         !info.allDone &&
           info.activeChapters.length > 0 && [
             accent.activeBg,
@@ -53,10 +49,8 @@ export function ProcessTag({
           info.activeChapters.length === 0 && [
             "border-neutral-200 bg-white text-neutral-500",
           ],
-        isActive &&
-          !info.allDone &&
-          "ring-2 ring-offset-1 ring-primary/20",
-        interactive && "cursor-pointer hover:shadow-sm active:scale-95"
+        isActive && !info.allDone && "ring-2 ring-offset-1 ring-primary/20",
+        interactive && "cursor-pointer hover:shadow-sm active:scale-95",
       )}
     >
       <span
@@ -66,7 +60,7 @@ export function ProcessTag({
             ? "bg-emerald-500"
             : info.activeChapters.length > 0
               ? accent.dot
-              : "bg-neutral-300"
+              : "bg-neutral-300",
         )}
       />
 
@@ -76,7 +70,7 @@ export function ProcessTag({
         <Check className="h-2.5 w-2.5 text-emerald-600" strokeWidth={2.5} />
       ) : info.activeChapters.length > 0 ? (
         <span className="font-mono text-[9px] font-semibold tracking-tighter">
-          CH{info.activeChapters.join(",")}
+          {info.activeChapters.join(",")}장
         </span>
       ) : !info.noneStarted ? (
         <span className="font-mono text-[9px] opacity-50">

@@ -24,7 +24,7 @@ interface WeeklyCalendarProps {
 
 function taskLabel(t: ChapterTask): string {
   if (t.chapter === 0) return t.taskType;
-  return `CH${t.chapter} ${t.taskType}`;
+  return `${t.chapter}장 ${t.taskType}`;
 }
 
 export default function WeeklyCalendar({
@@ -45,7 +45,7 @@ export default function WeeklyCalendar({
         const s = parseISO(t.startDate);
         const e = t.endDate ? parseISO(t.endDate) : s;
         return isWithinInterval(day, { start: s, end: e });
-      })
+      }),
     );
   }, [days, tasks]);
 
@@ -81,14 +81,11 @@ export default function WeeklyCalendar({
             <div
               className={cn(
                 "text-center py-1.5 border-b border-border text-xs",
-                isToday(day) && "bg-primary/5"
+                isToday(day) && "bg-primary/5",
               )}
             >
               <div
-                className={cn(
-                  "font-medium",
-                  isToday(day) && "text-primary"
-                )}
+                className={cn("font-medium", isToday(day) && "text-primary")}
               >
                 {format(day, "EEE", { locale: ko })}
               </div>
@@ -96,7 +93,7 @@ export default function WeeklyCalendar({
                 className={cn(
                   isToday(day)
                     ? "bg-primary text-primary-foreground rounded-full inline-flex items-center justify-center h-5 w-5 text-[10px]"
-                    : "text-muted-foreground"
+                    : "text-muted-foreground",
                 )}
               >
                 {format(day, "d")}
@@ -113,7 +110,7 @@ export default function WeeklyCalendar({
                       "w-full text-left text-[10px] leading-tight px-1.5 py-1 rounded-md transition-colors",
                       done
                         ? "bg-muted text-muted-foreground line-through opacity-50"
-                        : "bg-primary/10 text-foreground hover:bg-primary/20"
+                        : "bg-primary/10 text-foreground hover:bg-primary/20",
                     )}
                   >
                     <div className="flex items-center gap-1">
@@ -122,7 +119,7 @@ export default function WeeklyCalendar({
                           "h-3 w-3 rounded border flex items-center justify-center shrink-0",
                           done
                             ? "bg-primary border-primary text-primary-foreground"
-                            : "border-border"
+                            : "border-border",
                         )}
                       >
                         {done && <Check className="h-2 w-2" />}

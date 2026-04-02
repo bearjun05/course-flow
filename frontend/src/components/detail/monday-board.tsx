@@ -167,7 +167,7 @@ export default function MondayBoard({
       .sort(([a], [b]) => a - b)
       .map(([ch, chTasks]) => ({
         chapter: ch,
-        label: ch === 0 ? "사전 준비" : `Chapter ${ch}`,
+        label: ch === 0 ? "사전 준비" : `${ch}장`,
         color: GROUP_COLORS[ch % GROUP_COLORS.length],
         tasks: chTasks,
         completedCount: chTasks.filter((t) => t.status === "완료").length,

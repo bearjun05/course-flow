@@ -33,7 +33,7 @@ function getZoomDays(zoom: ZoomLevel): number {
 
 function taskLabel(t: ChapterTask): string {
   if (t.chapter === 0) return t.taskType;
-  return `CH${t.chapter} ${t.taskType}`;
+  return `${t.chapter}장 ${t.taskType}`;
 }
 
 const CHAPTER_COLORS = [

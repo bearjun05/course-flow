@@ -100,7 +100,6 @@ export default function ProjectDetailPage() {
         {/* 제작 일정 보드 */}
         <section>
           <div className="flex items-center gap-3 mb-3">
-            <h2 className="text-sm font-semibold text-foreground">제작 일정</h2>
             <div className="flex items-center gap-1 rounded-lg border border-border p-0.5 bg-muted/30">
               <button
                 onClick={() => setScheduleTab("schedule")}

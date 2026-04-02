@@ -155,7 +155,7 @@ export default function WorkStatusTab({
 
       rows.push({
         chapter: ch,
-        label: `Chapter ${ch}`,
+        label: `${ch}장`,
         lectures: chLectures,
         taskStatuses,
       });
