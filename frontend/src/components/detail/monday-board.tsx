@@ -744,7 +744,7 @@ export default function MondayBoard({
                       chapterStatus.type === "done" &&
                         "bg-neutral-100 text-neutral-400",
                       chapterStatus.type === "active" &&
-                        "bg-[#E6F0E6] text-[#5A7A55]",
+                        "bg-[#EEF4EE] text-[#7A9A72]",
                       chapterStatus.type === "overdue" &&
                         "bg-[#F5E0E0] text-[#9A4A4A]",
                     )}
