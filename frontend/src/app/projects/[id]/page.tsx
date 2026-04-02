@@ -3,7 +3,7 @@
 import { useParams } from "next/navigation";
 import { useState, useCallback, useMemo } from "react";
 import Link from "next/link";
-import { CalendarDays, ClipboardList } from "lucide-react";
+import { CalendarDays, ClipboardList, Calendar } from "lucide-react";
 import { mockProjects } from "@/lib/mock-data";
 import type {
   ChapterTask,
@@ -15,9 +15,10 @@ import DetailHeader from "@/components/detail/detail-header";
 import InfoGuideTab from "@/components/detail/info-guide-tab";
 import MondayBoard from "@/components/detail/monday-board";
 import WorkStatusTab from "@/components/detail/work-status-tab";
+import WeeklyCalendar from "@/components/detail/weekly-calendar";
 import { Separator } from "@/components/ui/separator";
 
-type ScheduleTab = "schedule" | "work-status";
+type ScheduleTab = "schedule" | "calendar" | "work-status";
 
 export default function ProjectDetailPage() {
   const params = useParams<{ id: string }>();
@@ -46,6 +47,12 @@ export default function ProjectDetailPage() {
   );
   const [note, setNote] = useState(baseProject?.note ?? "");
   const [scheduleTab, setScheduleTab] = useState<ScheduleTab>("schedule");
+  const [weekStart, setWeekStart] = useState(() => {
+    const d = new Date();
+    const day = d.getDay();
+    const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+    return new Date(d.getFullYear(), d.getMonth(), diff);
+  });
 
   const project = useMemo(() => {
     if (!baseProject) return null;
@@ -140,6 +147,17 @@ export default function ProjectDetailPage() {
                 일정
               </button>
               <button
+                onClick={() => setScheduleTab("calendar")}
+                className={`flex items-center gap-1.5 h-7 px-3 rounded-md text-xs font-medium transition-colors ${
+                  scheduleTab === "calendar"
+                    ? "bg-white text-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <Calendar className="h-3.5 w-3.5" />
+                캘린더
+              </button>
+              <button
                 onClick={() => setScheduleTab("work-status")}
                 className={`flex items-center gap-1.5 h-7 px-3 rounded-md text-xs font-medium transition-colors ${
                   scheduleTab === "work-status"
@@ -153,13 +171,30 @@ export default function ProjectDetailPage() {
             </div>
           </div>
 
-          {scheduleTab === "schedule" ? (
+          {scheduleTab === "schedule" && (
             <MondayBoard
               tasks={tasks}
               onTasksChange={handleTasksChange}
               onAddChapter={handleAddChapter}
             />
-          ) : (
+          )}
+          {scheduleTab === "calendar" && (
+            <WeeklyCalendar
+              tasks={tasks}
+              weekStart={weekStart}
+              onWeekChange={setWeekStart}
+              onTaskToggle={(taskId) => {
+                handleTasksChange(
+                  tasks.map((t) =>
+                    t.id === taskId
+                      ? { ...t, status: t.status === "완료" ? "진행" : "완료" }
+                      : t,
+                  ),
+                );
+              }}
+            />
+          )}
+          {scheduleTab === "work-status" && (
             <WorkStatusTab
               tasks={tasks}
               lectures={project.lectures}
