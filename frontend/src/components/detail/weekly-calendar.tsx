@@ -20,7 +20,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { ChapterTask } from "@/lib/types";
 
-const TODAY_COLOR = "#8BA888";
+const TODAY_COLOR = "#98CBFF";
 
 interface WeeklyCalendarProps {
   tasks: ChapterTask[];
@@ -130,7 +130,7 @@ export default function WeeklyCalendar({
               className={cn(
                 "min-h-[100px] border-b border-border",
                 !isCurrentMonth && "bg-neutral-50/50",
-                todayFlag && "bg-[#8BA888]/[0.04]",
+                todayFlag && "bg-[#98CBFF]/[0.06]",
               )}
             >
               {/* 날짜 숫자 */}
@@ -168,7 +168,7 @@ export default function WeeklyCalendar({
                         !done
                           ? {
                               backgroundColor: `${TODAY_COLOR}18`,
-                              color: "#5A7A55",
+                              color: "#4A7EB5",
                             }
                           : {}
                       }
@@ -179,7 +179,7 @@ export default function WeeklyCalendar({
                             "h-2.5 w-2.5 rounded-sm border flex items-center justify-center shrink-0",
                             done
                               ? "border-neutral-300 bg-neutral-200 text-neutral-400"
-                              : "border-[#8BA888]/40",
+                              : "border-[#98CBFF]/40",
                           )}
                           style={
                             done ? {} : { backgroundColor: `${TODAY_COLOR}30` }

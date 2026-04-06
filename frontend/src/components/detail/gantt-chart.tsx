@@ -140,7 +140,7 @@ export default function GanttChart({
                 key={i}
                 className={cn(
                   "text-center text-[10px] py-2 border-r border-border/50",
-                  isToday(d) && "bg-primary/5 font-semibold text-primary",
+                  isToday(d) && "bg-[#98CBFF]/10 font-semibold text-[#4A7EB5]",
                 )}
                 style={{ width: `${COL_W}px` }}
               >
@@ -156,7 +156,7 @@ export default function GanttChart({
         {/* Today line */}
         {todayIdx >= 0 && todayIdx < totalDays && (
           <div
-            className="absolute top-0 bottom-0 w-px bg-destructive/60 z-[5] pointer-events-none"
+            className="absolute top-0 bottom-0 w-px bg-[#98CBFF] z-[5] pointer-events-none"
             style={{ left: `${200 + todayIdx * COL_W + COL_W / 2}px` }}
           />
         )}
