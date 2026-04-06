@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { BookOpen } from "lucide-react";
 import type { Project } from "@/lib/types";
 import { getDday, formatDday, getDdayColor, cn } from "@/lib/utils";
@@ -28,18 +29,44 @@ const STAGE_ORDER: Record<DetailColumn, number> = {
   승인: 5,
 };
 
-// 공정별 색상 (밝고 투명한 블루 그라데이션)
-const STAGE_COLORS: Record<DetailColumn, string> = {
-  교안: "#DEEEFF",
-  촬영: "#D0E7FF",
-  편집: "#C2E0FF",
-  자막: "#B4D9FF",
-  검수: "#A6D2FF",
-  승인: "#98CBFF",
+type ColorTheme = "blue" | "green";
+
+const THEME_COLORS: Record<
+  ColorTheme,
+  { stages: Record<DetailColumn, string>; progress: string }
+> = {
+  blue: {
+    stages: {
+      교안: "#DEEEFF",
+      촬영: "#D0E7FF",
+      편집: "#C2E0FF",
+      자막: "#B4D9FF",
+      검수: "#A6D2FF",
+      승인: "#98CBFF",
+    },
+    progress: "#98CBFF",
+  },
+  green: {
+    stages: {
+      교안: "#E2F8DC",
+      촬영: "#D4F2CC",
+      편집: "#C6ECBC",
+      자막: "#B8E6AC",
+      검수: "#AAE09C",
+      승인: "#9CDA8C",
+    },
+    progress: "#9CDA8C",
+  },
 };
 
 /** SVG 원형 진척 바 */
-function CircleProgress({ percent }: { percent: number }) {
+function CircleProgress({
+  percent,
+  color,
+}: {
+  percent: number;
+  color: string;
+}) {
   const r = 9;
   const circumference = 2 * Math.PI * r;
   const offset = circumference - (percent / 100) * circumference;
@@ -58,7 +85,7 @@ function CircleProgress({ percent }: { percent: number }) {
         cy="12"
         r={r}
         fill="none"
-        stroke="#98CBFF"
+        stroke={color}
         strokeWidth="2.5"
         strokeLinecap="round"
         strokeDasharray={circumference}
@@ -80,14 +107,20 @@ function CircleProgress({ percent }: { percent: number }) {
   );
 }
 
-function ProjectRow({ project }: { project: Project }) {
+function ProjectRow({
+  project,
+  theme,
+}: {
+  project: Project;
+  theme: ColorTheme;
+}) {
   const dday = getDday(project.rolloutDate);
   const chapters = Array.from(
     { length: project.chapterCount },
     (_, i) => i + 1,
   );
+  const colors = THEME_COLORS[theme];
 
-  // 장별 공정 그룹핑 (같은 공정에 있는 장끼리 겹치지 않게 오프셋 계산용)
   const chaptersByStage: Record<DetailColumn, number[]> = {
     교안: [],
     촬영: [],
@@ -114,10 +147,9 @@ function ProjectRow({ project }: { project: Project }) {
 
   return (
     <tr className="border-b border-border/40 last:border-b-0 hover:bg-accent/20 transition-colors">
-      {/* 강의명 + 진척 */}
       <td className="px-4 py-3">
         <div className="flex items-center gap-2">
-          <CircleProgress percent={progressPct} />
+          <CircleProgress percent={progressPct} color={colors.progress} />
           <span className="text-[13px] font-medium text-foreground leading-snug">
             {project.title}
           </span>
@@ -128,12 +160,9 @@ function ProjectRow({ project }: { project: Project }) {
         </div>
       </td>
 
-      {/* 파이프라인 트랙 */}
       <td colSpan={DETAIL_COLUMNS.length} className="px-2 py-3">
         <div className="relative h-[28px] flex items-center">
-          {/* 트랙 라인 */}
           <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-[2px] bg-[#E5E7EB] rounded-full" />
-          {/* 구간 구분선 */}
           {Array.from({ length: 7 }, (_, i) => (
             <div
               key={i}
@@ -141,16 +170,12 @@ function ProjectRow({ project }: { project: Project }) {
               style={{ left: `${(i / 6) * 100}%` }}
             />
           ))}
-          {/* 장 도트 — 같은 공정의 장끼리 나란히 배치 */}
           {DETAIL_COLUMNS.map((col) => {
             const items = chaptersByStage[col];
             if (items.length === 0) return null;
             const order = STAGE_ORDER[col];
             const centerPct = ((order + 0.5) / DETAIL_COLUMNS.length) * 100;
             const dotSize = 20;
-            const gap = 3;
-            const totalWidth =
-              items.length * dotSize + (items.length - 1) * gap;
 
             return (
               <div
@@ -165,7 +190,7 @@ function ProjectRow({ project }: { project: Project }) {
                     style={{
                       width: dotSize,
                       height: dotSize,
-                      backgroundColor: STAGE_COLORS[col],
+                      backgroundColor: colors.stages[col],
                     }}
                   >
                     {ch}
@@ -177,7 +202,6 @@ function ProjectRow({ project }: { project: Project }) {
         </div>
       </td>
 
-      {/* D-Day */}
       <td className="px-3 py-3 text-right">
         <span
           className={cn(
@@ -193,43 +217,65 @@ function ProjectRow({ project }: { project: Project }) {
 }
 
 export function DotMatrixTable({ projects }: DotMatrixTableProps) {
+  const [theme, setTheme] = useState<ColorTheme>("blue");
+
   return (
-    <div className="rounded-2xl border border-border/50 bg-white shadow-[0_1px_8px_rgba(0,0,0,0.04)] overflow-hidden">
-      <table className="w-full table-fixed">
-        <colgroup>
-          <col style={{ width: "22%" }} />
-          {DETAIL_COLUMNS.map((col) => (
-            <col
-              key={col}
-              style={{ width: `${70 / DETAIL_COLUMNS.length}%` }}
-            />
-          ))}
-          <col style={{ width: "8%" }} />
-        </colgroup>
-        <thead>
-          <tr className="border-b border-[#E5E7EB] bg-[#F8F9FA]">
-            <th className="px-4 py-2.5 text-left text-[11px] font-semibold text-[#9CA3AF]">
-              강의명
-            </th>
+    <div>
+      {/* 디버그 색상 토글 */}
+      <div className="flex items-center gap-2 mb-3">
+        {(["blue", "green"] as ColorTheme[]).map((t) => (
+          <button
+            key={t}
+            onClick={() => setTheme(t)}
+            className={cn(
+              "px-3 py-1.5 rounded-lg text-[12px] font-medium transition-colors border",
+              theme === t
+                ? "bg-foreground text-background border-foreground"
+                : "bg-white text-muted-foreground border-border hover:bg-accent/50",
+            )}
+          >
+            {t === "blue" ? "블루" : "연두"}
+          </button>
+        ))}
+      </div>
+
+      <div className="rounded-2xl border border-border/50 bg-white shadow-[0_1px_8px_rgba(0,0,0,0.04)] overflow-hidden">
+        <table className="w-full table-fixed">
+          <colgroup>
+            <col style={{ width: "22%" }} />
             {DETAIL_COLUMNS.map((col) => (
-              <th
+              <col
                 key={col}
-                className="px-1 py-2.5 text-center text-[11px] font-semibold text-[#9CA3AF]"
-              >
-                {col}
-              </th>
+                style={{ width: `${70 / DETAIL_COLUMNS.length}%` }}
+              />
             ))}
-            <th className="px-3 py-2.5 text-right text-[11px] font-semibold text-[#9CA3AF]">
-              D-Day
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {projects.map((project) => (
-            <ProjectRow key={project.id} project={project} />
-          ))}
-        </tbody>
-      </table>
+            <col style={{ width: "8%" }} />
+          </colgroup>
+          <thead>
+            <tr className="border-b border-[#E5E7EB] bg-[#F8F9FA]">
+              <th className="px-4 py-2.5 text-left text-[11px] font-semibold text-[#9CA3AF]">
+                강의명
+              </th>
+              {DETAIL_COLUMNS.map((col) => (
+                <th
+                  key={col}
+                  className="px-1 py-2.5 text-center text-[11px] font-semibold text-[#9CA3AF]"
+                >
+                  {col}
+                </th>
+              ))}
+              <th className="px-3 py-2.5 text-right text-[11px] font-semibold text-[#9CA3AF]">
+                D-Day
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {projects.map((project) => (
+              <ProjectRow key={project.id} project={project} theme={theme} />
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
