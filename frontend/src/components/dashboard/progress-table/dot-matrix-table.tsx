@@ -28,14 +28,14 @@ const STAGE_ORDER: Record<DetailColumn, number> = {
   승인: 5,
 };
 
-// 공정별 색상 (맑은 쿨 블루 그라데이션)
+// 공정별 색상 (산뜻한 블루 그라데이션)
 const STAGE_COLORS: Record<DetailColumn, string> = {
-  교안: "#D6DFE8",
-  촬영: "#CAD6E2",
-  편집: "#BECDDC",
-  자막: "#B2C4D6",
-  검수: "#A6BBD0",
-  승인: "#9AB2CA",
+  교안: "#C2DEFF",
+  촬영: "#ADD4FF",
+  편집: "#99CAFF",
+  자막: "#85C0FF",
+  검수: "#70B6FF",
+  승인: "#5CACFF",
 };
 
 /** SVG 원형 진척 바 */
