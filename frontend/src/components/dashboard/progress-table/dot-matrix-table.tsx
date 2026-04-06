@@ -19,35 +19,18 @@ const DETAIL_COLUMNS = [
 ] as const;
 type DetailColumn = (typeof DETAIL_COLUMNS)[number];
 
-const COL_STYLE: Record<DetailColumn, string> = {
-  교안: "bg-[#EDECD8] text-[#6B6840]",
-  촬영: "bg-[#E4E5CE] text-[#5F5E38]",
-  편집: "bg-[#DCE0C4] text-[#555830]",
-  자막: "bg-[#D4DABA] text-[#4C5228]",
-  검수: "bg-[#CCD4B0] text-[#444C22]",
-  승인: "bg-[#C4CEA6] text-[#3C461C]",
+// 셀 배경: 아주 연한 웜 그린, 단계별로 살짝씩 진해짐
+const CELL_BG: Record<DetailColumn, string> = {
+  교안: "bg-[#F6F5EE]",
+  촬영: "bg-[#F3F4EB]",
+  편집: "bg-[#F1F3E8]",
+  자막: "bg-[#EFF2E5]",
+  검수: "bg-[#EDF1E2]",
+  승인: "bg-[#EBF0DF]",
 };
 
-/** 연속된 장 번호를 "1~3장", "5장" 형태로 묶기 */
-function formatChapterRanges(chapters: number[]): string[] {
-  if (chapters.length === 0) return [];
-  const sorted = [...chapters].sort((a, b) => a - b);
-  const ranges: string[] = [];
-  let start = sorted[0];
-  let end = sorted[0];
-
-  for (let i = 1; i < sorted.length; i++) {
-    if (sorted[i] === end + 1) {
-      end = sorted[i];
-    } else {
-      ranges.push(start === end ? `${start}장` : `${start}~${end}장`);
-      start = sorted[i];
-      end = sorted[i];
-    }
-  }
-  ranges.push(start === end ? `${start}장` : `${start}~${end}장`);
-  return ranges;
-}
+// 숫자 텍스트 색: 부드러운 웜 그린
+const TEXT_COLOR = "text-[#7B8263]";
 
 function ProjectRow({ project }: { project: Project }) {
   const dday = getDday(project.rolloutDate);
@@ -80,23 +63,19 @@ function ProjectRow({ project }: { project: Project }) {
       </td>
 
       {DETAIL_COLUMNS.map((col) => {
-        const ranges = formatChapterRanges(chaptersByDetail[col]);
+        const items = chaptersByDetail[col];
         return (
-          <td key={col} className="px-2 py-3">
-            {ranges.length > 0 && (
-              <div className="flex flex-wrap gap-1">
-                {ranges.map((range) => (
-                  <span
-                    key={range}
-                    className={cn(
-                      "inline-block rounded-full px-2.5 py-[2px] text-[10.5px] font-medium whitespace-nowrap",
-                      COL_STYLE[col],
-                    )}
-                  >
-                    {range}
-                  </span>
-                ))}
-              </div>
+          <td
+            key={col}
+            className={cn(
+              "px-3 py-3 text-center",
+              items.length > 0 && CELL_BG[col],
+            )}
+          >
+            {items.length > 0 && (
+              <span className={cn("text-[11.5px] font-medium", TEXT_COLOR)}>
+                {items.join(", ")}
+              </span>
             )}
           </td>
         );
@@ -138,7 +117,7 @@ export function DotMatrixTable({ projects }: DotMatrixTableProps) {
             {DETAIL_COLUMNS.map((col) => (
               <th
                 key={col}
-                className="px-2 py-2.5 text-left text-[11.5px] font-semibold text-muted-foreground"
+                className="px-2 py-2.5 text-center text-[11.5px] font-semibold text-muted-foreground"
               >
                 {col}
               </th>
