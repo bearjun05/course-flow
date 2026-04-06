@@ -1,29 +1,31 @@
 "use client";
 
-import type { Project, KanbanColumn } from "@/lib/types";
-import { KANBAN_COLUMNS } from "@/lib/constants";
+import type { Project } from "@/lib/types";
 import { getDday, formatDday, getDdayColor, cn } from "@/lib/utils";
-import {
-  getChapterKanbanColumn,
-  getChapterDetailedStage,
-} from "@/lib/process-helpers";
+import { getChapterDetailedStage } from "@/lib/process-helpers";
 
 interface DotMatrixTableProps {
   projects: Project[];
 }
 
-const COL_HEADER: Record<KanbanColumn, string> = {
-  교안: "교안",
-  촬영: "촬영",
-  "편집·검수": "편집·검수",
-  롤아웃: "승인",
-};
+// 표에 표시할 세부 공정 컬럼
+const DETAIL_COLUMNS = [
+  "교안",
+  "촬영",
+  "편집",
+  "자막",
+  "검수",
+  "승인",
+] as const;
+type DetailColumn = (typeof DETAIL_COLUMNS)[number];
 
-const COL_STYLE: Record<KanbanColumn, string> = {
+const COL_STYLE: Record<DetailColumn, string> = {
   교안: "bg-[#F5F0E8] text-[#8B7A55]",
   촬영: "bg-[#EEF0E6] text-[#6E7A55]",
-  "편집·검수": "bg-[#EDF2DC] text-[#7A9445]",
-  롤아웃: "bg-[#E5F0D0] text-[#628A38]",
+  편집: "bg-[#EDF2DC] text-[#7A9445]",
+  자막: "bg-[#E2EEDC] text-[#5E8A42]",
+  검수: "bg-[#DCE8D4] text-[#4E7A38]",
+  승인: "bg-[#E5F0D0] text-[#628A38]",
 };
 
 function ProjectRow({ project }: { project: Project }) {
@@ -33,44 +35,44 @@ function ProjectRow({ project }: { project: Project }) {
     (_, i) => i + 1,
   );
 
-  // 장별로 어느 공정에 있는지 그룹핑
-  const chaptersByCol: Record<KanbanColumn, { ch: number; label: string }[]> = {
+  // 장별 세부 공정으로 그룹핑
+  const chaptersByDetail: Record<DetailColumn, number[]> = {
     교안: [],
     촬영: [],
-    "편집·검수": [],
-    롤아웃: [],
+    편집: [],
+    자막: [],
+    검수: [],
+    승인: [],
   };
 
   for (const ch of chapters) {
-    const col = getChapterKanbanColumn(project, ch);
-    const detailedStage = getChapterDetailedStage(project, ch);
-    const label = col === "편집·검수" ? `${ch}장 ${detailedStage}` : `${ch}장`;
-    chaptersByCol[col].push({ ch, label });
+    const stage = getChapterDetailedStage(project, ch) as DetailColumn;
+    if (chaptersByDetail[stage]) {
+      chaptersByDetail[stage].push(ch);
+    }
   }
 
   return (
     <tr className="border-b border-border/40 last:border-b-0">
-      {/* 강의명 */}
       <td className="px-4 py-3 text-[13px] font-medium text-foreground max-w-[180px] truncate">
         {project.title}
       </td>
 
-      {/* 공정별 장 목록 */}
-      {KANBAN_COLUMNS.map((kanbanCol) => {
-        const items = chaptersByCol[kanbanCol.id];
+      {DETAIL_COLUMNS.map((col) => {
+        const items = chaptersByDetail[col];
         return (
-          <td key={kanbanCol.id} className="px-3 py-3">
+          <td key={col} className="px-2 py-3">
             {items.length > 0 && (
               <div className="flex flex-wrap gap-1">
-                {items.map((item) => (
+                {items.map((ch) => (
                   <span
-                    key={item.ch}
+                    key={ch}
                     className={cn(
                       "inline-block rounded-full px-2.5 py-[2px] text-[10.5px] font-medium whitespace-nowrap",
-                      COL_STYLE[kanbanCol.id],
+                      COL_STYLE[col],
                     )}
                   >
-                    {item.label}
+                    {ch}장
                   </span>
                 ))}
               </div>
@@ -79,7 +81,6 @@ function ProjectRow({ project }: { project: Project }) {
         );
       })}
 
-      {/* D-Day */}
       <td className="px-4 py-3 text-right">
         <span
           className={cn(
@@ -103,12 +104,12 @@ export function DotMatrixTable({ projects }: DotMatrixTableProps) {
             <th className="px-4 py-2.5 text-left text-[11.5px] font-semibold text-muted-foreground w-[180px]">
               강의명
             </th>
-            {KANBAN_COLUMNS.map((col) => (
+            {DETAIL_COLUMNS.map((col) => (
               <th
-                key={col.id}
-                className="px-3 py-2.5 text-left text-[11.5px] font-semibold text-muted-foreground"
+                key={col}
+                className="px-2 py-2.5 text-left text-[11.5px] font-semibold text-muted-foreground"
               >
-                {COL_HEADER[col.id]}
+                {col}
               </th>
             ))}
             <th className="px-4 py-2.5 text-right text-[11.5px] font-semibold text-muted-foreground w-[72px]">
