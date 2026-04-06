@@ -20,13 +20,34 @@ const DETAIL_COLUMNS = [
 type DetailColumn = (typeof DETAIL_COLUMNS)[number];
 
 const COL_STYLE: Record<DetailColumn, string> = {
-  교안: "bg-[#E8F0E2] text-[#5A7A48]",
-  촬영: "bg-[#E0ECDA] text-[#4E7040]",
-  편집: "bg-[#D8E8D2] text-[#436838]",
-  자막: "bg-[#D0E4CA] text-[#3A5F30]",
-  검수: "bg-[#C8E0C2] text-[#325828]",
-  승인: "bg-[#C0DCBA] text-[#2A5020]",
+  교안: "bg-[#EDECD8] text-[#6B6840]",
+  촬영: "bg-[#E4E5CE] text-[#5F5E38]",
+  편집: "bg-[#DCE0C4] text-[#555830]",
+  자막: "bg-[#D4DABA] text-[#4C5228]",
+  검수: "bg-[#CCD4B0] text-[#444C22]",
+  승인: "bg-[#C4CEA6] text-[#3C461C]",
 };
+
+/** 연속된 장 번호를 "1~3장", "5장" 형태로 묶기 */
+function formatChapterRanges(chapters: number[]): string[] {
+  if (chapters.length === 0) return [];
+  const sorted = [...chapters].sort((a, b) => a - b);
+  const ranges: string[] = [];
+  let start = sorted[0];
+  let end = sorted[0];
+
+  for (let i = 1; i < sorted.length; i++) {
+    if (sorted[i] === end + 1) {
+      end = sorted[i];
+    } else {
+      ranges.push(start === end ? `${start}장` : `${start}~${end}장`);
+      start = sorted[i];
+      end = sorted[i];
+    }
+  }
+  ranges.push(start === end ? `${start}장` : `${start}~${end}장`);
+  return ranges;
+}
 
 function ProjectRow({ project }: { project: Project }) {
   const dday = getDday(project.rolloutDate);
@@ -59,20 +80,20 @@ function ProjectRow({ project }: { project: Project }) {
       </td>
 
       {DETAIL_COLUMNS.map((col) => {
-        const items = chaptersByDetail[col];
+        const ranges = formatChapterRanges(chaptersByDetail[col]);
         return (
           <td key={col} className="px-2 py-3">
-            {items.length > 0 && (
+            {ranges.length > 0 && (
               <div className="flex flex-wrap gap-1">
-                {items.map((ch) => (
+                {ranges.map((range) => (
                   <span
-                    key={ch}
+                    key={range}
                     className={cn(
                       "inline-block rounded-full px-2.5 py-[2px] text-[10.5px] font-medium whitespace-nowrap",
                       COL_STYLE[col],
                     )}
                   >
-                    {ch}장
+                    {range}
                   </span>
                 ))}
               </div>
@@ -100,7 +121,7 @@ export function DotMatrixTable({ projects }: DotMatrixTableProps) {
     <div className="rounded-2xl border border-border/50 bg-white shadow-[0_1px_8px_rgba(0,0,0,0.04)] overflow-hidden">
       <table className="w-full table-fixed">
         <colgroup>
-          <col className="w-[160px]" />
+          <col className="w-[130px]" />
           {DETAIL_COLUMNS.map((col) => (
             <col
               key={col}
