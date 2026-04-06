@@ -8,7 +8,6 @@ interface DotMatrixTableProps {
   projects: Project[];
 }
 
-// 표에 표시할 세부 공정 컬럼
 const DETAIL_COLUMNS = [
   "교안",
   "촬영",
@@ -19,18 +18,20 @@ const DETAIL_COLUMNS = [
 ] as const;
 type DetailColumn = (typeof DETAIL_COLUMNS)[number];
 
-// 셀 배경: 아주 연한 웜 그린, 단계별로 살짝씩 진해짐
-const CELL_BG: Record<DetailColumn, string> = {
-  교안: "bg-[#F6F5EE]",
-  촬영: "bg-[#F3F4EB]",
-  편집: "bg-[#F1F3E8]",
-  자막: "bg-[#EFF2E5]",
-  검수: "bg-[#EDF1E2]",
-  승인: "bg-[#EBF0DF]",
+// 공정 순서 (승인=마지막)
+const STAGE_ORDER: Record<DetailColumn, number> = {
+  교안: 0,
+  촬영: 1,
+  편집: 2,
+  자막: 3,
+  검수: 4,
+  승인: 5,
 };
 
-// 숫자 텍스트 색: 부드러운 웜 그린
-const TEXT_COLOR = "text-[#7B8263]";
+// 점 색상: 부드러운 웜 세이지 그린
+const DOT_ACTIVE = "bg-[#B5BFA0] text-white";
+// 완료된(지나온) 공정 셀 배경
+const CELL_DONE = "bg-[#F7F7F3]";
 
 function ProjectRow({ project }: { project: Project }) {
   const dday = getDday(project.rolloutDate);
@@ -49,42 +50,85 @@ function ProjectRow({ project }: { project: Project }) {
     승인: [],
   };
 
+  // 프로젝트에서 가장 앞서 있는 공정 단계
+  let maxStageOrder = 0;
+
   for (const ch of chapters) {
     const stage = getChapterDetailedStage(project, ch) as DetailColumn;
     if (chaptersByDetail[stage]) {
       chaptersByDetail[stage].push(ch);
     }
+    if (STAGE_ORDER[stage] > maxStageOrder) {
+      maxStageOrder = STAGE_ORDER[stage];
+    }
   }
 
+  // 진척률: 각 장이 6단계 중 몇 번째인지로 계산
+  const totalSteps = chapters.length * DETAIL_COLUMNS.length;
+  const doneSteps = chapters.reduce((sum, ch) => {
+    const stage = getChapterDetailedStage(project, ch) as DetailColumn;
+    return sum + STAGE_ORDER[stage];
+  }, 0);
+  const progressPct =
+    totalSteps > 0 ? Math.round((doneSteps / totalSteps) * 100) : 0;
+
   return (
-    <tr className="border-b border-border/40 last:border-b-0">
-      <td className="px-4 py-3 text-[13px] font-medium text-foreground">
-        {project.title}
+    <tr className="border-b border-border/40 last:border-b-0 group">
+      {/* 강의명 + 진척 바 */}
+      <td className="px-4 py-3">
+        <div className="text-[13px] font-medium text-foreground leading-snug">
+          {project.title}
+        </div>
+        <div className="flex items-center gap-2 mt-1.5">
+          <div className="flex-1 h-[3px] rounded-full bg-[#EEEDE8] overflow-hidden">
+            <div
+              className="h-full rounded-full bg-[#B5BFA0] transition-all"
+              style={{ width: `${progressPct}%` }}
+            />
+          </div>
+          <span className="text-[10px] text-muted-foreground/60 tabular-nums">
+            {progressPct}%
+          </span>
+        </div>
       </td>
 
+      {/* 공정별 도트 */}
       {DETAIL_COLUMNS.map((col) => {
         const items = chaptersByDetail[col];
+        const colOrder = STAGE_ORDER[col];
+        // 이미 지나온 공정이면 연한 배경
+        const isDone = items.length === 0 && colOrder < maxStageOrder;
         return (
-          <td
-            key={col}
-            className={cn(
-              "px-3 py-3 text-center",
-              items.length > 0 && CELL_BG[col],
-            )}
-          >
+          <td key={col} className={cn("px-1 py-3", isDone && CELL_DONE)}>
             {items.length > 0 && (
-              <span className={cn("text-[11.5px] font-medium", TEXT_COLOR)}>
-                {items.join(", ")}
-              </span>
+              <div className="flex flex-wrap gap-[5px] justify-center">
+                {items.map((ch) => (
+                  <span
+                    key={ch}
+                    className={cn(
+                      "inline-flex items-center justify-center w-[22px] h-[22px] rounded-full text-[10px] font-semibold",
+                      DOT_ACTIVE,
+                    )}
+                  >
+                    {ch}
+                  </span>
+                ))}
+              </div>
+            )}
+            {isDone && (
+              <div className="flex justify-center">
+                <span className="text-[#C8C6BE] text-[11px]">✓</span>
+              </div>
             )}
           </td>
         );
       })}
 
-      <td className="px-4 py-3 text-right">
+      {/* D-Day */}
+      <td className="px-3 py-3 text-right">
         <span
           className={cn(
-            "text-[12.5px] font-medium whitespace-nowrap",
+            "text-[12px] font-medium whitespace-nowrap",
             getDdayColor(dday),
           )}
         >
@@ -100,29 +144,29 @@ export function DotMatrixTable({ projects }: DotMatrixTableProps) {
     <div className="rounded-2xl border border-border/50 bg-white shadow-[0_1px_8px_rgba(0,0,0,0.04)] overflow-hidden">
       <table className="w-full table-fixed">
         <colgroup>
-          <col className="w-[130px]" />
+          <col className="w-[140px]" />
           {DETAIL_COLUMNS.map((col) => (
             <col
               key={col}
-              style={{ width: `${60 / DETAIL_COLUMNS.length}%` }}
+              style={{ width: `${62 / DETAIL_COLUMNS.length}%` }}
             />
           ))}
-          <col className="w-[72px]" />
+          <col className="w-[64px]" />
         </colgroup>
         <thead>
-          <tr className="border-b border-border/50 bg-muted/30">
-            <th className="px-4 py-2.5 text-left text-[11.5px] font-semibold text-muted-foreground">
+          <tr className="border-b border-border/50 bg-[#FAFAF7]">
+            <th className="px-4 py-2.5 text-left text-[11px] font-semibold text-muted-foreground/70">
               강의명
             </th>
             {DETAIL_COLUMNS.map((col) => (
               <th
                 key={col}
-                className="px-2 py-2.5 text-center text-[11.5px] font-semibold text-muted-foreground"
+                className="px-1 py-2.5 text-center text-[11px] font-semibold text-muted-foreground/70"
               >
                 {col}
               </th>
             ))}
-            <th className="px-4 py-2.5 text-right text-[11.5px] font-semibold text-muted-foreground">
+            <th className="px-3 py-2.5 text-right text-[11px] font-semibold text-muted-foreground/70">
               D-Day
             </th>
           </tr>
