@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import type { Project } from "@/lib/types";
 import { getDday, formatDday, getDdayColor, cn } from "@/lib/utils";
 import { getChapterDetailedStage } from "@/lib/process-helpers";
@@ -45,6 +46,51 @@ function getChapterColor(ch: number): string {
   return CHAPTER_COLORS[(ch - 1) % CHAPTER_COLORS.length];
 }
 
+type StyleVariant = "A" | "B" | "C";
+
+/** A안: 원색 동그라미 + 흰 숫자 */
+function ChapterDotA({ ch }: { ch: number }) {
+  return (
+    <span
+      className="inline-flex items-center justify-center w-[22px] h-[22px] rounded-full text-[10px] font-extrabold text-white"
+      style={{ backgroundColor: getChapterColor(ch) }}
+    >
+      {ch}
+    </span>
+  );
+}
+
+/** B안: 동그라미 없이 컬러 숫자만 */
+function ChapterDotB({ ch }: { ch: number }) {
+  return (
+    <span
+      className="text-[12px] font-extrabold"
+      style={{ color: getChapterColor(ch) }}
+    >
+      {ch}
+    </span>
+  );
+}
+
+/** C안: 작은 색 점 + 회색 숫자 */
+function ChapterDotC({ ch }: { ch: number }) {
+  return (
+    <span className="inline-flex items-center gap-[3px]">
+      <span
+        className="w-[7px] h-[7px] rounded-full shrink-0"
+        style={{ backgroundColor: getChapterColor(ch) }}
+      />
+      <span className="text-[11px] font-bold text-[#6B7280]">{ch}</span>
+    </span>
+  );
+}
+
+const VARIANT_COMPONENTS: Record<StyleVariant, React.FC<{ ch: number }>> = {
+  A: ChapterDotA,
+  B: ChapterDotB,
+  C: ChapterDotC,
+};
+
 /** SVG 원형 진척 바 */
 function CircleProgress({ percent }: { percent: number }) {
   const r = 9;
@@ -87,7 +133,13 @@ function CircleProgress({ percent }: { percent: number }) {
   );
 }
 
-function ProjectRow({ project }: { project: Project }) {
+function ProjectRow({
+  project,
+  variant,
+}: {
+  project: Project;
+  variant: StyleVariant;
+}) {
   const dday = getDday(project.rolloutDate);
   const chapters = Array.from(
     { length: project.chapterCount },
@@ -110,7 +162,6 @@ function ProjectRow({ project }: { project: Project }) {
     }
   }
 
-  // 진척률
   const totalSteps = chapters.length * DETAIL_COLUMNS.length;
   const doneSteps = chapters.reduce((sum, ch) => {
     const stage = getChapterDetailedStage(project, ch) as DetailColumn;
@@ -118,6 +169,8 @@ function ProjectRow({ project }: { project: Project }) {
   }, 0);
   const progressPct =
     totalSteps > 0 ? Math.round((doneSteps / totalSteps) * 100) : 0;
+
+  const Dot = VARIANT_COMPONENTS[variant];
 
   return (
     <tr className="border-b border-border/40 last:border-b-0 hover:bg-accent/20 transition-colors">
@@ -135,18 +188,9 @@ function ProjectRow({ project }: { project: Project }) {
         return (
           <td key={col} className="px-1 py-3">
             {items.length > 0 && (
-              <div className="flex flex-wrap gap-[4px] justify-center">
+              <div className="flex flex-wrap gap-[5px] justify-center items-center">
                 {items.map((ch) => (
-                  <span
-                    key={ch}
-                    className="inline-flex items-center justify-center w-[22px] h-[22px] rounded-full text-[10px] font-extrabold"
-                    style={{
-                      backgroundColor: `${getChapterColor(ch)}90`,
-                      color: getChapterColor(ch),
-                    }}
-                  >
-                    {ch}
-                  </span>
+                  <Dot key={ch} ch={ch} />
                 ))}
               </div>
             )}
@@ -168,44 +212,76 @@ function ProjectRow({ project }: { project: Project }) {
   );
 }
 
+const VARIANT_LABELS: Record<StyleVariant, string> = {
+  A: "A: 원색 + 흰 숫자",
+  B: "B: 컬러 숫자만",
+  C: "C: 점 + 회색 숫자",
+};
+
 export function DotMatrixTable({ projects }: DotMatrixTableProps) {
+  const [variant, setVariant] = useState<StyleVariant>("A");
+
   return (
-    <div className="rounded-2xl border border-border/50 bg-white shadow-[0_1px_8px_rgba(0,0,0,0.04)] overflow-hidden">
-      <table className="w-full table-fixed">
-        <colgroup>
-          <col className="w-[180px]" />
-          {DETAIL_COLUMNS.map((col) => (
-            <col
-              key={col}
-              style={{ width: `${58 / DETAIL_COLUMNS.length}%` }}
-            />
-          ))}
-          <col className="w-[64px]" />
-        </colgroup>
-        <thead>
-          <tr className="border-b border-[#E5E7EB] bg-[#F8F9FA]">
-            <th className="px-4 py-2.5 text-left text-[11px] font-semibold text-[#9CA3AF]">
-              강의명
-            </th>
+    <div>
+      {/* 디버그 스타일 토글 */}
+      <div className="flex items-center gap-2 mb-3">
+        {(["A", "B", "C"] as StyleVariant[]).map((v) => (
+          <button
+            key={v}
+            onClick={() => setVariant(v)}
+            className={cn(
+              "px-3 py-1.5 rounded-lg text-[12px] font-medium transition-colors border",
+              variant === v
+                ? "bg-foreground text-background border-foreground"
+                : "bg-white text-muted-foreground border-border hover:bg-accent/50",
+            )}
+          >
+            {VARIANT_LABELS[v]}
+          </button>
+        ))}
+      </div>
+
+      <div className="rounded-2xl border border-border/50 bg-white shadow-[0_1px_8px_rgba(0,0,0,0.04)] overflow-hidden">
+        <table className="w-full table-fixed">
+          <colgroup>
+            <col className="w-[180px]" />
             {DETAIL_COLUMNS.map((col) => (
-              <th
+              <col
                 key={col}
-                className="px-1 py-2.5 text-center text-[11px] font-semibold text-[#9CA3AF]"
-              >
-                {col}
-              </th>
+                style={{ width: `${58 / DETAIL_COLUMNS.length}%` }}
+              />
             ))}
-            <th className="px-3 py-2.5 text-right text-[11px] font-semibold text-[#9CA3AF]">
-              D-Day
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {projects.map((project) => (
-            <ProjectRow key={project.id} project={project} />
-          ))}
-        </tbody>
-      </table>
+            <col className="w-[64px]" />
+          </colgroup>
+          <thead>
+            <tr className="border-b border-[#E5E7EB] bg-[#F8F9FA]">
+              <th className="px-4 py-2.5 text-left text-[11px] font-semibold text-[#9CA3AF]">
+                강의명
+              </th>
+              {DETAIL_COLUMNS.map((col) => (
+                <th
+                  key={col}
+                  className="px-1 py-2.5 text-center text-[11px] font-semibold text-[#9CA3AF]"
+                >
+                  {col}
+                </th>
+              ))}
+              <th className="px-3 py-2.5 text-right text-[11px] font-semibold text-[#9CA3AF]">
+                D-Day
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {projects.map((project) => (
+              <ProjectRow
+                key={project.id}
+                project={project}
+                variant={variant}
+              />
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
