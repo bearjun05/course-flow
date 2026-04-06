@@ -54,7 +54,7 @@ function ProjectRow({ project }: { project: Project }) {
 
   return (
     <tr className="border-b border-border/40 last:border-b-0">
-      <td className="px-4 py-3 text-[13px] font-medium text-foreground whitespace-nowrap">
+      <td className="px-4 py-3 text-[13px] font-medium text-foreground">
         {project.title}
       </td>
 
@@ -100,7 +100,7 @@ export function DotMatrixTable({ projects }: DotMatrixTableProps) {
     <div className="rounded-2xl border border-border/50 bg-white shadow-[0_1px_8px_rgba(0,0,0,0.04)] overflow-hidden">
       <table className="w-full table-fixed">
         <colgroup>
-          <col className="w-auto" />
+          <col className="w-[160px]" />
           {DETAIL_COLUMNS.map((col) => (
             <col
               key={col}
@@ -111,7 +111,7 @@ export function DotMatrixTable({ projects }: DotMatrixTableProps) {
         </colgroup>
         <thead>
           <tr className="border-b border-border/50 bg-muted/30">
-            <th className="px-4 py-2.5 text-left text-[11.5px] font-semibold text-muted-foreground whitespace-nowrap">
+            <th className="px-4 py-2.5 text-left text-[11.5px] font-semibold text-muted-foreground">
               강의명
             </th>
             {DETAIL_COLUMNS.map((col) => (
