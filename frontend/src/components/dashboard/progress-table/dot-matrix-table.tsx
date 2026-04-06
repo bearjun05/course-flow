@@ -28,14 +28,14 @@ const STAGE_ORDER: Record<DetailColumn, number> = {
   승인: 5,
 };
 
-// 공정별 색상 (산뜻한 블루 그라데이션)
+// 공정별 색상 (밝고 투명한 블루 그라데이션)
 const STAGE_COLORS: Record<DetailColumn, string> = {
-  교안: "#C2DEFF",
-  촬영: "#ADD4FF",
-  편집: "#99CAFF",
-  자막: "#85C0FF",
-  검수: "#70B6FF",
-  승인: "#5CACFF",
+  교안: "#DEEEFF",
+  촬영: "#D0E7FF",
+  편집: "#C2E0FF",
+  자막: "#B4D9FF",
+  검수: "#A6D2FF",
+  승인: "#98CBFF",
 };
 
 /** SVG 원형 진척 바 */
@@ -58,7 +58,7 @@ function CircleProgress({ percent }: { percent: number }) {
         cy="12"
         r={r}
         fill="none"
-        stroke="#94A3B8"
+        stroke="#98CBFF"
         strokeWidth="2.5"
         strokeLinecap="round"
         strokeDasharray={circumference}
