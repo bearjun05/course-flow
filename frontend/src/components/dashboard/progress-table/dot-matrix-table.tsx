@@ -48,14 +48,14 @@ const THEME_COLORS: Record<
   },
   green: {
     stages: {
-      교안: "#E2F8DC",
-      촬영: "#D4F2CC",
-      편집: "#C6ECBC",
-      자막: "#B8E6AC",
-      검수: "#AAE09C",
-      승인: "#9CDA8C",
+      교안: "#E8EDCF",
+      촬영: "#E0E6C4",
+      편집: "#D8DFB9",
+      자막: "#D0D8AE",
+      검수: "#C8D1A3",
+      승인: "#C0CA98",
     },
-    progress: "#9CDA8C",
+    progress: "#C0CA98",
   },
 };
 
