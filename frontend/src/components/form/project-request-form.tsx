@@ -76,7 +76,7 @@ export function ProjectRequestForm() {
     <K extends keyof FormData>(key: K, value: FormData[K]) => {
       setForm((prev) => ({ ...prev, [key]: value }));
     },
-    []
+    [],
   );
 
   const saveDraft = () => {
@@ -92,8 +92,9 @@ export function ProjectRequestForm() {
 
   const handleChapterCountChange = (count: number) => {
     const clamped = Math.max(0, Math.min(20, count));
-    const durations = Array.from({ length: clamped }, (_, i) =>
-      form.chapterDurations[i] ?? ""
+    const durations = Array.from(
+      { length: clamped },
+      (_, i) => form.chapterDurations[i] ?? "",
     );
     setForm((prev) => ({
       ...prev,
@@ -151,7 +152,9 @@ export function ProjectRequestForm() {
               </Label>
               <Select
                 value={form.businessUnit}
-                onValueChange={(v) => { if (v) update("businessUnit", v as BusinessUnit); }}
+                onValueChange={(v) => {
+                  if (v) update("businessUnit", v as BusinessUnit);
+                }}
               >
                 <SelectTrigger className="mt-1.5">
                   <SelectValue placeholder="선택" />
@@ -172,7 +175,9 @@ export function ProjectRequestForm() {
               </Label>
               <Select
                 value={form.productionType}
-                onValueChange={(v) => { if (v) update("productionType", v as ProductionType); }}
+                onValueChange={(v) => {
+                  if (v) update("productionType", v as ProductionType);
+                }}
               >
                 <SelectTrigger className="mt-1.5">
                   <SelectValue placeholder="선택" />
@@ -250,16 +255,14 @@ export function ProjectRequestForm() {
 
         <div className="space-y-4">
           <div>
-            <Label className="text-xs">챕터 수</Label>
+            <Label className="text-xs">장 수</Label>
             <div className="mt-1.5 flex items-center gap-2">
               <Button
                 type="button"
                 variant="outline"
                 size="icon"
                 className="h-9 w-9"
-                onClick={() =>
-                  handleChapterCountChange(form.chapterCount - 1)
-                }
+                onClick={() => handleChapterCountChange(form.chapterCount - 1)}
               >
                 <Minus className="h-3.5 w-3.5" />
               </Button>
@@ -278,9 +281,7 @@ export function ProjectRequestForm() {
                 variant="outline"
                 size="icon"
                 className="h-9 w-9"
-                onClick={() =>
-                  handleChapterCountChange(form.chapterCount + 1)
-                }
+                onClick={() => handleChapterCountChange(form.chapterCount + 1)}
               >
                 <Plus className="h-3.5 w-3.5" />
               </Button>
@@ -289,7 +290,7 @@ export function ProjectRequestForm() {
 
           {form.chapterCount > 0 && (
             <div>
-              <Label className="text-xs">챕터별 예상 분량 (시간)</Label>
+              <Label className="text-xs">장별 예상 분량 (시간)</Label>
               <div className="mt-1.5 grid grid-cols-3 gap-2 sm:grid-cols-4">
                 {Array.from({ length: form.chapterCount }, (_, i) => (
                   <div key={i} className="flex items-center gap-1.5">

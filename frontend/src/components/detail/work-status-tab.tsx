@@ -167,7 +167,7 @@ export default function WorkStatusTab({
   if (chapters.length === 0) {
     return (
       <div className="rounded-2xl border border-neutral-100 bg-white shadow-sm flex items-center justify-center h-32 text-sm text-muted-foreground">
-        등록된 챕터가 없습니다.
+        등록된 장이 없습니다.
       </div>
     );
   }

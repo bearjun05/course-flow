@@ -122,7 +122,7 @@ export function KanbanCard({ project, column, onClick }: KanbanCardProps) {
       <div className="flex items-center gap-3 text-[11px] text-neutral-400">
         <span className="flex items-center gap-1">
           <BookOpen className="w-3 h-3" />
-          {project.chapterCount}챕터
+          {project.chapterCount}장
         </span>
         <span className="flex items-center gap-1">
           <svg className="w-3 h-3" viewBox="0 0 12 12" fill="none">

@@ -332,7 +332,7 @@ export default function InfoGuideTab({
         {/* 챕터 */}
         <span className="flex items-center gap-1 text-[11px] text-neutral-400">
           <BookOpen className="h-3 w-3" />
-          {project.chapterCount}챕터
+          {project.chapterCount}장
         </span>
       </div>
 
@@ -375,7 +375,7 @@ export default function InfoGuideTab({
           {project.chapterDurations.length > 0 && (
             <div className="mt-3 pt-3 border-t border-neutral-100">
               <div className="flex items-center justify-between mb-2">
-                <p className="text-xs text-neutral-500">챕터별 분량</p>
+                <p className="text-xs text-neutral-500">장별 분량</p>
                 {editingDurations ? (
                   <button
                     onClick={() => {

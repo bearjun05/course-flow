@@ -123,7 +123,7 @@ function ProjectRow({ project }: { project: Project }) {
           </span>
           <span className="inline-flex items-center gap-[3px] text-[10px] text-muted-foreground/60 shrink-0">
             <BookOpen className="w-3 h-3" />
-            {project.chapterCount}챕터
+            {project.chapterCount}장
           </span>
         </div>
       </td>
