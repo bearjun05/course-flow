@@ -1,5 +1,6 @@
 "use client";
 
+import { BookOpen } from "lucide-react";
 import type { Project } from "@/lib/types";
 import { getDday, formatDday, getDdayColor, cn } from "@/lib/utils";
 import { getChapterDetailedStage } from "@/lib/process-helpers";
@@ -119,6 +120,10 @@ function ProjectRow({ project }: { project: Project }) {
           <CircleProgress percent={progressPct} />
           <span className="text-[13px] font-medium text-foreground leading-snug">
             {project.title}
+          </span>
+          <span className="inline-flex items-center gap-[3px] text-[10px] text-muted-foreground/60 shrink-0">
+            <BookOpen className="w-3 h-3" />
+            {project.chapterCount}챕터
           </span>
         </div>
       </td>
