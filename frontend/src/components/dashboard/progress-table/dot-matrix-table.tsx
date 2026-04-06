@@ -139,8 +139,11 @@ function ProjectRow({ project }: { project: Project }) {
                 {items.map((ch) => (
                   <span
                     key={ch}
-                    className="inline-flex items-center justify-center w-[20px] h-[20px] rounded-full text-[9.5px] font-bold text-white"
-                    style={{ backgroundColor: getChapterColor(ch) }}
+                    className="inline-flex items-center justify-center w-[22px] h-[22px] rounded-full text-[10px] font-extrabold"
+                    style={{
+                      backgroundColor: `${getChapterColor(ch)}40`,
+                      color: getChapterColor(ch),
+                    }}
                   >
                     {ch}
                   </span>
