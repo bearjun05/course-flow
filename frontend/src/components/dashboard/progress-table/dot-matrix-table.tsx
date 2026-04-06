@@ -20,12 +20,12 @@ const DETAIL_COLUMNS = [
 type DetailColumn = (typeof DETAIL_COLUMNS)[number];
 
 const COL_STYLE: Record<DetailColumn, string> = {
-  교안: "bg-[#F5F0E8] text-[#8B7A55]",
-  촬영: "bg-[#EEF0E6] text-[#6E7A55]",
-  편집: "bg-[#EDF2DC] text-[#7A9445]",
-  자막: "bg-[#E2EEDC] text-[#5E8A42]",
-  검수: "bg-[#DCE8D4] text-[#4E7A38]",
-  승인: "bg-[#E5F0D0] text-[#628A38]",
+  교안: "bg-[#E8F0E2] text-[#5A7A48]",
+  촬영: "bg-[#E0ECDA] text-[#4E7040]",
+  편집: "bg-[#D8E8D2] text-[#436838]",
+  자막: "bg-[#D0E4CA] text-[#3A5F30]",
+  검수: "bg-[#C8E0C2] text-[#325828]",
+  승인: "bg-[#C0DCBA] text-[#2A5020]",
 };
 
 function ProjectRow({ project }: { project: Project }) {
@@ -54,7 +54,7 @@ function ProjectRow({ project }: { project: Project }) {
 
   return (
     <tr className="border-b border-border/40 last:border-b-0">
-      <td className="px-4 py-3 text-[13px] font-medium text-foreground max-w-[180px] truncate">
+      <td className="px-4 py-3 text-[13px] font-medium text-foreground whitespace-nowrap">
         {project.title}
       </td>
 
@@ -98,10 +98,10 @@ function ProjectRow({ project }: { project: Project }) {
 export function DotMatrixTable({ projects }: DotMatrixTableProps) {
   return (
     <div className="rounded-2xl border border-border/50 bg-white shadow-[0_1px_8px_rgba(0,0,0,0.04)] overflow-hidden">
-      <table className="w-full table-fixed">
+      <table className="w-full">
         <thead>
           <tr className="border-b border-border/50 bg-muted/30">
-            <th className="px-4 py-2.5 text-left text-[11.5px] font-semibold text-muted-foreground w-[180px]">
+            <th className="px-4 py-2.5 text-left text-[11.5px] font-semibold text-muted-foreground whitespace-nowrap">
               강의명
             </th>
             {DETAIL_COLUMNS.map((col) => (
