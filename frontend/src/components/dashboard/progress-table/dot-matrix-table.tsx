@@ -86,7 +86,8 @@ function ProjectRow({ project }: { project: Project }) {
     (_, i) => i + 1,
   );
 
-  const chaptersByDetail: Record<DetailColumn, number[]> = {
+  // 장별 공정 그룹핑 (같은 공정에 있는 장끼리 겹치지 않게 오프셋 계산용)
+  const chaptersByStage: Record<DetailColumn, number[]> = {
     교안: [],
     촬영: [],
     편집: [],
@@ -97,8 +98,8 @@ function ProjectRow({ project }: { project: Project }) {
 
   for (const ch of chapters) {
     const stage = getChapterDetailedStage(project, ch) as DetailColumn;
-    if (chaptersByDetail[stage]) {
-      chaptersByDetail[stage].push(ch);
+    if (chaptersByStage[stage]) {
+      chaptersByStage[stage].push(ch);
     }
   }
 
@@ -112,6 +113,7 @@ function ProjectRow({ project }: { project: Project }) {
 
   return (
     <tr className="border-b border-border/40 last:border-b-0 hover:bg-accent/20 transition-colors">
+      {/* 강의명 + 진척 */}
       <td className="px-4 py-3">
         <div className="flex items-center gap-2">
           <CircleProgress percent={progressPct} />
@@ -121,28 +123,56 @@ function ProjectRow({ project }: { project: Project }) {
         </div>
       </td>
 
-      {DETAIL_COLUMNS.map((col) => {
-        const items = chaptersByDetail[col];
-        const color = STAGE_COLORS[col];
-        return (
-          <td key={col} className="px-1 py-3">
-            {items.length > 0 && (
-              <div className="flex flex-wrap gap-[4px] justify-center">
+      {/* 파이프라인 트랙 */}
+      <td colSpan={DETAIL_COLUMNS.length} className="px-2 py-3">
+        <div className="relative h-[28px] flex items-center">
+          {/* 트랙 라인 */}
+          <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-[2px] bg-[#E5E7EB] rounded-full" />
+          {/* 구간 구분선 */}
+          {Array.from({ length: 7 }, (_, i) => (
+            <div
+              key={i}
+              className="absolute top-1/2 -translate-y-1/2 w-[3px] h-[3px] rounded-full bg-[#D1D5DB]"
+              style={{ left: `${(i / 6) * 100}%` }}
+            />
+          ))}
+          {/* 장 도트 — 같은 공정의 장끼리 나란히 배치 */}
+          {DETAIL_COLUMNS.map((col) => {
+            const items = chaptersByStage[col];
+            if (items.length === 0) return null;
+            const order = STAGE_ORDER[col];
+            const centerPct = ((order + 0.5) / DETAIL_COLUMNS.length) * 100;
+            const dotSize = 20;
+            const gap = 3;
+            const totalWidth =
+              items.length * dotSize + (items.length - 1) * gap;
+
+            return (
+              <div
+                key={col}
+                className="absolute flex items-center gap-[3px] -translate-x-1/2"
+                style={{ left: `${centerPct}%` }}
+              >
                 {items.map((ch) => (
                   <span
                     key={ch}
-                    className="inline-flex items-center justify-center w-[22px] h-[22px] rounded-full text-[10px] font-extrabold text-white"
-                    style={{ backgroundColor: color }}
+                    className="inline-flex items-center justify-center rounded-full text-[9px] font-extrabold text-white shadow-sm"
+                    style={{
+                      width: dotSize,
+                      height: dotSize,
+                      backgroundColor: STAGE_COLORS[col],
+                    }}
                   >
                     {ch}
                   </span>
                 ))}
               </div>
-            )}
-          </td>
-        );
-      })}
+            );
+          })}
+        </div>
+      </td>
 
+      {/* D-Day */}
       <td className="px-3 py-3 text-right">
         <span
           className={cn(
