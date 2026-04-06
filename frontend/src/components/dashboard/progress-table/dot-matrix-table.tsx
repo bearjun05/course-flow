@@ -18,20 +18,24 @@ const DETAIL_COLUMNS = [
 ] as const;
 type DetailColumn = (typeof DETAIL_COLUMNS)[number];
 
-// 공정 순서 (승인=마지막)
-const STAGE_ORDER: Record<DetailColumn, number> = {
-  교안: 0,
-  촬영: 1,
-  편집: 2,
-  자막: 3,
-  검수: 4,
-  승인: 5,
-};
+// 장별 무지개 색상 (상세 페이지와 동일)
+const CHAPTER_COLORS = [
+  "#E4A0A0", // 1장 분홍
+  "#E4B89C", // 2장 살구
+  "#E4CC9C", // 3장 주황
+  "#E0D49C", // 4장 노랑
+  "#C8D89C", // 5장 연두
+  "#9CD4B0", // 6장 초록
+  "#9CCCC8", // 7장 민트
+  "#9CB8D8", // 8장 하늘
+  "#B0A8D8", // 9장 보라
+  "#D0A8C8", // 10장 자주
+  "#C8BCB0", // 11장 베이지
+];
 
-// 점 색상: 부드러운 웜 세이지 그린
-const DOT_ACTIVE = "bg-[#B5BFA0] text-white";
-// 완료된(지나온) 공정 셀 배경
-const CELL_DONE = "bg-[#F7F7F3]";
+function getChapterColor(ch: number): string {
+  return CHAPTER_COLORS[(ch - 1) % CHAPTER_COLORS.length];
+}
 
 function ProjectRow({ project }: { project: Project }) {
   const dday = getDday(project.rolloutDate);
@@ -40,7 +44,6 @@ function ProjectRow({ project }: { project: Project }) {
     (_, i) => i + 1,
   );
 
-  // 장별 세부 공정으로 그룹핑
   const chaptersByDetail: Record<DetailColumn, number[]> = {
     교안: [],
     촬영: [],
@@ -50,81 +53,42 @@ function ProjectRow({ project }: { project: Project }) {
     승인: [],
   };
 
-  // 프로젝트에서 가장 앞서 있는 공정 단계
-  let maxStageOrder = 0;
-
   for (const ch of chapters) {
     const stage = getChapterDetailedStage(project, ch) as DetailColumn;
     if (chaptersByDetail[stage]) {
       chaptersByDetail[stage].push(ch);
     }
-    if (STAGE_ORDER[stage] > maxStageOrder) {
-      maxStageOrder = STAGE_ORDER[stage];
-    }
   }
 
-  // 진척률: 각 장이 6단계 중 몇 번째인지로 계산
-  const totalSteps = chapters.length * DETAIL_COLUMNS.length;
-  const doneSteps = chapters.reduce((sum, ch) => {
-    const stage = getChapterDetailedStage(project, ch) as DetailColumn;
-    return sum + STAGE_ORDER[stage];
-  }, 0);
-  const progressPct =
-    totalSteps > 0 ? Math.round((doneSteps / totalSteps) * 100) : 0;
-
   return (
-    <tr className="border-b border-border/40 last:border-b-0 group">
-      {/* 강의명 + 진척 바 */}
+    <tr className="border-b border-border/40 last:border-b-0 hover:bg-accent/20 transition-colors">
       <td className="px-4 py-3">
         <div className="text-[13px] font-medium text-foreground leading-snug">
           {project.title}
         </div>
-        <div className="flex items-center gap-2 mt-1.5">
-          <div className="flex-1 h-[3px] rounded-full bg-[#EEEDE8] overflow-hidden">
-            <div
-              className="h-full rounded-full bg-[#B5BFA0] transition-all"
-              style={{ width: `${progressPct}%` }}
-            />
-          </div>
-          <span className="text-[10px] text-muted-foreground/60 tabular-nums">
-            {progressPct}%
-          </span>
-        </div>
       </td>
 
-      {/* 공정별 도트 */}
       {DETAIL_COLUMNS.map((col) => {
         const items = chaptersByDetail[col];
-        const colOrder = STAGE_ORDER[col];
-        // 이미 지나온 공정이면 연한 배경
-        const isDone = items.length === 0 && colOrder < maxStageOrder;
         return (
-          <td key={col} className={cn("px-1 py-3", isDone && CELL_DONE)}>
+          <td key={col} className="px-1 py-3">
             {items.length > 0 && (
-              <div className="flex flex-wrap gap-[5px] justify-center">
+              <div className="flex flex-wrap gap-[4px] justify-center">
                 {items.map((ch) => (
                   <span
                     key={ch}
-                    className={cn(
-                      "inline-flex items-center justify-center w-[22px] h-[22px] rounded-full text-[10px] font-semibold",
-                      DOT_ACTIVE,
-                    )}
+                    className="inline-flex items-center justify-center w-[20px] h-[20px] rounded-full text-[9.5px] font-bold text-white"
+                    style={{ backgroundColor: getChapterColor(ch) }}
                   >
                     {ch}
                   </span>
                 ))}
               </div>
             )}
-            {isDone && (
-              <div className="flex justify-center">
-                <span className="text-[#C8C6BE] text-[11px]">✓</span>
-              </div>
-            )}
           </td>
         );
       })}
 
-      {/* D-Day */}
       <td className="px-3 py-3 text-right">
         <span
           className={cn(
@@ -154,7 +118,7 @@ export function DotMatrixTable({ projects }: DotMatrixTableProps) {
           <col className="w-[64px]" />
         </colgroup>
         <thead>
-          <tr className="border-b border-border/50 bg-[#FAFAF7]">
+          <tr className="border-b border-border/50 bg-[#FAFAF8]">
             <th className="px-4 py-2.5 text-left text-[11px] font-semibold text-muted-foreground/70">
               강의명
             </th>
