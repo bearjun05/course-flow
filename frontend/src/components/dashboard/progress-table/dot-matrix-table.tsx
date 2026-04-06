@@ -98,7 +98,17 @@ function ProjectRow({ project }: { project: Project }) {
 export function DotMatrixTable({ projects }: DotMatrixTableProps) {
   return (
     <div className="rounded-2xl border border-border/50 bg-white shadow-[0_1px_8px_rgba(0,0,0,0.04)] overflow-hidden">
-      <table className="w-full">
+      <table className="w-full table-fixed">
+        <colgroup>
+          <col className="w-auto" />
+          {DETAIL_COLUMNS.map((col) => (
+            <col
+              key={col}
+              style={{ width: `${60 / DETAIL_COLUMNS.length}%` }}
+            />
+          ))}
+          <col className="w-[72px]" />
+        </colgroup>
         <thead>
           <tr className="border-b border-border/50 bg-muted/30">
             <th className="px-4 py-2.5 text-left text-[11.5px] font-semibold text-muted-foreground whitespace-nowrap">
@@ -112,7 +122,7 @@ export function DotMatrixTable({ projects }: DotMatrixTableProps) {
                 {col}
               </th>
             ))}
-            <th className="px-4 py-2.5 text-right text-[11.5px] font-semibold text-muted-foreground w-[72px]">
+            <th className="px-4 py-2.5 text-right text-[11.5px] font-semibold text-muted-foreground">
               D-Day
             </th>
           </tr>
