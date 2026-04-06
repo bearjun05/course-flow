@@ -141,7 +141,7 @@ function ProjectRow({ project }: { project: Project }) {
                     key={ch}
                     className="inline-flex items-center justify-center w-[22px] h-[22px] rounded-full text-[10px] font-extrabold"
                     style={{
-                      backgroundColor: `${getChapterColor(ch)}40`,
+                      backgroundColor: `${getChapterColor(ch)}90`,
                       color: getChapterColor(ch),
                     }}
                   >
