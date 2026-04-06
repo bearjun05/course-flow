@@ -197,14 +197,14 @@ export function DotMatrixTable({ projects }: DotMatrixTableProps) {
     <div className="rounded-2xl border border-border/50 bg-white shadow-[0_1px_8px_rgba(0,0,0,0.04)] overflow-hidden">
       <table className="w-full table-fixed">
         <colgroup>
-          <col className="w-[180px]" />
+          <col style={{ width: "22%" }} />
           {DETAIL_COLUMNS.map((col) => (
             <col
               key={col}
-              style={{ width: `${58 / DETAIL_COLUMNS.length}%` }}
+              style={{ width: `${70 / DETAIL_COLUMNS.length}%` }}
             />
           ))}
-          <col className="w-[64px]" />
+          <col style={{ width: "8%" }} />
         </colgroup>
         <thead>
           <tr className="border-b border-[#E5E7EB] bg-[#F8F9FA]">
