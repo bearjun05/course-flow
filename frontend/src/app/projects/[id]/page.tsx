@@ -195,6 +195,8 @@ export default function ProjectDetailPage() {
               onDeleteChapter={handleDeleteChapter}
               projectStartDate={project.createdAt}
               paymentDate={project.paymentDate}
+              tutor={project.tutor}
+              pm="박진영"
             />
           )}
           {scheduleTab === "calendar" && (

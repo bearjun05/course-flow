@@ -67,6 +67,10 @@ interface MondayBoardProps {
   projectStartDate?: string;
   /** 강의 지급일 */
   paymentDate?: string;
+  /** 튜터명 (교안/촬영 바에 표시) */
+  tutor?: string;
+  /** PM명 (승인 바에 표시) */
+  pm?: string;
 }
 
 interface ChapterGroup {
@@ -186,8 +190,11 @@ function MiniGantt({
   chapterColor,
   onToggle,
   onTaskDateChange,
+  onTaskDateClear,
   projectStartDate,
   paymentDate,
+  tutor,
+  pm,
 }: {
   tasks: ChapterTask[];
   chapterColor: string;
@@ -197,8 +204,11 @@ function MiniGantt({
     startDate: string,
     endDate: string,
   ) => void;
+  onTaskDateClear?: (taskId: string) => void;
   projectStartDate?: string;
   paymentDate?: string;
+  tutor?: string;
+  pm?: string;
 }) {
   const today = startOfDay(new Date());
   const containerRef = useRef<HTMLDivElement>(null);
@@ -591,13 +601,38 @@ function MiniGantt({
                         onMouseDown={(ev) => handleDragStart(ev, task, "move")}
                       >
                         <span className="truncate px-1 pointer-events-none select-none">
-                          {widthPx > COL_W * 2 ? (task.assignee ?? label) : ""}
+                          {widthPx > COL_W * 2
+                            ? (() => {
+                                // 공정별 적절한 담당자 표시
+                                const type = task.taskType;
+                                const person =
+                                  type === "교안제작" || type === "촬영"
+                                    ? tutor
+                                    : type === "승인"
+                                      ? pm
+                                      : task.assignee;
+                                return person ? `${label} · ${person}` : label;
+                              })()
+                            : ""}
                         </span>
                       </div>
                       <div
                         className="absolute right-0 top-0 bottom-0 w-2 cursor-col-resize z-10 opacity-0 group-hover/bar:opacity-100 transition-opacity rounded-r-md hover:bg-black/10"
                         onMouseDown={(ev) => handleDragStart(ev, task, "right")}
                       />
+                      {/* 일정 삭제 버튼 */}
+                      {onTaskDateClear && (
+                        <button
+                          className="absolute -top-1.5 -right-1.5 h-4 w-4 rounded-full bg-white border border-neutral-300 text-neutral-400 text-[10px] leading-none flex items-center justify-center opacity-0 group-hover/bar:opacity-100 transition-opacity hover:bg-red-50 hover:border-red-300 hover:text-red-500 z-20"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onTaskDateClear(task.id);
+                          }}
+                          title="일정 삭제"
+                        >
+                          ×
+                        </button>
+                      )}
                     </div>
                   </div>
                 );
@@ -664,6 +699,8 @@ export default function MondayBoard({
   onDeleteChapter,
   projectStartDate,
   paymentDate,
+  tutor,
+  pm,
 }: MondayBoardProps) {
   const [expandedGroups, setExpandedGroups] = useState<Set<number>>(new Set());
 
@@ -721,6 +758,19 @@ export default function MondayBoard({
     (taskId: string, startDate: string, endDate: string) => {
       onTasksChange(
         tasks.map((t) => (t.id === taskId ? { ...t, startDate, endDate } : t)),
+      );
+    },
+    [tasks, onTasksChange],
+  );
+
+  const handleTaskDateClear = useCallback(
+    (taskId: string) => {
+      onTasksChange(
+        tasks.map((t) =>
+          t.id === taskId
+            ? { ...t, startDate: undefined, endDate: undefined }
+            : t,
+        ),
       );
     },
     [tasks, onTasksChange],
@@ -859,8 +909,11 @@ export default function MondayBoard({
                   chapterColor={group.color}
                   onToggle={toggleTask}
                   onTaskDateChange={handleTaskDateChange}
+                  onTaskDateClear={handleTaskDateClear}
                   projectStartDate={projectStartDate}
                   paymentDate={paymentDate}
+                  tutor={tutor}
+                  pm={pm}
                 />
                 {onDeleteChapter && group.chapter > 0 && (
                   <div className="px-4 pl-10 pb-2 flex justify-end">
