@@ -8,8 +8,8 @@ import {
   Subtitles,
   Search,
   ThumbsUp,
-  Upload,
   ExternalLink,
+  Circle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { ChapterTask, Lecture, TaskStatus } from "@/lib/types";
@@ -61,7 +61,6 @@ const GROUP_COLORS = [
   "#C8BCB0",
 ];
 
-/** 공정별 강 단위 결과물 URL 매핑 */
 function getLectureDeliverableUrl(
   lecture: Lecture,
   taskKey: string,
@@ -83,7 +82,7 @@ function getLectureDeliverableUrl(
 }
 
 /* ------------------------------------------------------------------ */
-/*  Grid columns                                                       */
+/*  Grid                                                               */
 /* ------------------------------------------------------------------ */
 
 const GRID_COLS =
@@ -93,66 +92,7 @@ const GRID_COLS =
 /*  Sub-components                                                     */
 /* ------------------------------------------------------------------ */
 
-/** 장 레벨 공정 상태 표시 */
-function StatusCell({
-  status,
-  color,
-}: {
-  status: TaskStatus | undefined;
-  color: string;
-}) {
-  if (!status) {
-    return (
-      <div className="flex items-center justify-center">
-        <span className="text-neutral-200">—</span>
-      </div>
-    );
-  }
-
-  if (status === "완료") {
-    return (
-      <div className="flex items-center justify-center">
-        <span
-          className="inline-flex items-center justify-center h-5 w-5 rounded-full text-white text-[10px]"
-          style={{ backgroundColor: color }}
-        >
-          ✓
-        </span>
-      </div>
-    );
-  }
-
-  if (status === "진행") {
-    return (
-      <div className="flex items-center justify-center">
-        <span
-          className="inline-flex items-center h-5 px-1.5 rounded text-[10px] font-medium"
-          style={{ backgroundColor: `${color}18`, color }}
-        >
-          진행
-        </span>
-      </div>
-    );
-  }
-
-  if (status === "리뷰") {
-    return (
-      <div className="flex items-center justify-center">
-        <span className="inline-flex items-center h-5 px-1.5 rounded text-[10px] font-medium bg-[#F5C842]/10 text-[#F5C842]">
-          리뷰
-        </span>
-      </div>
-    );
-  }
-
-  return (
-    <div className="flex items-center justify-center">
-      <span className="text-neutral-200 text-[10px]">대기</span>
-    </div>
-  );
-}
-
-/** 강별 결과물 링크 셀 */
+/** 강별 결과물 링크 셀 — 업로드 완료/대기 강조 */
 function DeliverableCell({
   lecture,
   taskKey,
@@ -171,8 +111,8 @@ function DeliverableCell({
           href={url}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center justify-center h-5 w-5 rounded-full transition-opacity hover:opacity-70"
-          style={{ backgroundColor: `${color}20`, color }}
+          className="inline-flex items-center justify-center h-6 w-6 rounded-lg transition-all hover:scale-110 shadow-sm"
+          style={{ backgroundColor: color, color: "white" }}
           title="결과물 보기"
         >
           <ExternalLink className="h-3 w-3" />
@@ -181,10 +121,11 @@ function DeliverableCell({
     );
   }
 
+  // 업로드 대기 — 빈 원형 점선
   return (
     <div className="flex items-center justify-center">
-      <span className="inline-flex items-center justify-center h-5 w-5 rounded-full text-neutral-250">
-        <Upload className="h-3 w-3 text-neutral-300" />
+      <span className="inline-flex items-center justify-center h-6 w-6 rounded-lg border-2 border-dashed border-neutral-200">
+        <Circle className="h-2 w-2 text-neutral-300" />
       </span>
     </div>
   );
@@ -298,46 +239,37 @@ export default function WorkStatusTab({
 
         return (
           <div key={chapter.chapter}>
-            {/* Chapter header row */}
+            {/* 장 헤더 — 굵은 구분 행 (공정 상태 없음) */}
             <div
-              className={cn(
-                "grid",
-                GRID_COLS,
-                "items-center border-b border-neutral-100 bg-white hover:bg-accent/20 transition-colors",
-              )}
+              className="flex items-center border-b border-neutral-200 bg-neutral-50/70"
               style={{ borderLeft: `3px solid ${color}` }}
             >
-              <div className="px-4 py-2.5 flex items-center gap-2 min-w-0">
+              <div className="flex-1 px-4 py-2.5 flex items-center gap-2 min-w-0">
                 <span
-                  className="text-xs font-semibold shrink-0"
+                  className="text-[13px] font-bold shrink-0"
                   style={{ color }}
                 >
                   {chapter.label}
                 </span>
                 {chapter.title && (
-                  <span className="text-[11px] text-neutral-500 truncate">
+                  <span className="text-[12px] font-semibold text-neutral-700 truncate">
                     {chapter.title}
                   </span>
                 )}
               </div>
-              <div className="px-1 py-2.5 flex items-center justify-center">
+              <div className="px-4 py-2.5 flex items-center gap-3 shrink-0">
                 <ChapterProgress
                   completed={completedCount}
                   total={FILE_COLUMNS.length}
                   color={color}
                 />
+                <span className="text-[10px] text-neutral-400">
+                  {chapter.lectures.length}강
+                </span>
               </div>
-              {FILE_COLUMNS.map((col) => (
-                <div key={col.key} className="px-1 py-2.5">
-                  <StatusCell
-                    status={chapter.taskStatuses[col.key] as TaskStatus}
-                    color={color}
-                  />
-                </div>
-              ))}
             </div>
 
-            {/* Lecture sub-rows */}
+            {/* 강별 행 */}
             {chapter.lectures.map((lecture) => (
               <div
                 key={lecture.id}
@@ -348,12 +280,15 @@ export default function WorkStatusTab({
                 )}
                 style={{ borderLeft: `3px solid ${color}20` }}
               >
-                <div className="px-4 pl-8 py-1.5 flex items-center gap-2 min-w-0">
-                  <span className="text-[12px] text-muted-foreground shrink-0">
-                    {lecture.label}강
+                <div className="px-4 pl-7 py-2 flex items-center gap-2 min-w-0">
+                  <span
+                    className="text-[12px] font-medium shrink-0"
+                    style={{ color }}
+                  >
+                    {lecture.label}
                   </span>
                   {lecture.title && (
-                    <span className="text-[11px] text-neutral-400 truncate">
+                    <span className="text-[11px] text-neutral-500 truncate">
                       {lecture.title}
                     </span>
                   )}
