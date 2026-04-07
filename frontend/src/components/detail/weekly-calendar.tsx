@@ -305,7 +305,7 @@ export default function WeeklyCalendar({
                 title={`${bar.label} (${bar.task.status}) ${pct}%${bar.task.assignee ? ` · ${bar.task.assignee}` : ""}`}
               >
                 {/* 진행률 게이지 (배경) */}
-                {bar.uploadProgress > 0 && (
+                {pct > 0 && (
                   <div
                     className="absolute left-0 top-0 bottom-0 opacity-15 rounded-l-sm"
                     style={{
@@ -314,18 +314,13 @@ export default function WeeklyCalendar({
                     }}
                   />
                 )}
-                {/* 텍스트 */}
+                {/* 왼쪽: 라벨 · 담당자 */}
                 <span
                   className="relative z-[1] px-2 text-[12px] font-extrabold truncate"
                   style={{ color: bar.color }}
                 >
                   {bar.label}
-                  {pct > 0 && bar.span >= 2 && (
-                    <span className="ml-1 font-bold text-[10px]">{pct}%</span>
-                  )}
-                </span>
-                {bar.span >= 2 &&
-                  (() => {
+                  {(() => {
                     const type = bar.task.taskType;
                     const person =
                       type === "교안제작" || type === "촬영"
@@ -334,14 +329,20 @@ export default function WeeklyCalendar({
                           ? pm
                           : bar.task.assignee;
                     return person ? (
-                      <span
-                        className="relative z-[1] text-[10px] font-semibold ml-auto pr-2 shrink-0 opacity-60"
-                        style={{ color: bar.color }}
-                      >
-                        {person}
+                      <span className="font-semibold opacity-60">
+                        {" "}
+                        · {person}
                       </span>
                     ) : null;
                   })()}
+                </span>
+                {/* 오른쪽: 퍼센트 */}
+                <span
+                  className="relative z-[1] text-[11px] font-bold ml-auto pr-2 shrink-0 tabular-nums"
+                  style={{ color: bar.color }}
+                >
+                  {pct}%
+                </span>
               </button>
             );
           }),

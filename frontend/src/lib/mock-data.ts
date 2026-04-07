@@ -254,13 +254,19 @@ function createLectures(
 }
 
 const proj2Lectures = createLectures("proj-2", [2.0, 2.5, 2.0, 2.5, 2.0], 2);
-// 1장 자막: 1강만 업로드 (2강은 아직) → 50% 진행률
+// 1장 자막: 1강만 업로드 (2강은 아직) → 50%
 proj2Lectures
   .filter((l) => l.chapter === 1)
   .forEach((l, i) => {
     if (i === 0)
       l.subtitleUrl = `https://drive.google.com/file/d/proj-2-sub-1-1.srt`;
-    // i===1 은 subtitleUrl 없음 (미업로드)
+  });
+// 3장 편집: 1강만 업로드 (2강은 아직) → 50%
+proj2Lectures
+  .filter((l) => l.chapter === 3)
+  .forEach((l, i) => {
+    if (i === 0)
+      l.editedVideoUrl = `https://drive.google.com/file/d/proj-2-edit-3-1.mp4`;
   });
 
 function makePmReview(scores: number[]): VideoReview {
