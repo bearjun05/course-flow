@@ -638,7 +638,7 @@ function MiniGantt({
                 );
               })}
 
-              {/* 일정 미정 — 어제~내일 위치에 대시 테두리 바 */}
+              {/* 일정 미정 — 빈 공간 클릭 또는 일정 배정 바 클릭으로 생성 */}
               {unscheduled.map((task) => {
                 const yesterdayIdx = todayIndex - 1;
                 const barLeftPx = Math.max(0, yesterdayIdx) * COL_W;
@@ -648,6 +648,7 @@ function MiniGantt({
                     key={task.id}
                     className="relative h-10 border-b border-neutral-50 last:border-b-0 cursor-pointer group/unsch hover:bg-neutral-50/50"
                     onClick={(e) => {
+                      // 빈 공간 클릭 → 클릭한 날짜에 3일짜리 일정 생성
                       const rect = e.currentTarget.getBoundingClientRect();
                       const x = e.clientX - rect.left;
                       const dayIndex = Math.floor(x / COL_W);
@@ -662,18 +663,28 @@ function MiniGantt({
                   >
                     {/* 오늘 세로선 */}
                     <div
-                      className="absolute top-0 bottom-0 w-px"
+                      className="absolute top-0 bottom-0 w-px pointer-events-none"
                       style={{
                         left: todayIndex * COL_W + COL_W / 2,
                         backgroundColor: `${TODAY_COLOR}40`,
                       }}
                     />
-                    {/* 대시 테두리 바 */}
+                    {/* 일정 배정 바 클릭 → 오늘 기준 3일 일정 생성 */}
                     <div
-                      className="absolute top-1.5 h-7 rounded-md border-2 border-dashed border-neutral-300 flex items-center justify-center group-hover/unsch:border-neutral-400 transition-colors"
+                      className="absolute top-1.5 h-7 rounded-md border-2 border-dashed border-neutral-300 flex items-center justify-center group-hover/unsch:border-neutral-400 transition-colors z-[2] cursor-pointer"
                       style={{ left: barLeftPx, width: barWidthPx }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const todayDate = startOfDay(new Date());
+                        const endDate = addDays(todayDate, 2);
+                        onTaskDateChange(
+                          task.id,
+                          format(todayDate, "yyyy-MM-dd"),
+                          format(endDate, "yyyy-MM-dd"),
+                        );
+                      }}
                     >
-                      <span className="text-[10px] text-neutral-400 group-hover/unsch:text-neutral-500 whitespace-nowrap">
+                      <span className="text-[10px] text-neutral-400 group-hover/unsch:text-neutral-500 whitespace-nowrap pointer-events-none">
                         일정 배정
                       </span>
                     </div>
