@@ -214,9 +214,7 @@ export default function WorkStatusTab({
           "border-b border-neutral-100 bg-neutral-50/50",
         )}
       >
-        <div className="px-4 py-2 text-[11px] font-medium text-neutral-400 uppercase tracking-wider">
-          목차
-        </div>
+        <div className="px-4 py-2" />
         {FILE_COLUMNS.map((col) => (
           <div
             key={col.key}
