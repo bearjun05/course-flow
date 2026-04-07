@@ -17,7 +17,7 @@ import { ko } from "date-fns/locale";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import type { ChapterTask } from "@/lib/types";
+import type { ChapterTask, Lecture } from "@/lib/types";
 
 const GROUP_COLORS = [
   "#B0B0B0",
@@ -48,6 +48,7 @@ const STAGE_SHORT: Record<string, string> = {
 
 interface WeeklyCalendarProps {
   tasks: ChapterTask[];
+  lectures?: Lecture[];
   weekStart: Date;
   onWeekChange: (d: Date) => void;
   onTaskToggle?: (taskId: string) => void;
@@ -63,6 +64,8 @@ interface TaskBar {
   isEnd: boolean;
   color: string;
   label: string;
+  /** 강별 업로드 진행률 (0~1) */
+  uploadProgress: number;
 }
 
 function layoutBars(bars: TaskBar[]): TaskBar[][] {
@@ -82,8 +85,27 @@ function layoutBars(bars: TaskBar[]): TaskBar[][] {
   return rows;
 }
 
+/** 공정별 강 업로드 URL 키 매핑 */
+function getDeliverableKey(taskType: string): string | null {
+  switch (taskType) {
+    case "교안제작":
+      return "lessonPlanUrl";
+    case "촬영":
+      return "rawVideoUrl";
+    case "편집":
+      return "editedVideoUrl";
+    case "자막":
+      return "subtitleUrl";
+    case "검수":
+      return "reviewUrl";
+    default:
+      return null;
+  }
+}
+
 export default function WeeklyCalendar({
   tasks,
+  lectures = [],
   weekStart,
   onWeekChange,
   onTaskToggle,
@@ -114,6 +136,19 @@ export default function WeeklyCalendar({
       const label =
         task.chapter === 0 ? shortType : `${task.chapter}장 ${shortType}`;
 
+      // 강별 업로드 진행률 계산
+      const urlKey = getDeliverableKey(task.taskType);
+      let uploadProgress = 0;
+      if (urlKey && task.chapter > 0) {
+        const chLectures = lectures.filter((l) => l.chapter === task.chapter);
+        if (chLectures.length > 0) {
+          const uploaded = chLectures.filter(
+            (l) => !!(l as unknown as Record<string, unknown>)[urlKey],
+          ).length;
+          uploadProgress = uploaded / chLectures.length;
+        }
+      }
+
       result.push({
         task,
         startCol,
@@ -122,6 +157,7 @@ export default function WeeklyCalendar({
         isEnd: isSameDay(visEnd, tEnd),
         color,
         label,
+        uploadProgress,
       });
     }
 
@@ -242,36 +278,52 @@ export default function WeeklyCalendar({
             const done = bar.task.status === "완료";
             const leftPct = (bar.startCol / 7) * 100;
             const widthPct = (bar.span / 7) * 100;
+            const pct = Math.round(bar.uploadProgress * 100);
 
             return (
               <button
                 key={bar.task.id}
                 onClick={() => onTaskToggle?.(bar.task.id)}
                 className={cn(
-                  "absolute text-[12px] font-semibold truncate px-2.5 flex items-center transition-all hover:brightness-95",
+                  "absolute truncate flex items-center transition-all hover:brightness-95 overflow-hidden",
                   bar.isStart ? "rounded-l-lg" : "",
                   bar.isEnd ? "rounded-r-lg" : "",
-                  done && "opacity-35 line-through",
+                  done && "opacity-35",
                 )}
                 style={{
                   left: `calc(${leftPct}% + 3px)`,
                   width: `calc(${widthPct}% - 6px)`,
                   top: `${rowIdx * ROW_H + 6}px`,
                   height: `${ROW_H - 6}px`,
-                  backgroundColor: `${bar.color}35`,
-                  color: bar.color,
+                  backgroundColor: `${bar.color}18`,
                   borderLeft: bar.isStart
                     ? `3px solid ${bar.color}`
                     : undefined,
                 }}
-                title={`${bar.label} (${bar.task.status})${bar.task.assignee ? ` · ${bar.task.assignee}` : ""}`}
+                title={`${bar.label} (${bar.task.status}) ${pct}%${bar.task.assignee ? ` · ${bar.task.assignee}` : ""}`}
               >
-                {bar.label}
-                {bar.task.assignee && bar.span >= 3 && (
-                  <span className="ml-1.5 opacity-70 text-[11px]">
-                    {bar.task.assignee}
-                  </span>
+                {/* 진행률 게이지 (배경) */}
+                {bar.uploadProgress > 0 && (
+                  <div
+                    className="absolute inset-0 opacity-30"
+                    style={{
+                      width: `${pct}%`,
+                      backgroundColor: bar.color,
+                    }}
+                  />
                 )}
+                {/* 텍스트 */}
+                <span
+                  className="relative z-[1] px-2 text-[12px] font-bold truncate"
+                  style={{ color: bar.color }}
+                >
+                  {bar.label}
+                  {pct > 0 && bar.span >= 2 && (
+                    <span className="ml-1 font-semibold opacity-80 text-[10px]">
+                      {pct}%
+                    </span>
+                  )}
+                </span>
               </button>
             );
           }),

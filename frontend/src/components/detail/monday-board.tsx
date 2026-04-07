@@ -183,7 +183,7 @@ function ProgressBar({
 const COL_W = 44; // 날짜 열 1칸 폭 (px)
 const MIN_RANGE = 60; // 최소 표시 범위 (일)
 const RANGE_PADDING = 7; // 양쪽 여유 (일)
-const TODAY_COLOR = "#6BA3DE"; // 오늘 색상 (소프트 블루)
+const TODAY_COLOR = "#A8C8E8"; // 오늘 색상 (연한 블루)
 
 function MiniGantt({
   tasks,

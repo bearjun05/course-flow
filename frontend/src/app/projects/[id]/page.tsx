@@ -202,6 +202,7 @@ export default function ProjectDetailPage() {
           {scheduleTab === "calendar" && (
             <WeeklyCalendar
               tasks={tasks}
+              lectures={project.lectures}
               weekStart={weekStart}
               onWeekChange={setWeekStart}
               projectStartDate={project.createdAt}
