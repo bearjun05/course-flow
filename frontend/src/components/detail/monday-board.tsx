@@ -470,12 +470,14 @@ function MiniGantt({
               <div className="flex border-b border-neutral-100 bg-neutral-50/50 h-12 relative">
                 {dates.map((d, i) => {
                   const isTodayCol = isToday(d);
+                  const isFirstOfMonth = d.getDate() === 1;
                   return (
                     <div
                       key={i}
                       className={cn(
                         "text-center text-[11px] py-1 border-l border-neutral-100/50 relative",
                         isTodayCol && "bg-[#6B8DE3]/[0.06]",
+                        isFirstOfMonth && !isTodayCol && "border-l-neutral-300",
                       )}
                       style={{ width: COL_W }}
                     >
@@ -487,10 +489,12 @@ function MiniGantt({
                           today
                         </span>
                       )}
-                      <div
-                        className={cn("mt-1")}
-                        style={isTodayCol ? {} : undefined}
-                      >
+                      {isFirstOfMonth && !isTodayCol && (
+                        <span className="absolute -top-0.5 left-1/2 -translate-x-1/2 text-[8px] font-bold text-neutral-500 whitespace-nowrap">
+                          {format(d, "M/d")}
+                        </span>
+                      )}
+                      <div className={cn("mt-1")}>
                         {isTodayCol ? (
                           <span
                             className="inline-flex items-center justify-center h-5 w-5 rounded-full text-white text-[11px] font-bold"
@@ -499,7 +503,13 @@ function MiniGantt({
                             {format(d, "d", { locale: ko })}
                           </span>
                         ) : (
-                          format(d, "d", { locale: ko })
+                          <span
+                            className={cn(
+                              isFirstOfMonth && "font-bold text-neutral-600",
+                            )}
+                          >
+                            {format(d, "d", { locale: ko })}
+                          </span>
                         )}
                       </div>
                       <div
@@ -598,40 +608,48 @@ function MiniGantt({
                 );
               })}
 
-              {/* 일정 미정 */}
-              {unscheduled.map((task) => (
-                <div
-                  key={task.id}
-                  className="relative h-9 border-b border-neutral-50 last:border-b-0 cursor-pointer group/unsch hover:bg-neutral-50/50"
-                  onClick={(e) => {
-                    // 클릭한 위치의 날짜를 계산해서 3일짜리 일정 생성
-                    const rect = e.currentTarget.getBoundingClientRect();
-                    const x = e.clientX - rect.left;
-                    const dayIndex = Math.floor(x / COL_W);
-                    const clickedDate = addDays(minDate, dayIndex);
-                    const endDate = addDays(clickedDate, 2);
-                    onTaskDateChange(
-                      task.id,
-                      format(clickedDate, "yyyy-MM-dd"),
-                      format(endDate, "yyyy-MM-dd"),
-                    );
-                  }}
-                >
+              {/* 일정 미정 — 어제~내일 위치에 대시 테두리 바 */}
+              {unscheduled.map((task) => {
+                const yesterdayIdx = todayIndex - 1;
+                const barLeftPx = Math.max(0, yesterdayIdx) * COL_W;
+                const barWidthPx = COL_W * 3;
+                return (
                   <div
-                    className="absolute top-0 bottom-0 w-px"
-                    style={{
-                      left: todayIndex * COL_W + COL_W / 2,
-                      backgroundColor: `${TODAY_COLOR}40`,
+                    key={task.id}
+                    className="relative h-10 border-b border-neutral-50 last:border-b-0 cursor-pointer group/unsch hover:bg-neutral-50/50"
+                    onClick={(e) => {
+                      const rect = e.currentTarget.getBoundingClientRect();
+                      const x = e.clientX - rect.left;
+                      const dayIndex = Math.floor(x / COL_W);
+                      const clickedDate = addDays(minDate, dayIndex);
+                      const endDate = addDays(clickedDate, 2);
+                      onTaskDateChange(
+                        task.id,
+                        format(clickedDate, "yyyy-MM-dd"),
+                        format(endDate, "yyyy-MM-dd"),
+                      );
                     }}
-                  />
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[11px] text-neutral-300 group-hover/unsch:hidden">
-                    일정 미정
-                  </span>
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[11px] text-neutral-500 hidden group-hover/unsch:inline">
-                    클릭하여 일정 지정
-                  </span>
-                </div>
-              ))}
+                  >
+                    {/* 오늘 세로선 */}
+                    <div
+                      className="absolute top-0 bottom-0 w-px"
+                      style={{
+                        left: todayIndex * COL_W + COL_W / 2,
+                        backgroundColor: `${TODAY_COLOR}40`,
+                      }}
+                    />
+                    {/* 대시 테두리 바 */}
+                    <div
+                      className="absolute top-1.5 h-7 rounded-md border-2 border-dashed border-neutral-300 flex items-center justify-center group-hover/unsch:border-neutral-400 transition-colors"
+                      style={{ left: barLeftPx, width: barWidthPx }}
+                    >
+                      <span className="text-[10px] text-neutral-400 group-hover/unsch:text-neutral-500 whitespace-nowrap">
+                        일정 배정
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>
