@@ -60,6 +60,13 @@ export default function WeeklyCalendar({
     return { start: rangeStart, end: rangeEnd };
   }, [projectStartDate, paymentDate]);
 
+  // 프로젝트 시작월 이전으로 이동 제한
+  const canGoPrev = useMemo(() => {
+    if (!projectRange.start) return true;
+    const prevMonth = addMonths(currentMonth, -1);
+    return !isBefore(endOfMonth(prevMonth), startOfMonth(projectRange.start));
+  }, [currentMonth, projectRange.start]);
+
   // 달력에 표시할 날짜 배열 (월요일 시작)
   const days = useMemo(() => {
     const monthStart = startOfMonth(currentMonth);
@@ -98,8 +105,11 @@ export default function WeeklyCalendar({
         <Button
           variant="ghost"
           size="sm"
-          className="h-7 w-7 p-0"
-          onClick={() => onWeekChange(addMonths(currentMonth, -1))}
+          className={cn(
+            "h-7 w-7 p-0",
+            !canGoPrev && "opacity-30 pointer-events-none",
+          )}
+          onClick={() => canGoPrev && onWeekChange(addMonths(currentMonth, -1))}
         >
           <ChevronLeft className="h-4 w-4" />
         </Button>
@@ -156,21 +166,22 @@ export default function WeeklyCalendar({
           const todayFlag = isToday(day);
           const dayTasks = tasksPerDay[idx];
 
-          // 프로젝트 범위 밖인지 체크
-          const isBeforeProject =
-            projectRange.start && isBefore(day, projectRange.start);
-          const isAfterProject =
-            projectRange.end && isAfter(day, projectRange.end);
-          const isOutOfRange = isBeforeProject || isAfterProject;
+          // 프로젝트 범위 안인지 체크
+          const inRange =
+            projectRange.start && projectRange.end
+              ? !isBefore(day, projectRange.start) &&
+                !isAfter(day, projectRange.end)
+              : true;
 
           return (
             <div
               key={idx}
               className={cn(
-                "min-h-[100px] border-b border-border",
-                !isCurrentMonth && "bg-neutral-50/50",
-                isOutOfRange && isCurrentMonth && "bg-neutral-50/30",
-                todayFlag && "bg-[#6BA3DE]/[0.06]",
+                "min-h-[100px] border-b border-border transition-colors",
+                inRange
+                  ? "bg-white"
+                  : "bg-[repeating-linear-gradient(135deg,transparent,transparent_4px,#f5f5f5_4px,#f5f5f5_5px)]",
+                todayFlag && "bg-[#6BA3DE]/[0.08]",
               )}
             >
               {/* 날짜 숫자 */}
@@ -178,12 +189,11 @@ export default function WeeklyCalendar({
                 <div
                   className={cn(
                     "text-[11px]",
-                    !isCurrentMonth && "text-neutral-300",
-                    isCurrentMonth &&
-                      !todayFlag &&
-                      (isOutOfRange ? "text-neutral-300" : "text-neutral-500"),
-                    todayFlag &&
-                      "inline-flex items-center justify-center h-5 w-5 rounded-full text-white text-[11px] font-bold",
+                    todayFlag
+                      ? "inline-flex items-center justify-center h-5 w-5 rounded-full text-white text-[11px] font-bold"
+                      : inRange
+                        ? "text-neutral-700 font-medium"
+                        : "text-neutral-300",
                   )}
                   style={todayFlag ? { backgroundColor: TODAY_COLOR } : {}}
                 >
