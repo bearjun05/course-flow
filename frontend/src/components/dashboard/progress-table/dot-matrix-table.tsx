@@ -217,28 +217,10 @@ function ProjectRow({
 }
 
 export function DotMatrixTable({ projects }: DotMatrixTableProps) {
-  const [theme, setTheme] = useState<ColorTheme>("blue");
+  const theme: ColorTheme = "green";
 
   return (
     <div>
-      {/* 디버그 색상 토글 */}
-      <div className="flex items-center gap-2 mb-3">
-        {(["blue", "green"] as ColorTheme[]).map((t) => (
-          <button
-            key={t}
-            onClick={() => setTheme(t)}
-            className={cn(
-              "px-3 py-1.5 rounded-lg text-[12px] font-medium transition-colors border",
-              theme === t
-                ? "bg-foreground text-background border-foreground"
-                : "bg-white text-muted-foreground border-border hover:bg-accent/50",
-            )}
-          >
-            {t === "blue" ? "블루" : "연두"}
-          </button>
-        ))}
-      </div>
-
       <div className="rounded-2xl border border-border/50 bg-white shadow-[0_1px_8px_rgba(0,0,0,0.04)] overflow-hidden">
         <table className="w-full table-fixed">
           <colgroup>
