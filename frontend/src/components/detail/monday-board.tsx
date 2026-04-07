@@ -216,8 +216,10 @@ function MiniGantt({
   const [showLeftArrow, setShowLeftArrow] = useState(false);
   const [showRightArrow, setShowRightArrow] = useState(false);
 
-  const scheduled = tasks.filter((t) => t.startDate);
-  const unscheduled = tasks.filter((t) => !t.startDate);
+  // STAGE_ORDER 순서 유지: 일정 유무와 관계없이 항상 고정 순서
+  const allTasks = tasks; // 이미 orderedTasks로 정렬된 상태
+  const scheduled = allTasks.filter((t) => t.startDate);
+  const unscheduled = allTasks.filter((t) => !t.startDate);
 
   // 프로젝트 시작일~지급일+7일 기반 범위 + 태스크 날짜 포함
   const { minDate, totalDays, todayIndex, earliestTaskIndex, latestTaskIndex } =
@@ -401,14 +403,15 @@ function MiniGantt({
 
       <div className="rounded-xl border border-neutral-100 bg-white overflow-hidden">
         <div className="flex">
-          {/* 고정 라벨 열 */}
+          {/* 고정 라벨 열 — STAGE_ORDER 순서 고정 */}
           <div className="w-20 shrink-0 z-10 bg-white">
             {/* 헤더 빈칸 */}
             <div className="h-12 border-b border-neutral-100 bg-neutral-50/50" />
-            {/* 공정 라벨들 */}
-            {scheduled.map((task) => {
+            {/* 공정 라벨들 (일정 유무 관계없이 고정 순서) */}
+            {allTasks.map((task) => {
               const isComplete = task.status === "완료";
               const isActive = task.status === "진행";
+              const hasDate = !!task.startDate;
               const label = STAGE_SHORT[task.taskType] ?? task.taskType;
               return (
                 <div
@@ -434,36 +437,10 @@ function MiniGantt({
                     className={cn(
                       "text-xs truncate",
                       isComplete && "line-through text-muted-foreground",
+                      !hasDate && !isComplete && "text-muted-foreground",
                       isActive && "font-semibold",
                     )}
                   >
-                    {label}
-                  </span>
-                </div>
-              );
-            })}
-            {/* 일정 미정 라벨 */}
-            {unscheduled.map((task) => {
-              const isComplete = task.status === "완료";
-              const label = STAGE_SHORT[task.taskType] ?? task.taskType;
-              return (
-                <div
-                  key={task.id}
-                  className="flex items-center h-9 px-2 gap-1.5 border-b border-neutral-50 last:border-b-0"
-                >
-                  <button
-                    onClick={() => onToggle(task.id)}
-                    className={cn(
-                      "h-4 w-4 rounded border flex items-center justify-center shrink-0",
-                      isComplete
-                        ? "text-white border-transparent"
-                        : "border-neutral-300",
-                    )}
-                    style={isComplete ? { backgroundColor: chapterColor } : {}}
-                  >
-                    {isComplete && <Check className="h-3 w-3" />}
-                  </button>
-                  <span className="text-xs text-muted-foreground truncate">
                     {label}
                   </span>
                 </div>
@@ -531,128 +508,134 @@ function MiniGantt({
                 })}
               </div>
 
-              {/* 공정별 바 */}
-              {scheduled.map((task) => {
-                const s = parseISO(task.startDate!);
-                const e = task.endDate ? parseISO(task.endDate) : s;
-                const startOff = differenceInDays(s, minDate);
-                const span = differenceInDays(e, s) + 1;
-                const leftPx = startOff * COL_W;
-                const widthPx = span * COL_W;
-
-                const isComplete = task.status === "완료";
-                const isActive = task.status === "진행";
-                const isReview = task.status === "리뷰";
-                const isOverdue =
-                  task.endDate &&
-                  differenceInDays(today, parseISO(task.endDate)) > 0 &&
-                  !isComplete;
+              {/* 공정별 행 — STAGE_ORDER 순서 고정 */}
+              {allTasks.map((task) => {
+                const hasDate = !!task.startDate;
                 const label = STAGE_SHORT[task.taskType] ?? task.taskType;
 
-                return (
-                  <div
-                    key={task.id}
-                    className={cn(
-                      "relative border-b border-neutral-50 h-10 group hover:bg-neutral-50/30",
-                      isComplete && "opacity-50",
-                    )}
-                  >
-                    {/* 오늘 세로선 */}
+                if (hasDate) {
+                  // 일정 있는 태스크 → 간트 바
+                  const s = parseISO(task.startDate!);
+                  const e = task.endDate ? parseISO(task.endDate) : s;
+                  const startOff = differenceInDays(s, minDate);
+                  const span = differenceInDays(e, s) + 1;
+                  const leftPx = startOff * COL_W;
+                  const widthPx = span * COL_W;
+
+                  const isComplete = task.status === "완료";
+                  const isActive = task.status === "진행";
+                  const isReview = task.status === "리뷰";
+                  const isOverdue =
+                    task.endDate &&
+                    differenceInDays(today, parseISO(task.endDate)) > 0 &&
+                    !isComplete;
+
+                  return (
                     <div
-                      className="absolute top-0 bottom-0 w-px z-10"
-                      style={{
-                        left: todayIndex * COL_W + COL_W / 2,
-                        backgroundColor: `${TODAY_COLOR}40`,
-                      }}
-                    />
-                    {/* 간트 바 */}
-                    <div
+                      key={task.id}
                       className={cn(
-                        "absolute top-1.5 h-7 rounded-md flex items-center justify-center text-[11px] font-medium transition-shadow group/bar",
-                        isOverdue
-                          ? "bg-red-400/80 text-white"
-                          : isReview
-                            ? "bg-amber-300 text-amber-800"
-                            : isComplete
-                              ? "text-white/90"
-                              : isActive
-                                ? "text-white shadow-sm"
-                                : "bg-neutral-200 text-neutral-500",
+                        "relative border-b border-neutral-50 h-10 group hover:bg-neutral-50/30",
+                        isComplete && "opacity-50",
                       )}
-                      style={{
-                        left: leftPx,
-                        width: Math.max(widthPx, COL_W * 0.6),
-                        ...(isComplete || isActive
-                          ? {
-                              backgroundColor: isOverdue
-                                ? undefined
-                                : chapterColor,
-                            }
-                          : {}),
-                        ...(isActive ? { opacity: 0.9 } : {}),
-                      }}
                     >
                       <div
-                        className="absolute left-0 top-0 bottom-0 w-2 cursor-col-resize z-10 opacity-0 group-hover/bar:opacity-100 transition-opacity rounded-l-md hover:bg-black/10"
-                        onMouseDown={(ev) => handleDragStart(ev, task, "left")}
+                        className="absolute top-0 bottom-0 w-px z-10"
+                        style={{
+                          left: todayIndex * COL_W + COL_W / 2,
+                          backgroundColor: `${TODAY_COLOR}40`,
+                        }}
                       />
                       <div
-                        className="absolute left-2 right-2 top-0 bottom-0 cursor-grab active:cursor-grabbing flex items-center justify-center"
-                        onMouseDown={(ev) => handleDragStart(ev, task, "move")}
+                        className={cn(
+                          "absolute top-1.5 h-7 rounded-md flex items-center justify-center text-[11px] font-medium transition-shadow group/bar",
+                          isOverdue
+                            ? "bg-red-400/80 text-white"
+                            : isReview
+                              ? "bg-amber-300 text-amber-800"
+                              : isComplete
+                                ? "text-white/90"
+                                : isActive
+                                  ? "text-white shadow-sm"
+                                  : "bg-neutral-200 text-neutral-500",
+                        )}
+                        style={{
+                          left: leftPx,
+                          width: Math.max(widthPx, COL_W * 0.6),
+                          ...(isComplete || isActive
+                            ? {
+                                backgroundColor: isOverdue
+                                  ? undefined
+                                  : chapterColor,
+                              }
+                            : {}),
+                          ...(isActive ? { opacity: 0.9 } : {}),
+                        }}
                       >
-                        <span className="truncate px-1 pointer-events-none select-none">
-                          {widthPx > COL_W * 2
-                            ? (() => {
-                                // 공정별 적절한 담당자 표시
-                                const type = task.taskType;
-                                const person =
-                                  type === "교안제작" || type === "촬영"
-                                    ? tutor
-                                    : type === "승인"
-                                      ? pm
-                                      : task.assignee;
-                                return person ? `${label} · ${person}` : label;
-                              })()
-                            : ""}
-                        </span>
-                      </div>
-                      <div
-                        className="absolute right-0 top-0 bottom-0 w-2 cursor-col-resize z-10 opacity-0 group-hover/bar:opacity-100 transition-opacity rounded-r-md hover:bg-black/10"
-                        onMouseDown={(ev) => handleDragStart(ev, task, "right")}
-                      />
-                      {/* 일정 삭제 버튼 */}
-                      {onTaskDateClear && (
-                        <button
-                          className="absolute -top-1.5 -right-1.5 h-4 w-4 rounded-full bg-white border border-neutral-300 text-neutral-400 text-[10px] leading-none flex items-center justify-center opacity-0 group-hover/bar:opacity-100 transition-opacity hover:bg-red-50 hover:border-red-300 hover:text-red-500 z-20"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onTaskDateClear(task.id);
-                          }}
-                          title="일정 삭제"
+                        <div
+                          className="absolute left-0 top-0 bottom-0 w-2 cursor-col-resize z-10 opacity-0 group-hover/bar:opacity-100 transition-opacity rounded-l-md hover:bg-black/10"
+                          onMouseDown={(ev) =>
+                            handleDragStart(ev, task, "left")
+                          }
+                        />
+                        <div
+                          className="absolute left-2 right-2 top-0 bottom-0 cursor-grab active:cursor-grabbing flex items-center justify-center"
+                          onMouseDown={(ev) =>
+                            handleDragStart(ev, task, "move")
+                          }
                         >
-                          ×
-                        </button>
-                      )}
+                          <span className="truncate px-1 pointer-events-none select-none">
+                            {widthPx > COL_W * 2
+                              ? (() => {
+                                  const type = task.taskType;
+                                  const person =
+                                    type === "교안제작" || type === "촬영"
+                                      ? tutor
+                                      : type === "승인"
+                                        ? pm
+                                        : task.assignee;
+                                  return person
+                                    ? `${label} · ${person}`
+                                    : label;
+                                })()
+                              : ""}
+                          </span>
+                        </div>
+                        <div
+                          className="absolute right-0 top-0 bottom-0 w-2 cursor-col-resize z-10 opacity-0 group-hover/bar:opacity-100 transition-opacity rounded-r-md hover:bg-black/10"
+                          onMouseDown={(ev) =>
+                            handleDragStart(ev, task, "right")
+                          }
+                        />
+                        {onTaskDateClear && (
+                          <button
+                            className="absolute -top-1.5 -right-1.5 h-4 w-4 rounded-full bg-white border border-neutral-300 text-neutral-400 text-[10px] leading-none flex items-center justify-center opacity-0 group-hover/bar:opacity-100 transition-opacity hover:bg-red-50 hover:border-red-300 hover:text-red-500 z-20"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onTaskDateClear(task.id);
+                            }}
+                            title="일정 삭제"
+                          >
+                            ×
+                          </button>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                }
 
-              {/* 일정 미정 — 빈 공간 클릭 또는 일정 배정 바 클릭으로 생성 */}
-              {unscheduled.map((task) => {
+                // 일정 미정 → 일정 배정 바
                 const yesterdayIdx = todayIndex - 1;
                 const barLeftPx = Math.max(0, yesterdayIdx) * COL_W;
                 const barWidthPx = COL_W * 3;
                 return (
                   <div
                     key={task.id}
-                    className="relative h-10 border-b border-neutral-50 last:border-b-0 cursor-pointer group/unsch hover:bg-neutral-50/50"
+                    className="relative h-10 border-b border-neutral-50 cursor-pointer group/unsch hover:bg-neutral-50/50"
                     onClick={(e) => {
-                      // 빈 공간 클릭 → 클릭한 날짜에 3일짜리 일정 생성
                       const rect = e.currentTarget.getBoundingClientRect();
                       const x = e.clientX - rect.left;
-                      const dayIndex = Math.floor(x / COL_W);
-                      const clickedDate = addDays(minDate, dayIndex);
+                      const dayIdx = Math.floor(x / COL_W);
+                      const clickedDate = addDays(minDate, dayIdx);
                       const endDate = addDays(clickedDate, 2);
                       onTaskDateChange(
                         task.id,
@@ -661,7 +644,6 @@ function MiniGantt({
                       );
                     }}
                   >
-                    {/* 오늘 세로선 */}
                     <div
                       className="absolute top-0 bottom-0 w-px pointer-events-none"
                       style={{
@@ -669,7 +651,6 @@ function MiniGantt({
                         backgroundColor: `${TODAY_COLOR}40`,
                       }}
                     />
-                    {/* 일정 배정 바 클릭 → 오늘 기준 3일 일정 생성 */}
                     <div
                       className="absolute top-1.5 h-7 rounded-md border-2 border-dashed border-neutral-300 flex items-center justify-center group-hover/unsch:border-neutral-400 transition-colors z-[2] cursor-pointer"
                       style={{ left: barLeftPx, width: barWidthPx }}

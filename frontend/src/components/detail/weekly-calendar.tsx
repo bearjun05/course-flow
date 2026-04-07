@@ -183,7 +183,7 @@ export default function WeeklyCalendar({
               key={i}
               className={cn(
                 "text-center py-2.5 border-r border-border last:border-r-0",
-                todayFlag && "bg-[#F0EDE8]",
+                todayFlag && "bg-[#F5F3F0]/50",
               )}
             >
               <div
@@ -219,7 +219,7 @@ export default function WeeklyCalendar({
         {/* 오늘 배경 칼럼 */}
         {todayColIdx >= 0 && (
           <div
-            className="absolute top-0 bottom-0 bg-[#F0EDE8]/60"
+            className="absolute top-0 bottom-0 bg-[#F5F3F0]/30"
             style={{
               left: `${(todayColIdx / 7) * 100}%`,
               width: `${(1 / 7) * 100}%`,
