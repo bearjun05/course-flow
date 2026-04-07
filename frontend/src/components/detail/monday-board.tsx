@@ -721,6 +721,19 @@ export default function MondayBoard({
         completedCount: chTasks.filter((t) => t.status === "완료").length,
       }));
 
+    // 전체 장의 승인이 모두 완료되면 롤아웃 자동 "진행" 전환
+    if (rollout && rollout.status === "대기") {
+      const chapterGroups = grps.filter((g) => g.chapter > 0);
+      const allApproved =
+        chapterGroups.length > 0 &&
+        chapterGroups.every((g) =>
+          g.tasks.some((t) => t.taskType === "승인" && t.status === "완료"),
+        );
+      if (allApproved) {
+        rollout = { ...rollout, status: "진행" };
+      }
+    }
+
     return { groups: grps, rolloutTask: rollout };
   }, [tasks]);
 
