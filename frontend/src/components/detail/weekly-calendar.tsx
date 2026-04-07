@@ -66,8 +66,9 @@ interface TaskBar {
   isEnd: boolean;
   color: string;
   label: string;
-  /** 강별 업로드 진행률 (0~1) */
-  uploadProgress: number;
+  /** 업로드 완료 강 수 / 전체 강 수 */
+  uploadedCount: number;
+  totalCount: number;
   /** 시간 기반 진행률 — 오늘까지 경과 비율 (0~1) */
   timeProgress: number;
 }
@@ -142,23 +143,25 @@ export default function WeeklyCalendar({
       const label =
         task.chapter === 0 ? shortType : `${task.chapter}장 ${shortType}`;
 
-      // 강별 업로드 진행률 계산
+      // 강별 업로드 현황
       const urlKey = getDeliverableKey(task.taskType);
-      let uploadProgress = 0;
+      let uploadedCount = 0;
+      let totalCount = 0;
       if (urlKey && task.chapter > 0) {
         const chLectures = lectures.filter((l) => l.chapter === task.chapter);
-        if (chLectures.length > 0) {
-          const uploaded = chLectures.filter(
-            (l) => !!(l as unknown as Record<string, unknown>)[urlKey],
-          ).length;
-          uploadProgress = uploaded / chLectures.length;
-        }
+        totalCount = chLectures.length;
+        uploadedCount = chLectures.filter(
+          (l) => !!(l as unknown as Record<string, unknown>)[urlKey],
+        ).length;
       }
 
       // 시간 기반 진행률: 완료면 100%, 아니면 오늘까지 경과 비율
       const today = startOfDay(new Date());
       let timeProgress: number;
-      if (task.status === "완료" || uploadProgress >= 1) {
+      if (
+        task.status === "완료" ||
+        (totalCount > 0 && uploadedCount >= totalCount)
+      ) {
         timeProgress = 1;
       } else if (isBefore(today, tStart)) {
         timeProgress = 0; // 아직 시작 전
@@ -178,7 +181,8 @@ export default function WeeklyCalendar({
         isEnd: isSameDay(visEnd, tEnd),
         color,
         label,
-        uploadProgress,
+        uploadedCount,
+        totalCount,
         timeProgress,
       });
     }
@@ -300,7 +304,6 @@ export default function WeeklyCalendar({
             const done = bar.task.status === "완료";
             const leftPct = (bar.startCol / 7) * 100;
             const widthPct = (bar.span / 7) * 100;
-            const pct = Math.round(bar.uploadProgress * 100);
 
             return (
               <button
@@ -320,7 +323,7 @@ export default function WeeklyCalendar({
                   borderLeftWidth: bar.isStart ? "3px" : "1px",
                   borderLeftColor: bar.isStart ? bar.color : `${bar.color}80`,
                 }}
-                title={`${bar.label} (${bar.task.status}) ${pct}%${bar.task.assignee ? ` · ${bar.task.assignee}` : ""}`}
+                title={`${bar.label} (${bar.task.status}) ${bar.uploadedCount}/${bar.totalCount}${bar.task.assignee ? ` · ${bar.task.assignee}` : ""}`}
               >
                 {/* 시간 진행 게이지 (오늘까지 색칠) */}
                 {bar.timeProgress > 0 && (
@@ -351,13 +354,15 @@ export default function WeeklyCalendar({
                     ) : null;
                   })()}
                 </span>
-                {/* 오른쪽: 퍼센트 */}
-                <span
-                  className="relative z-[1] text-[12px] font-extrabold ml-auto pr-2 shrink-0 tabular-nums"
-                  style={{ color: bar.color }}
-                >
-                  {pct}%
-                </span>
+                {/* 오른쪽: 완료강/전체강 */}
+                {bar.totalCount > 0 && (
+                  <span
+                    className="relative z-[1] text-[12px] font-extrabold ml-auto pr-2 shrink-0 tabular-nums"
+                    style={{ color: bar.color }}
+                  >
+                    {bar.uploadedCount}/{bar.totalCount}
+                  </span>
+                )}
               </button>
             );
           }),
