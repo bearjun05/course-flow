@@ -179,7 +179,7 @@ function ProgressBar({
 const COL_W = 44; // 날짜 열 1칸 폭 (px)
 const MIN_RANGE = 60; // 최소 표시 범위 (일)
 const RANGE_PADDING = 7; // 양쪽 여유 (일)
-const TODAY_COLOR = "#4A90D9"; // 오늘 색상 (블루)
+const TODAY_COLOR = "#6BA3DE"; // 오늘 색상 (소프트 블루)
 
 function MiniGantt({
   tasks,
@@ -212,15 +212,17 @@ function MiniGantt({
   // 프로젝트 시작일~지급일+7일 기반 범위 + 태스크 날짜 포함
   const { minDate, totalDays, todayIndex, earliestTaskIndex, latestTaskIndex } =
     useMemo(() => {
-      // 기본 앵커: 프로젝트 시작일, 지급일+7, 오늘
+      // 기본 앵커: 프로젝트 시작일, 지급일+7, 오늘 (모두 로컬 자정으로 통일)
       const anchors: Date[] = [today];
-      if (projectStartDate) anchors.push(parseISO(projectStartDate));
-      if (paymentDate) anchors.push(addDays(parseISO(paymentDate), 7));
+      if (projectStartDate)
+        anchors.push(startOfDay(parseISO(projectStartDate)));
+      if (paymentDate)
+        anchors.push(addDays(startOfDay(parseISO(paymentDate)), 7));
 
       // 태스크 날짜도 포함 (범위 밖 태스크도 보이도록)
       for (const t of scheduled) {
-        if (t.startDate) anchors.push(parseISO(t.startDate));
-        if (t.endDate) anchors.push(parseISO(t.endDate));
+        if (t.startDate) anchors.push(startOfDay(parseISO(t.startDate)));
+        if (t.endDate) anchors.push(startOfDay(parseISO(t.endDate)));
       }
 
       const earliest = anchors.reduce((a, b) => (a < b ? a : b));
@@ -373,7 +375,7 @@ function MiniGantt({
           className="absolute left-2 top-1/2 -translate-y-1/2 z-30 h-8 w-8 rounded-full bg-white/80 backdrop-blur-sm border border-neutral-200 shadow-md flex items-center justify-center hover:bg-white transition-colors"
           title={leftTarget === todayIndex ? "오늘로 이동" : "일정으로 이동"}
         >
-          <ChevronDown className="h-4 w-4 rotate-90 text-[#4A90D9]" />
+          <ChevronDown className="h-4 w-4 rotate-90 text-[#6BA3DE]" />
         </button>
       )}
       {/* 오른쪽 화살표: 가려진 랜드마크로 이동 */}
@@ -383,7 +385,7 @@ function MiniGantt({
           className="absolute right-2 top-1/2 -translate-y-1/2 z-30 h-8 w-8 rounded-full bg-white/80 backdrop-blur-sm border border-neutral-200 shadow-md flex items-center justify-center hover:bg-white transition-colors"
           title={rightTarget === todayIndex ? "오늘로 이동" : "일정으로 이동"}
         >
-          <ChevronDown className="h-4 w-4 -rotate-90 text-[#4A90D9]" />
+          <ChevronDown className="h-4 w-4 -rotate-90 text-[#6BA3DE]" />
         </button>
       )}
 
