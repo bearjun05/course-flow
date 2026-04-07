@@ -179,7 +179,7 @@ function ProgressBar({
 const COL_W = 44; // 날짜 열 1칸 폭 (px)
 const MIN_RANGE = 60; // 최소 표시 범위 (일)
 const RANGE_PADDING = 7; // 양쪽 여유 (일)
-const TODAY_COLOR = "#8BA888"; // 오늘 색상 (빈티지 그린)
+const TODAY_COLOR = "#4A90D9"; // 오늘 색상 (블루)
 
 function MiniGantt({
   tasks,
@@ -373,7 +373,7 @@ function MiniGantt({
           className="absolute left-2 top-1/2 -translate-y-1/2 z-30 h-8 w-8 rounded-full bg-white/80 backdrop-blur-sm border border-neutral-200 shadow-md flex items-center justify-center hover:bg-white transition-colors"
           title={leftTarget === todayIndex ? "오늘로 이동" : "일정으로 이동"}
         >
-          <ChevronDown className="h-4 w-4 rotate-90 text-[#8BA888]" />
+          <ChevronDown className="h-4 w-4 rotate-90 text-[#4A90D9]" />
         </button>
       )}
       {/* 오른쪽 화살표: 가려진 랜드마크로 이동 */}
@@ -383,7 +383,7 @@ function MiniGantt({
           className="absolute right-2 top-1/2 -translate-y-1/2 z-30 h-8 w-8 rounded-full bg-white/80 backdrop-blur-sm border border-neutral-200 shadow-md flex items-center justify-center hover:bg-white transition-colors"
           title={rightTarget === todayIndex ? "오늘로 이동" : "일정으로 이동"}
         >
-          <ChevronDown className="h-4 w-4 -rotate-90 text-[#8BA888]" />
+          <ChevronDown className="h-4 w-4 -rotate-90 text-[#4A90D9]" />
         </button>
       )}
 
