@@ -329,16 +329,13 @@ export default function WeeklyCalendar({
                           ? pm
                           : bar.task.assignee;
                     return person ? (
-                      <span className="font-semibold opacity-60">
-                        {" "}
-                        · {person}
-                      </span>
+                      <span className="font-bold"> · {person}</span>
                     ) : null;
                   })()}
                 </span>
                 {/* 오른쪽: 퍼센트 */}
                 <span
-                  className="relative z-[1] text-[11px] font-bold ml-auto pr-2 shrink-0 tabular-nums"
+                  className="relative z-[1] text-[12px] font-extrabold ml-auto pr-2 shrink-0 tabular-nums"
                   style={{ color: bar.color }}
                 >
                   {pct}%
