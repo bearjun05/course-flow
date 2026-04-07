@@ -85,7 +85,8 @@ function getLectureDeliverableUrl(
 /*  Grid                                                               */
 /* ------------------------------------------------------------------ */
 
-const GRID_COLS = "grid-cols-[minmax(120px,3fr)_repeat(6,2fr)]";
+const GRID_COLS =
+  "grid-cols-[minmax(120px,2fr)_repeat(6,1fr)_minmax(80px,auto)]";
 
 /* ------------------------------------------------------------------ */
 /*  Sub-components                                                     */
@@ -226,6 +227,7 @@ export default function WorkStatusTab({
             </div>
           </div>
         ))}
+        <div className="px-1 py-2" />
       </div>
 
       {/* Chapter rows */}
@@ -259,14 +261,15 @@ export default function WorkStatusTab({
                   </span>
                 )}
               </div>
-              {/* 교안~검수 칼럼 빈 칸 (5개) */}
+              {/* 교안~승인 칼럼 빈 칸 (6개) */}
               <div />
               <div />
               <div />
               <div />
               <div />
-              {/* 마지막 승인 칼럼 자리에 진행률 */}
-              <div className="px-1 py-2.5 flex items-center justify-center gap-2">
+              <div />
+              {/* 8번째: 진행률 */}
+              <div className="px-2 py-2.5 flex items-center justify-end gap-2">
                 <ChapterProgress
                   completed={completedCount}
                   total={FILE_COLUMNS.length}
@@ -311,6 +314,7 @@ export default function WorkStatusTab({
                     />
                   </div>
                 ))}
+                <div />
               </div>
             ))}
           </div>
