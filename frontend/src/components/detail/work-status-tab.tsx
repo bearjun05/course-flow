@@ -85,8 +85,7 @@ function getLectureDeliverableUrl(
 /*  Grid                                                               */
 /* ------------------------------------------------------------------ */
 
-const GRID_COLS =
-  "grid-cols-[minmax(200px,2fr)_60px_repeat(6,minmax(50px,1fr))]";
+const GRID_COLS = "grid-cols-[minmax(200px,2fr)_repeat(6,minmax(50px,1fr))]";
 
 /* ------------------------------------------------------------------ */
 /*  Sub-components                                                     */
@@ -111,8 +110,12 @@ function DeliverableCell({
           href={url}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center justify-center h-6 w-6 rounded-lg transition-all hover:scale-110 shadow-sm"
-          style={{ backgroundColor: color, color: "white" }}
+          className="inline-flex items-center justify-center h-6 w-6 rounded-lg border transition-all hover:scale-105"
+          style={{
+            backgroundColor: `${color}12`,
+            borderColor: `${color}40`,
+            color,
+          }}
           title="결과물 보기"
         >
           <ExternalLink className="h-3 w-3" />
@@ -214,9 +217,6 @@ export default function WorkStatusTab({
         <div className="px-4 py-2 text-[11px] font-medium text-neutral-400 uppercase tracking-wider">
           목차
         </div>
-        <div className="px-1 py-2 text-center text-[11px] font-medium text-neutral-400">
-          진행률
-        </div>
         {FILE_COLUMNS.map((col) => (
           <div
             key={col.key}
@@ -293,7 +293,6 @@ export default function WorkStatusTab({
                     </span>
                   )}
                 </div>
-                <div />
                 {FILE_COLUMNS.map((col) => (
                   <div key={col.key} className="px-1 py-1.5">
                     <DeliverableCell
