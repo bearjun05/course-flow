@@ -8,11 +8,14 @@ import {
   endOfMonth,
   startOfWeek,
   endOfWeek,
+  startOfDay,
   format,
   parseISO,
   isWithinInterval,
   isToday,
   isSameMonth,
+  isBefore,
+  isAfter,
 } from "date-fns";
 import { ko } from "date-fns/locale";
 import { ChevronLeft, ChevronRight, Check } from "lucide-react";
@@ -20,13 +23,15 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { ChapterTask } from "@/lib/types";
 
-const TODAY_COLOR = "#98CBFF";
+const TODAY_COLOR = "#6BA3DE";
 
 interface WeeklyCalendarProps {
   tasks: ChapterTask[];
   weekStart: Date;
   onWeekChange: (d: Date) => void;
   onTaskToggle?: (taskId: string) => void;
+  projectStartDate?: string;
+  paymentDate?: string;
 }
 
 function taskLabel(t: ChapterTask): string {
@@ -39,10 +44,23 @@ export default function WeeklyCalendar({
   weekStart,
   onWeekChange,
   onTaskToggle,
+  projectStartDate,
+  paymentDate,
 }: WeeklyCalendarProps) {
   const currentMonth = weekStart;
 
-  // 달력에 표시할 날짜 배열 (월요일 시작, 6주 = 42칸)
+  // 프로젝트 범위 (시작일 ~ 지급일+7)
+  const projectRange = useMemo(() => {
+    const rangeStart = projectStartDate
+      ? startOfDay(parseISO(projectStartDate))
+      : null;
+    const rangeEnd = paymentDate
+      ? addDays(startOfDay(parseISO(paymentDate)), 7)
+      : null;
+    return { start: rangeStart, end: rangeEnd };
+  }, [projectStartDate, paymentDate]);
+
+  // 달력에 표시할 날짜 배열 (월요일 시작)
   const days = useMemo(() => {
     const monthStart = startOfMonth(currentMonth);
     const monthEnd = endOfMonth(currentMonth);
@@ -63,8 +81,8 @@ export default function WeeklyCalendar({
     return days.map((day) =>
       tasks.filter((t) => {
         if (!t.startDate) return false;
-        const s = parseISO(t.startDate);
-        const e = t.endDate ? parseISO(t.endDate) : s;
+        const s = startOfDay(parseISO(t.startDate));
+        const e = t.endDate ? startOfDay(parseISO(t.endDate)) : s;
         return isWithinInterval(day, { start: s, end: e });
       }),
     );
@@ -89,7 +107,7 @@ export default function WeeklyCalendar({
           <span className="text-sm font-semibold">{monthLabel}</span>
           <button
             onClick={() => onWeekChange(new Date())}
-            className="text-[10px] font-medium px-2 py-0.5 rounded-md bg-[#EEF4EE] text-[#7A9A72] hover:bg-[#E6F0E6] transition-colors"
+            className="text-[10px] font-medium px-2 py-0.5 rounded-md bg-[#E8F0FE] text-[#5A8AC0] hover:bg-[#D8E8FC] transition-colors"
           >
             오늘
           </button>
@@ -103,6 +121,21 @@ export default function WeeklyCalendar({
           <ChevronRight className="h-4 w-4" />
         </Button>
       </div>
+
+      {/* 프로젝트 범위 표시 */}
+      {(projectRange.start || projectRange.end) && (
+        <div className="flex items-center justify-center gap-3 px-4 py-1.5 border-b border-border bg-neutral-50/50 text-[11px] text-neutral-500">
+          <span className="flex items-center gap-1.5">
+            <span className="h-1.5 w-1.5 rounded-full bg-[#6BA3DE]" />
+            프로젝트 기간
+          </span>
+          <span className="tabular-nums">
+            {projectRange.start ? format(projectRange.start, "yy.MM.dd") : "—"}
+            {" ~ "}
+            {projectRange.end ? format(projectRange.end, "yy.MM.dd") : "—"}
+          </span>
+        </div>
+      )}
 
       {/* 요일 헤더 */}
       <div className="grid grid-cols-7 border-b border-border">
@@ -122,7 +155,13 @@ export default function WeeklyCalendar({
           const isCurrentMonth = isSameMonth(day, currentMonth);
           const todayFlag = isToday(day);
           const dayTasks = tasksPerDay[idx];
-          const isWeekEnd = idx % 7 >= 5; // 토, 일
+
+          // 프로젝트 범위 밖인지 체크
+          const isBeforeProject =
+            projectRange.start && isBefore(day, projectRange.start);
+          const isAfterProject =
+            projectRange.end && isAfter(day, projectRange.end);
+          const isOutOfRange = isBeforeProject || isAfterProject;
 
           return (
             <div
@@ -130,7 +169,8 @@ export default function WeeklyCalendar({
               className={cn(
                 "min-h-[100px] border-b border-border",
                 !isCurrentMonth && "bg-neutral-50/50",
-                todayFlag && "bg-[#98CBFF]/[0.06]",
+                isOutOfRange && isCurrentMonth && "bg-neutral-50/30",
+                todayFlag && "bg-[#6BA3DE]/[0.06]",
               )}
             >
               {/* 날짜 숫자 */}
@@ -139,8 +179,9 @@ export default function WeeklyCalendar({
                   className={cn(
                     "text-[11px]",
                     !isCurrentMonth && "text-neutral-300",
-                    isCurrentMonth && !todayFlag && "text-neutral-500",
-                    isWeekEnd && isCurrentMonth && "text-neutral-400",
+                    isCurrentMonth &&
+                      !todayFlag &&
+                      (isOutOfRange ? "text-neutral-300" : "text-neutral-500"),
                     todayFlag &&
                       "inline-flex items-center justify-center h-5 w-5 rounded-full text-white text-[11px] font-bold",
                   )}
@@ -179,7 +220,7 @@ export default function WeeklyCalendar({
                             "h-2.5 w-2.5 rounded-sm border flex items-center justify-center shrink-0",
                             done
                               ? "border-neutral-300 bg-neutral-200 text-neutral-400"
-                              : "border-[#98CBFF]/40",
+                              : "border-[#6BA3DE]/40",
                           )}
                           style={
                             done ? {} : { backgroundColor: `${TODAY_COLOR}30` }

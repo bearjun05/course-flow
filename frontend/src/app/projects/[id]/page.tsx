@@ -202,6 +202,8 @@ export default function ProjectDetailPage() {
               tasks={tasks}
               weekStart={weekStart}
               onWeekChange={setWeekStart}
+              projectStartDate={project.createdAt}
+              paymentDate={project.paymentDate}
               onTaskToggle={(taskId) => {
                 handleTasksChange(
                   tasks.map((t) =>

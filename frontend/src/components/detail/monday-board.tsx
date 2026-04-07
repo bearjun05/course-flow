@@ -748,7 +748,7 @@ export default function MondayBoard({
     );
 
     if (active) {
-      const stageLabel = `${STAGE_SHORT[active.taskType] ?? active.taskType} ${active.status === "리뷰" ? "리뷰 중" : "진행 중"}`;
+      const stageLabel = active.status === "리뷰" ? "리뷰 중" : "진행 중";
       return {
         label: stageLabel,
         type: overdue ? "overdue" : "active",
