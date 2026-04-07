@@ -85,6 +85,12 @@ export interface Lecture {
   lectureNumber: number;
   label: string;
   videoUrls: string[];
+  /** 공정별 결과물 링크 (업로드 시 자동 생성) */
+  lessonPlanUrl?: string; // 교안 링크
+  rawVideoUrl?: string; // 촬영 원본 영상
+  editedVideoUrl?: string; // 편집 완료 영상
+  subtitleUrl?: string; // 자막 파일
+  reviewUrl?: string; // 검수 (백오피스 링크)
 }
 
 export interface ReviewScore {

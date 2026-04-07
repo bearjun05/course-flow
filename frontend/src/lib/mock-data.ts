@@ -188,11 +188,14 @@ const project4Tasks = createChapterTasks(
 function createLectures(
   projectId: string,
   chapterDurations: number[],
+  /** 완료 챕터 수 (이 장까지 결과물 링크 생성) */
+  completedChapters = 0,
 ): Lecture[] {
   const lectures: Lecture[] = [];
   chapterDurations.forEach((dur, idx) => {
     const ch = idx + 1;
     const count = Math.max(1, Math.round(dur));
+    const hasDeliverables = ch <= completedChapters;
     for (let l = 1; l <= count; l++) {
       lectures.push({
         id: `${projectId}-lec-${ch}-${l}`,
@@ -204,13 +207,22 @@ function createLectures(
           l <= 1
             ? [`https://videos.example.com/${projectId}/${ch}-${l}.mp4`]
             : [],
+        ...(hasDeliverables
+          ? {
+              lessonPlanUrl: `https://docs.google.com/document/d/${projectId}-ch${ch}-${l}`,
+              rawVideoUrl: `https://drive.google.com/file/d/${projectId}-raw-${ch}-${l}`,
+              editedVideoUrl: `https://drive.google.com/file/d/${projectId}-edit-${ch}-${l}`,
+              subtitleUrl: `https://drive.google.com/file/d/${projectId}-sub-${ch}-${l}.srt`,
+              reviewUrl: `https://backoffice.example.com/${projectId}/review/${ch}-${l}`,
+            }
+          : {}),
       });
     }
   });
   return lectures;
 }
 
-const proj2Lectures = createLectures("proj-2", [2.0, 2.5, 2.0, 2.5, 2.0]);
+const proj2Lectures = createLectures("proj-2", [2.0, 2.5, 2.0, 2.5, 2.0], 2);
 
 function makePmReview(scores: number[]): VideoReview {
   const qIds = ["pm-q1", "pm-q2", "pm-q3", "pm-q4", "pm-q5", "pm-q6"];
@@ -293,7 +305,7 @@ export const mockProjects: Project[] = [
     backofficeLink: "https://backoffice.example.com/proj-1",
     trafficLight: "green",
     tasks: project1Tasks,
-    lectures: createLectures("proj-1", [1.5, 2.0, 1.5, 2.0]),
+    lectures: createLectures("proj-1", [1.5, 2.0, 1.5, 2.0], 4),
     videoFeedbacks: [],
     createdAt: "2025-10-01T09:00:00Z",
   },
@@ -347,7 +359,7 @@ export const mockProjects: Project[] = [
     backofficeLink: "https://backoffice.example.com/proj-3",
     trafficLight: "yellow",
     tasks: project3Tasks,
-    lectures: createLectures("proj-3", [2.5, 3.0, 2.5]),
+    lectures: createLectures("proj-3", [2.5, 3.0, 2.5], 3),
     videoFeedbacks: [],
     note: "자막 작업 진행 중, 롤아웃 D-7",
     createdAt: "2025-12-01T09:00:00Z",
@@ -392,7 +404,7 @@ export const mockProjects: Project[] = [
     slackChannel: "#courseflow-marketing",
     trafficLight: "green",
     tasks: project6Tasks,
-    lectures: createLectures("proj-6", [2.0, 2.0, 2.0]),
+    lectures: createLectures("proj-6", [2.0, 2.0, 2.0], 3),
     videoFeedbacks: [],
     createdAt: "2025-12-01T09:00:00Z",
   },

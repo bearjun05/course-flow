@@ -10,6 +10,7 @@ import {
   Search,
   ThumbsUp,
   Upload,
+  ExternalLink,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { ChapterTask, Lecture, TaskStatus } from "@/lib/types";
@@ -22,6 +23,9 @@ interface WorkStatusTabProps {
   tasks: ChapterTask[];
   lectures: Lecture[];
   chapterCount: number;
+  /** 프로젝트 레벨 링크 (교안, 백오피스 등) */
+  lessonPlanLink?: string;
+  backofficeLink?: string;
 }
 
 interface ChapterRow {
@@ -44,29 +48,50 @@ const FILE_COLUMNS = [
   { key: "승인", label: "승인", icon: ThumbsUp },
 ] as const;
 
+/** 공정별 강 단위 결과물 URL 매핑 */
+function getLectureDeliverableUrl(
+  lecture: Lecture,
+  taskKey: string,
+): string | undefined {
+  switch (taskKey) {
+    case "교안제작":
+      return lecture.lessonPlanUrl;
+    case "촬영":
+      return lecture.rawVideoUrl;
+    case "편집":
+      return lecture.editedVideoUrl;
+    case "자막":
+      return lecture.subtitleUrl;
+    case "검수":
+      return lecture.reviewUrl;
+    default:
+      return undefined;
+  }
+}
+
 const STATUS_INDICATOR: Record<
   TaskStatus,
   { color: string; bg: string; label: string }
 > = {
   완료: { color: "text-[#6ECC9A]", bg: "bg-[#6ECC9A]/10", label: "완료" },
-  진행: { color: "text-[#8AAE50]", bg: "bg-[#8AAE50]/10", label: "진행" },
+  진행: { color: "text-[#6BA3DE]", bg: "bg-[#6BA3DE]/10", label: "진행" },
   리뷰: { color: "text-[#F5C842]", bg: "bg-[#F5C842]/10", label: "리뷰" },
   대기: { color: "text-neutral-300", bg: "bg-neutral-50", label: "대기" },
 };
 
 const GROUP_COLORS = [
-  "#B0B0B0", // CH0 사전 (neutral)
-  "#E4A0A0", // CH1 분홍
-  "#E4B89C", // CH2 살구
-  "#E4CC9C", // CH3 주황
-  "#E0D49C", // CH4 노랑
-  "#C8D89C", // CH5 연두
-  "#9CD4B0", // CH6 초록
-  "#9CCCC8", // CH7 민트
-  "#9CB8D8", // CH8 하늘
-  "#B0A8D8", // CH9 보라
-  "#D0A8C8", // CH10 자주
-  "#C8BCB0", // CH11 베이지
+  "#B0B0B0",
+  "#E4A0A0",
+  "#E4B89C",
+  "#E4CC9C",
+  "#E0D49C",
+  "#C8D89C",
+  "#9CD4B0",
+  "#9CCCC8",
+  "#9CB8D8",
+  "#B0A8D8",
+  "#D0A8C8",
+  "#C8BCB0",
 ];
 
 /* ------------------------------------------------------------------ */
@@ -107,6 +132,42 @@ function StatusDot({ status }: { status: TaskStatus | undefined }) {
   );
 }
 
+/** 강별 결과물 링크 셀 */
+function DeliverableCell({
+  lecture,
+  taskKey,
+}: {
+  lecture: Lecture;
+  taskKey: string;
+}) {
+  const url = getLectureDeliverableUrl(lecture, taskKey);
+
+  if (url) {
+    return (
+      <div className="flex items-center justify-center">
+        <a
+          href={url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="group/link inline-flex items-center justify-center h-5 w-5 rounded-full bg-[#6ECC9A]/10 text-[#6ECC9A] hover:bg-[#6ECC9A]/20 transition-colors"
+          title="결과물 보기"
+        >
+          <ExternalLink className="h-3 w-3" />
+        </a>
+      </div>
+    );
+  }
+
+  // 업로드 대기 (링크 없음)
+  return (
+    <div className="flex items-center justify-center">
+      <span className="inline-flex items-center justify-center h-5 w-5 rounded-full text-neutral-300">
+        <Upload className="h-3 w-3" />
+      </span>
+    </div>
+  );
+}
+
 function ChapterProgress({
   completed,
   total,
@@ -119,7 +180,7 @@ function ChapterProgress({
     <div className="flex items-center gap-1.5">
       <div className="w-12 h-1.5 rounded-full bg-[#F0F0F0] overflow-hidden">
         <div
-          className="h-full rounded-full bg-[#00C875] transition-all"
+          className="h-full rounded-full bg-[#6BA3DE] transition-all"
           style={{ width: `${pct}%` }}
         />
       </div>
@@ -201,6 +262,19 @@ export default function WorkStatusTab({
         const completedCount = FILE_COLUMNS.filter(
           (col) => chapter.taskStatuses[col.key] === "완료",
         ).length;
+
+        // 강별 결과물 기준 완료율
+        const lecDeliverableCount = chapter.lectures.reduce((sum, lec) => {
+          const delivered = FILE_COLUMNS.filter(
+            (col) =>
+              col.key !== "승인" && getLectureDeliverableUrl(lec, col.key),
+          ).length;
+          return sum + delivered;
+        }, 0);
+        const lecTotalSlots =
+          chapter.lectures.length *
+          FILE_COLUMNS.filter((col) => col.key !== "승인").length;
+
         return (
           <div key={chapter.chapter}>
             {/* Chapter header row */}
@@ -215,6 +289,11 @@ export default function WorkStatusTab({
                 <span className="ml-2 text-[11px] text-muted-foreground">
                   {chapter.lectures.length}강
                 </span>
+                {lecTotalSlots > 0 && (
+                  <span className="ml-2 text-[10px] text-neutral-400">
+                    (파일 {lecDeliverableCount}/{lecTotalSlots})
+                  </span>
+                )}
               </div>
               {FILE_COLUMNS.map((col) => (
                 <div key={col.key} className="px-1 py-2.5">
@@ -251,20 +330,7 @@ export default function WorkStatusTab({
                 </div>
                 {FILE_COLUMNS.map((col) => (
                   <div key={col.key} className="px-1 py-1.5">
-                    {/* Lecture-level status inherits from chapter task */}
-                    {col.key === "촬영" ? (
-                      <div className="flex items-center justify-center">
-                        {lecture.videoUrls.length > 0 ? (
-                          <CheckCircle2 className="h-4 w-4 text-[#6ECC9A]" />
-                        ) : (
-                          <span className="text-neutral-200">—</span>
-                        )}
-                      </div>
-                    ) : (
-                      <div className="flex items-center justify-center">
-                        <span className="text-neutral-100">·</span>
-                      </div>
-                    )}
+                    <DeliverableCell lecture={lecture} taskKey={col.key} />
                   </div>
                 ))}
                 <div />
