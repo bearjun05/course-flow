@@ -263,7 +263,7 @@ export default function InfoGuideTab({
             if (v && onStatusChange) onStatusChange(v as ProjectStatus);
           }}
         >
-          <SelectTrigger className="h-6 w-auto gap-1 rounded-full border-none px-2.5 text-[11px] font-medium shadow-none bg-[#FDF5E6] text-[#A89060] [&_svg]:text-[#C4A96A]">
+          <SelectTrigger className="h-6 w-auto gap-1 rounded-full border-none px-2.5 text-[11px] font-medium shadow-none bg-[#E8F0FE] text-[#5A8AC0] [&_svg]:text-[#7AB4E0]">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -293,8 +293,9 @@ export default function InfoGuideTab({
               cy="10"
               r="8"
               fill="none"
-              stroke="#8AAE50"
+              stroke="#4A90D9"
               strokeWidth="2.5"
+              opacity="0.75"
               strokeLinecap="round"
               strokeDasharray={`${(progressPct / 100) * 50.27} 50.27`}
               transform="rotate(-90 10 10)"

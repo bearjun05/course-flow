@@ -172,7 +172,8 @@ function ProgressBar({
 /* ------------------------------------------------------------------ */
 
 const COL_W = 44; // 날짜 열 1칸 폭 (px)
-const TOTAL_RANGE = 60; // 전체 표시 범위 (일)
+const MIN_RANGE = 60; // 최소 표시 범위 (일)
+const RANGE_PADDING = 7; // 양쪽 여유 (일)
 const TODAY_COLOR = "#8BA888"; // 오늘 색상 (빈티지 그린)
 
 function MiniGantt({
@@ -199,45 +200,104 @@ function MiniGantt({
   const scheduled = tasks.filter((t) => t.startDate);
   const unscheduled = tasks.filter((t) => !t.startDate);
 
-  // 오늘 기준 앞뒤로 넉넉하게 범위 설정
-  const minDate = useMemo(() => addDays(today, -20), [today]);
-  const totalDays = TOTAL_RANGE;
+  // 실제 태스크 날짜 + 오늘을 모두 포함하는 동적 범위
+  const { minDate, totalDays, todayIndex, earliestTaskIndex, latestTaskIndex } =
+    useMemo(() => {
+      const allDates: Date[] = [today];
+      for (const t of scheduled) {
+        if (t.startDate) allDates.push(parseISO(t.startDate));
+        if (t.endDate) allDates.push(parseISO(t.endDate));
+      }
+      const earliest = allDates.reduce((a, b) => (a < b ? a : b));
+      const latest = allDates.reduce((a, b) => (a > b ? a : b));
+
+      let rangeStart = addDays(earliest, -RANGE_PADDING);
+      let rangeEnd = addDays(latest, RANGE_PADDING);
+      let days = differenceInDays(rangeEnd, rangeStart) + 1;
+
+      // 최소 범위 보장 (빈 프로젝트에서도 클릭으로 일정 지정 가능)
+      if (days < MIN_RANGE) {
+        const extra = Math.ceil((MIN_RANGE - days) / 2);
+        rangeStart = addDays(rangeStart, -extra);
+        days = MIN_RANGE;
+      }
+
+      // 태스크 랜드마크 인덱스
+      let eIdx = -1;
+      let lIdx = -1;
+      if (scheduled.length > 0) {
+        const taskStarts = scheduled.map((t) => parseISO(t.startDate!));
+        const taskEnds = scheduled
+          .filter((t) => t.endDate)
+          .map((t) => parseISO(t.endDate!));
+        const taskEarliest = taskStarts.reduce((a, b) => (a < b ? a : b));
+        const allTaskDates = [...taskStarts, ...taskEnds];
+        const taskLatest = allTaskDates.reduce((a, b) => (a > b ? a : b));
+        eIdx = differenceInDays(taskEarliest, rangeStart);
+        lIdx = differenceInDays(taskLatest, rangeStart);
+      }
+
+      return {
+        minDate: rangeStart,
+        totalDays: days,
+        todayIndex: differenceInDays(today, rangeStart),
+        earliestTaskIndex: eIdx,
+        latestTaskIndex: lIdx,
+      };
+    }, [today, scheduled]);
 
   const dates = useMemo(
     () => Array.from({ length: totalDays }, (_, i) => addDays(minDate, i)),
     [minDate, totalDays],
   );
 
-  const todayIndex = differenceInDays(today, minDate);
+  // 특정 인덱스 위치로 스크롤 (뷰포트 1/3 지점에 배치)
+  const scrollToIndex = useCallback(
+    (idx: number, behavior: ScrollBehavior = "smooth") => {
+      const el = scrollRef.current;
+      if (!el) return;
+      const viewW = el.clientWidth;
+      el.scrollTo({ left: Math.max(0, idx * COL_W - viewW / 3), behavior });
+    },
+    [],
+  );
 
-  // 오늘을 1/3 위치에 놓도록 초기 스크롤
-  const scrollToToday = useCallback(() => {
-    const el = scrollRef.current;
-    if (!el) return;
-    const viewW = el.clientWidth;
-    const targetLeft = todayIndex * COL_W - viewW / 3;
-    el.scrollTo({ left: Math.max(0, targetLeft), behavior: "smooth" });
-  }, [todayIndex]);
+  // 마운트 시 오늘 위치로 스크롤
+  const mountedRef = useRef(false);
+  if (!mountedRef.current) {
+    mountedRef.current = true;
+    setTimeout(() => scrollToIndex(todayIndex, "instant"), 50);
+  }
 
-  // 마운트 시 + 오늘 위치 세팅
-  useState(() => {
-    // setTimeout으로 DOM 렌더 후 스크롤
-    setTimeout(() => scrollToToday(), 50);
-  });
+  // 스크롤 시 화살표 표시 여부 + 이동 대상 판단
+  const [leftTarget, setLeftTarget] = useState<number | null>(null);
+  const [rightTarget, setRightTarget] = useState<number | null>(null);
 
-  // 스크롤 시 화살표 표시 여부 판단
   const handleScroll = useCallback(() => {
     const el = scrollRef.current;
     if (!el) return;
-    const viewW = el.clientWidth;
-    const todayLeft = todayIndex * COL_W;
-    const scrollLeft = el.scrollLeft;
-    const scrollRight = scrollLeft + viewW;
+    const viewLeft = el.scrollLeft;
+    const viewRight = viewLeft + el.clientWidth;
 
-    // 오늘이 뷰포트 밖이면 화살표 표시
-    setShowLeftArrow(todayLeft < scrollLeft);
-    setShowRightArrow(todayLeft > scrollRight - COL_W);
-  }, [todayIndex]);
+    // 왼쪽에 가려진 랜드마크 중 가장 가까운 것
+    const landmarks = [
+      earliestTaskIndex >= 0 ? earliestTaskIndex : null,
+      todayIndex,
+      latestTaskIndex >= 0 ? latestTaskIndex : null,
+    ].filter((v): v is number => v !== null);
+
+    const offLeft = landmarks
+      .filter((idx) => idx * COL_W < viewLeft)
+      .sort((a, b) => b - a);
+    const offRight = landmarks
+      .filter((idx) => idx * COL_W > viewRight - COL_W)
+      .sort((a, b) => a - b);
+
+    setShowLeftArrow(offLeft.length > 0);
+    setLeftTarget(offLeft.length > 0 ? offLeft[0] : null);
+    setShowRightArrow(offRight.length > 0);
+    setRightTarget(offRight.length > 0 ? offRight[0] : null);
+  }, [todayIndex, earliestTaskIndex, latestTaskIndex]);
 
   /** 드래그 공통 */
   const handleDragStart = useCallback(
@@ -291,22 +351,22 @@ function MiniGantt({
 
   return (
     <div className="px-4 pl-10 pb-3 pt-1 relative" ref={containerRef}>
-      {/* 왼쪽 화살표: 오늘로 이동 */}
-      {showLeftArrow && (
+      {/* 왼쪽 화살표: 가려진 랜드마크로 이동 */}
+      {showLeftArrow && leftTarget !== null && (
         <button
-          onClick={scrollToToday}
+          onClick={() => scrollToIndex(leftTarget)}
           className="absolute left-2 top-1/2 -translate-y-1/2 z-30 h-8 w-8 rounded-full bg-white/80 backdrop-blur-sm border border-neutral-200 shadow-md flex items-center justify-center hover:bg-white transition-colors"
-          title="오늘로 이동"
+          title={leftTarget === todayIndex ? "오늘로 이동" : "일정으로 이동"}
         >
           <ChevronDown className="h-4 w-4 rotate-90 text-[#8BA888]" />
         </button>
       )}
-      {/* 오른쪽 화살표 */}
-      {showRightArrow && (
+      {/* 오른쪽 화살표: 가려진 랜드마크로 이동 */}
+      {showRightArrow && rightTarget !== null && (
         <button
-          onClick={scrollToToday}
+          onClick={() => scrollToIndex(rightTarget)}
           className="absolute right-2 top-1/2 -translate-y-1/2 z-30 h-8 w-8 rounded-full bg-white/80 backdrop-blur-sm border border-neutral-200 shadow-md flex items-center justify-center hover:bg-white transition-colors"
-          title="오늘로 이동"
+          title={rightTarget === todayIndex ? "오늘로 이동" : "일정으로 이동"}
         >
           <ChevronDown className="h-4 w-4 -rotate-90 text-[#8BA888]" />
         </button>
