@@ -85,7 +85,7 @@ function getLectureDeliverableUrl(
 /*  Grid                                                               */
 /* ------------------------------------------------------------------ */
 
-const GRID_COLS = "grid-cols-[minmax(200px,2fr)_repeat(6,minmax(50px,1fr))]";
+const GRID_COLS = "grid-cols-[minmax(160px,1.2fr)_repeat(6,40px)]";
 
 /* ------------------------------------------------------------------ */
 /*  Sub-components                                                     */
@@ -110,25 +110,25 @@ function DeliverableCell({
           href={url}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center justify-center h-6 w-6 rounded-lg border transition-all hover:scale-105"
+          className="inline-flex items-center justify-center h-7 w-7 rounded-lg border transition-all hover:scale-110"
           style={{
-            backgroundColor: `${color}12`,
-            borderColor: `${color}40`,
+            backgroundColor: `${color}15`,
+            borderColor: `${color}50`,
             color,
           }}
           title="결과물 보기"
         >
-          <ExternalLink className="h-3 w-3" />
+          <ExternalLink className="h-3.5 w-3.5" />
         </a>
       </div>
     );
   }
 
-  // 업로드 대기 — 빈 원형 점선
+  // 업로드 대기 — 빈 점선
   return (
     <div className="flex items-center justify-center">
-      <span className="inline-flex items-center justify-center h-6 w-6 rounded-lg border-2 border-dashed border-neutral-200">
-        <Circle className="h-2 w-2 text-neutral-300" />
+      <span className="inline-flex items-center justify-center h-7 w-7 rounded-lg border-2 border-dashed border-neutral-200">
+        <Circle className="h-2.5 w-2.5 text-neutral-300" />
       </span>
     </div>
   );
