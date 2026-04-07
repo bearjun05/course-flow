@@ -103,6 +103,22 @@ export default function ProjectDetailPage() {
     setChapterDurations((prev) => [...prev, 0]);
   }, [tasks, projectId]);
 
+  const handleDeleteChapter = useCallback((chapter: number) => {
+    setTasks((prev) => {
+      // 해당 장의 태스크 제거
+      const filtered = prev.filter((t) => t.chapter !== chapter);
+      // 삭제된 장보다 큰 번호를 가진 장들의 번호를 1씩 당기기
+      return filtered.map((t) =>
+        t.chapter > chapter ? { ...t, chapter: t.chapter - 1 } : t,
+      );
+    });
+    setChapterDurations((prev) => {
+      const next = [...prev];
+      next.splice(chapter - 1, 1); // 1장 = index 0
+      return next;
+    });
+  }, []);
+
   if (!project) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen text-sm text-muted-foreground">
@@ -176,6 +192,9 @@ export default function ProjectDetailPage() {
               tasks={tasks}
               onTasksChange={handleTasksChange}
               onAddChapter={handleAddChapter}
+              onDeleteChapter={handleDeleteChapter}
+              projectStartDate={project.createdAt}
+              paymentDate={project.paymentDate}
             />
           )}
           {scheduleTab === "calendar" && (

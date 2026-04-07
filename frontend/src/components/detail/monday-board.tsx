@@ -62,6 +62,11 @@ interface MondayBoardProps {
   tasks: ChapterTask[];
   onTasksChange: (tasks: ChapterTask[]) => void;
   onAddChapter?: () => void;
+  onDeleteChapter?: (chapter: number) => void;
+  /** 프로젝트 생성일 또는 사용자 지정 시작일 */
+  projectStartDate?: string;
+  /** 강의 지급일 */
+  paymentDate?: string;
 }
 
 interface ChapterGroup {
@@ -181,6 +186,8 @@ function MiniGantt({
   chapterColor,
   onToggle,
   onTaskDateChange,
+  projectStartDate,
+  paymentDate,
 }: {
   tasks: ChapterTask[];
   chapterColor: string;
@@ -190,6 +197,8 @@ function MiniGantt({
     startDate: string,
     endDate: string,
   ) => void;
+  projectStartDate?: string;
+  paymentDate?: string;
 }) {
   const today = startOfDay(new Date());
   const containerRef = useRef<HTMLDivElement>(null);
@@ -200,16 +209,22 @@ function MiniGantt({
   const scheduled = tasks.filter((t) => t.startDate);
   const unscheduled = tasks.filter((t) => !t.startDate);
 
-  // 실제 태스크 날짜 + 오늘을 모두 포함하는 동적 범위
+  // 프로젝트 시작일~지급일+7일 기반 범위 + 태스크 날짜 포함
   const { minDate, totalDays, todayIndex, earliestTaskIndex, latestTaskIndex } =
     useMemo(() => {
-      const allDates: Date[] = [today];
+      // 기본 앵커: 프로젝트 시작일, 지급일+7, 오늘
+      const anchors: Date[] = [today];
+      if (projectStartDate) anchors.push(parseISO(projectStartDate));
+      if (paymentDate) anchors.push(addDays(parseISO(paymentDate), 7));
+
+      // 태스크 날짜도 포함 (범위 밖 태스크도 보이도록)
       for (const t of scheduled) {
-        if (t.startDate) allDates.push(parseISO(t.startDate));
-        if (t.endDate) allDates.push(parseISO(t.endDate));
+        if (t.startDate) anchors.push(parseISO(t.startDate));
+        if (t.endDate) anchors.push(parseISO(t.endDate));
       }
-      const earliest = allDates.reduce((a, b) => (a < b ? a : b));
-      const latest = allDates.reduce((a, b) => (a > b ? a : b));
+
+      const earliest = anchors.reduce((a, b) => (a < b ? a : b));
+      const latest = anchors.reduce((a, b) => (a > b ? a : b));
 
       let rangeStart = addDays(earliest, -RANGE_PADDING);
       let rangeEnd = addDays(latest, RANGE_PADDING);
@@ -633,6 +648,9 @@ export default function MondayBoard({
   tasks,
   onTasksChange,
   onAddChapter,
+  onDeleteChapter,
+  projectStartDate,
+  paymentDate,
 }: MondayBoardProps) {
   const [expandedGroups, setExpandedGroups] = useState<Set<number>>(new Set());
 
@@ -820,14 +838,31 @@ export default function MondayBoard({
               </div>
             </div>
 
-            {/* 펼침: 미니 간트 타임라인 */}
+            {/* 펼침: 미니 간트 타임라인 + 장 삭제 */}
             {expanded && (
-              <MiniGantt
-                tasks={orderedTasks}
-                chapterColor={group.color}
-                onToggle={toggleTask}
-                onTaskDateChange={handleTaskDateChange}
-              />
+              <>
+                <MiniGantt
+                  tasks={orderedTasks}
+                  chapterColor={group.color}
+                  onToggle={toggleTask}
+                  onTaskDateChange={handleTaskDateChange}
+                  projectStartDate={projectStartDate}
+                  paymentDate={paymentDate}
+                />
+                {onDeleteChapter && group.chapter > 0 && (
+                  <div className="px-4 pl-10 pb-2 flex justify-end">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onDeleteChapter(group.chapter);
+                      }}
+                      className="text-[11px] text-neutral-400 hover:text-red-500 transition-colors px-2 py-1 rounded-md hover:bg-red-50"
+                    >
+                      {group.label} 삭제
+                    </button>
+                  </div>
+                )}
+              </>
             )}
           </div>
         );
