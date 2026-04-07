@@ -54,6 +54,8 @@ interface WeeklyCalendarProps {
   onTaskToggle?: (taskId: string) => void;
   projectStartDate?: string;
   paymentDate?: string;
+  tutor?: string;
+  pm?: string;
 }
 
 interface TaskBar {
@@ -109,6 +111,8 @@ export default function WeeklyCalendar({
   weekStart,
   onWeekChange,
   onTaskToggle,
+  tutor,
+  pm,
 }: WeeklyCalendarProps) {
   const week = useMemo(() => {
     const monday = startOfWeek(weekStart, { weekStartsOn: 1 });
@@ -285,27 +289,25 @@ export default function WeeklyCalendar({
                 key={bar.task.id}
                 onClick={() => onTaskToggle?.(bar.task.id)}
                 className={cn(
-                  "absolute truncate flex items-center transition-all hover:brightness-95 overflow-hidden",
-                  bar.isStart ? "rounded-l-lg" : "",
-                  bar.isEnd ? "rounded-r-lg" : "",
-                  done && "opacity-35",
+                  "absolute truncate flex items-center transition-all hover:bg-neutral-50 overflow-hidden border rounded-md",
+                  done && "opacity-35 line-through",
                 )}
                 style={{
                   left: `calc(${leftPct}% + 3px)`,
                   width: `calc(${widthPct}% - 6px)`,
                   top: `${rowIdx * ROW_H + 6}px`,
                   height: `${ROW_H - 6}px`,
-                  backgroundColor: `${bar.color}18`,
-                  borderLeft: bar.isStart
-                    ? `3px solid ${bar.color}`
-                    : undefined,
+                  backgroundColor: "white",
+                  borderColor: `${bar.color}80`,
+                  borderLeftWidth: bar.isStart ? "3px" : "1px",
+                  borderLeftColor: bar.isStart ? bar.color : `${bar.color}80`,
                 }}
                 title={`${bar.label} (${bar.task.status}) ${pct}%${bar.task.assignee ? ` · ${bar.task.assignee}` : ""}`}
               >
                 {/* 진행률 게이지 (배경) */}
                 {bar.uploadProgress > 0 && (
                   <div
-                    className="absolute inset-0 opacity-30"
+                    className="absolute left-0 top-0 bottom-0 opacity-15 rounded-l-sm"
                     style={{
                       width: `${pct}%`,
                       backgroundColor: bar.color,
@@ -314,16 +316,32 @@ export default function WeeklyCalendar({
                 )}
                 {/* 텍스트 */}
                 <span
-                  className="relative z-[1] px-2 text-[12px] font-bold truncate"
+                  className="relative z-[1] px-2 text-[12px] font-extrabold truncate"
                   style={{ color: bar.color }}
                 >
                   {bar.label}
                   {pct > 0 && bar.span >= 2 && (
-                    <span className="ml-1 font-semibold opacity-80 text-[10px]">
-                      {pct}%
-                    </span>
+                    <span className="ml-1 font-bold text-[10px]">{pct}%</span>
                   )}
                 </span>
+                {bar.span >= 2 &&
+                  (() => {
+                    const type = bar.task.taskType;
+                    const person =
+                      type === "교안제작" || type === "촬영"
+                        ? tutor
+                        : type === "승인"
+                          ? pm
+                          : bar.task.assignee;
+                    return person ? (
+                      <span
+                        className="relative z-[1] text-[10px] font-semibold ml-auto pr-2 shrink-0 opacity-60"
+                        style={{ color: bar.color }}
+                      >
+                        {person}
+                      </span>
+                    ) : null;
+                  })()}
               </button>
             );
           }),

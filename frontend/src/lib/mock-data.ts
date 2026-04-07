@@ -117,16 +117,22 @@ const project2Tasks = createChapterTasks(
         ? { start: "2026-02-10", end: "2026-02-12" }
         : {};
     const idx = TASK_TYPES_PER_CHAPTER.indexOf(type);
-    const completed =
-      (ch <= 2 && idx <= 2) ||
-      (ch === 3 && idx <= 1) ||
-      (ch >= 4 && type === "교안제작");
-    const inProgress =
-      (ch <= 2 && idx === 3) ||
-      (ch === 3 && idx === 2) ||
-      (ch >= 4 && type === "촬영");
-    if (completed) return { start: "2026-02-15", end: "2026-03-01" };
-    if (inProgress) return { start: "2026-03-02", end: undefined };
+    // CH1~2: 교안~편집 완료(3월), 자막 진행중(이번주)
+    if (ch <= 2) {
+      if (idx <= 2) return { start: "2026-03-01", end: "2026-03-20" }; // 완료
+      if (idx === 3) return { start: "2026-04-06", end: "2026-04-10" }; // 자막 진행중 (이번주)
+      if (idx === 4) return { start: "2026-04-11", end: "2026-04-14" }; // 검수 예정 (이번주~다음주)
+      return {}; // 승인 미정
+    }
+    // CH3: 촬영 완료, 편집 진행중(이번주)
+    if (ch === 3) {
+      if (idx <= 1) return { start: "2026-03-10", end: "2026-03-28" }; // 교안/촬영 완료
+      if (idx === 2) return { start: "2026-04-07", end: "2026-04-12" }; // 편집 진행중 (이번주)
+      return {}; // 나머지 미정
+    }
+    // CH4~5: 교안 완료, 촬영 이번주 진행
+    if (type === "교안제작") return { start: "2026-03-15", end: "2026-03-25" };
+    if (type === "촬영") return { start: "2026-04-08", end: "2026-04-11" }; // 이번주
     return {};
   },
 );
@@ -248,6 +254,14 @@ function createLectures(
 }
 
 const proj2Lectures = createLectures("proj-2", [2.0, 2.5, 2.0, 2.5, 2.0], 2);
+// 1장 자막: 1강만 업로드 (2강은 아직) → 50% 진행률
+proj2Lectures
+  .filter((l) => l.chapter === 1)
+  .forEach((l, i) => {
+    if (i === 0)
+      l.subtitleUrl = `https://drive.google.com/file/d/proj-2-sub-1-1.srt`;
+    // i===1 은 subtitleUrl 없음 (미업로드)
+  });
 
 function makePmReview(scores: number[]): VideoReview {
   const qIds = ["pm-q1", "pm-q2", "pm-q3", "pm-q4", "pm-q5", "pm-q6"];
