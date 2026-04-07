@@ -85,7 +85,7 @@ function getLectureDeliverableUrl(
 /*  Grid                                                               */
 /* ------------------------------------------------------------------ */
 
-const GRID_COLS = "grid-cols-[minmax(160px,1fr)_repeat(6,1fr)]";
+const GRID_COLS = "grid-cols-[minmax(120px,3fr)_repeat(6,2fr)]";
 
 /* ------------------------------------------------------------------ */
 /*  Sub-components                                                     */
@@ -239,12 +239,16 @@ export default function WorkStatusTab({
 
         return (
           <div key={chapter.chapter}>
-            {/* 장 헤더 — 굵은 구분 행 (공정 상태 없음) */}
+            {/* 장 헤더 — 같은 그리드 사용, 마지막 칼럼에 진행률 */}
             <div
-              className="flex items-center border-b border-neutral-200 bg-neutral-50/70"
+              className={cn(
+                "grid",
+                GRID_COLS,
+                "items-center border-b border-neutral-200 bg-neutral-50/70",
+              )}
               style={{ borderLeft: `3px solid ${color}` }}
             >
-              <div className="flex-1 px-4 py-2.5 flex items-center gap-2 min-w-0">
+              <div className="px-4 py-2.5 flex items-center gap-2 min-w-0">
                 <span
                   className="text-[13px] font-bold shrink-0"
                   style={{ color }}
@@ -257,13 +261,20 @@ export default function WorkStatusTab({
                   </span>
                 )}
               </div>
-              <div className="px-4 py-2.5 flex items-center gap-3 shrink-0">
+              {/* 교안~검수 칼럼 빈 칸 (5개) */}
+              <div />
+              <div />
+              <div />
+              <div />
+              <div />
+              {/* 마지막 승인 칼럼 자리에 진행률 */}
+              <div className="px-1 py-2.5 flex items-center justify-center gap-2">
                 <ChapterProgress
                   completed={completedCount}
                   total={FILE_COLUMNS.length}
                   color={color}
                 />
-                <span className="text-[10px] text-neutral-400">
+                <span className="text-[10px] text-neutral-400 shrink-0">
                   {chapter.lectures.length}강
                 </span>
               </div>
