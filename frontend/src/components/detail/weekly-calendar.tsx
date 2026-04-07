@@ -68,6 +68,8 @@ interface TaskBar {
   label: string;
   /** 강별 업로드 진행률 (0~1) */
   uploadProgress: number;
+  /** 시간 기반 진행률 — 오늘까지 경과 비율 (0~1) */
+  timeProgress: number;
 }
 
 function layoutBars(bars: TaskBar[]): TaskBar[][] {
@@ -153,6 +155,21 @@ export default function WeeklyCalendar({
         }
       }
 
+      // 시간 기반 진행률: 완료면 100%, 아니면 오늘까지 경과 비율
+      const today = startOfDay(new Date());
+      let timeProgress: number;
+      if (task.status === "완료" || uploadProgress >= 1) {
+        timeProgress = 1;
+      } else if (isBefore(today, tStart)) {
+        timeProgress = 0; // 아직 시작 전
+      } else if (isAfter(today, tEnd)) {
+        timeProgress = 1; // 마감 지남
+      } else {
+        const totalDays = differenceInDays(tEnd, tStart) + 1;
+        const elapsed = differenceInDays(today, tStart) + 1;
+        timeProgress = Math.min(1, elapsed / totalDays);
+      }
+
       result.push({
         task,
         startCol,
@@ -162,6 +179,7 @@ export default function WeeklyCalendar({
         color,
         label,
         uploadProgress,
+        timeProgress,
       });
     }
 
@@ -304,12 +322,12 @@ export default function WeeklyCalendar({
                 }}
                 title={`${bar.label} (${bar.task.status}) ${pct}%${bar.task.assignee ? ` · ${bar.task.assignee}` : ""}`}
               >
-                {/* 진행률 게이지 (배경) */}
-                {pct > 0 && (
+                {/* 시간 진행 게이지 (오늘까지 색칠) */}
+                {bar.timeProgress > 0 && (
                   <div
-                    className="absolute left-0 top-0 bottom-0 opacity-15 rounded-l-sm"
+                    className="absolute left-0 top-0 bottom-0 opacity-12 rounded-l-sm"
                     style={{
-                      width: `${pct}%`,
+                      width: `${Math.round(bar.timeProgress * 100)}%`,
                       backgroundColor: bar.color,
                     }}
                   />
