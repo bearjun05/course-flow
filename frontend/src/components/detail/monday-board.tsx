@@ -502,14 +502,12 @@ function MiniGantt({
                           >
                             {format(d, "d", { locale: ko })}
                           </span>
-                        ) : (
-                          <span
-                            className={cn(
-                              isFirstOfMonth && "font-bold text-neutral-600",
-                            )}
-                          >
-                            {format(d, "d", { locale: ko })}
+                        ) : isFirstOfMonth ? (
+                          <span className="text-transparent select-none">
+                            1
                           </span>
+                        ) : (
+                          format(d, "d", { locale: ko })
                         )}
                       </div>
                       <div
