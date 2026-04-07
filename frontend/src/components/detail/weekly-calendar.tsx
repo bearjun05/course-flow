@@ -9,7 +9,6 @@ import {
   format,
   parseISO,
   isToday,
-  isTomorrow,
   isBefore,
   isAfter,
   isSameDay,
@@ -19,8 +18,6 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { ChapterTask } from "@/lib/types";
-
-const TODAY_COLOR = "#6BA3DE";
 
 const GROUP_COLORS = [
   "#B0B0B0",
@@ -68,7 +65,6 @@ interface TaskBar {
   label: string;
 }
 
-/** 태스크 바를 겹치지 않는 행으로 배치 */
 function layoutBars(bars: TaskBar[]): TaskBar[][] {
   const rows: TaskBar[][] = [];
   for (const bar of bars) {
@@ -92,17 +88,14 @@ export default function WeeklyCalendar({
   onWeekChange,
   onTaskToggle,
 }: WeeklyCalendarProps) {
-  // 월요일 시작 주간
   const week = useMemo(() => {
     const monday = startOfWeek(weekStart, { weekStartsOn: 1 });
     return Array.from({ length: 7 }, (_, i) => addDays(monday, i));
   }, [weekStart]);
 
   const monday = week[0];
-
   const scheduled = useMemo(() => tasks.filter((t) => t.startDate), [tasks]);
 
-  // 주간 태스크 바
   const bars = useMemo(() => {
     const weekEnd = week[6];
     const result: TaskBar[] = [];
@@ -143,253 +136,153 @@ export default function WeeklyCalendar({
 
   const barRows = useMemo(() => layoutBars(bars), [bars]);
 
-  // 오늘/내일 할일
-  const todayTasks = useMemo(() => {
-    const today = startOfDay(new Date());
-    return scheduled.filter((t) => {
-      const s = startOfDay(parseISO(t.startDate!));
-      const e = t.endDate ? startOfDay(parseISO(t.endDate)) : s;
-      return !isBefore(today, s) && !isAfter(today, e) && t.status !== "완료";
-    });
-  }, [scheduled]);
-
-  const tomorrowTasks = useMemo(() => {
-    const tmr = addDays(startOfDay(new Date()), 1);
-    return scheduled.filter((t) => {
-      const s = startOfDay(parseISO(t.startDate!));
-      const e = t.endDate ? startOfDay(parseISO(t.endDate)) : s;
-      return !isBefore(tmr, s) && !isAfter(tmr, e) && t.status !== "완료";
-    });
-  }, [scheduled]);
-
   const weekLabel = `${format(monday, "M.d")} ~ ${format(week[6], "M.d")}`;
   const weekDayLabels = ["월", "화", "수", "목", "금", "토", "일"];
-  const ROW_H = 28;
+  const ROW_H = 32;
+
+  // 오늘이 이번 주에 있는지
+  const todayColIdx = week.findIndex((d) => isToday(d));
 
   return (
-    <div className="space-y-3">
-      {/* 오늘 / 내일 할일 요약 */}
-      <div className="grid grid-cols-2 gap-3">
-        <TaskSummaryCard
-          title="오늘 할 일"
-          tasks={todayTasks}
-          accentColor={TODAY_COLOR}
-          onToggle={onTaskToggle}
-        />
-        <TaskSummaryCard
-          title="내일 할 일"
-          tasks={tomorrowTasks}
-          accentColor="#9CA3AF"
-          onToggle={onTaskToggle}
-        />
+    <div className="rounded-xl border border-border bg-card overflow-hidden">
+      {/* 네비게이션 */}
+      <div className="flex items-center justify-between px-4 py-2.5 border-b border-border">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-7 w-7 p-0"
+          onClick={() => onWeekChange(addDays(monday, -7))}
+        >
+          <ChevronLeft className="h-4 w-4" />
+        </Button>
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-semibold">{weekLabel}</span>
+          <button
+            onClick={() => onWeekChange(new Date())}
+            className="text-[10px] font-medium px-2 py-0.5 rounded-md bg-neutral-100 text-neutral-500 hover:bg-neutral-200 transition-colors"
+          >
+            이번 주
+          </button>
+        </div>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-7 w-7 p-0"
+          onClick={() => onWeekChange(addDays(monday, 7))}
+        >
+          <ChevronRight className="h-4 w-4" />
+        </Button>
       </div>
 
-      {/* 주간 캘린더 */}
-      <div className="rounded-xl border border-border bg-card overflow-hidden">
-        {/* 네비게이션 */}
-        <div className="flex items-center justify-between px-4 py-2.5 border-b border-border">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-7 w-7 p-0"
-            onClick={() => onWeekChange(addDays(monday, -7))}
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-semibold">{weekLabel}</span>
-            <button
-              onClick={() => onWeekChange(new Date())}
-              className="text-[10px] font-medium px-2 py-0.5 rounded-md bg-neutral-100 text-neutral-500 hover:bg-neutral-200 transition-colors"
-            >
-              이번 주
-            </button>
-          </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-7 w-7 p-0"
-            onClick={() => onWeekChange(addDays(monday, 7))}
-          >
-            <ChevronRight className="h-4 w-4" />
-          </Button>
-        </div>
-
-        {/* 요일 + 날짜 헤더 */}
-        <div className="grid grid-cols-7 border-b border-border">
-          {week.map((day, i) => {
-            const todayFlag = isToday(day);
-            const tomorrowFlag = isTomorrow(day);
-            return (
-              <div
-                key={i}
-                className={cn(
-                  "text-center py-2 border-r border-border last:border-r-0",
-                  todayFlag && "bg-[#6BA3DE]/[0.06]",
-                )}
-              >
-                <div className="text-[10px] text-neutral-400">
-                  {weekDayLabels[i]}
-                </div>
-                <div
-                  className={cn(
-                    "text-[13px] font-semibold mt-0.5",
-                    todayFlag
-                      ? "inline-flex items-center justify-center h-6 w-6 rounded-full text-white mx-auto"
-                      : tomorrowFlag
-                        ? "text-neutral-600"
-                        : "text-neutral-500",
-                  )}
-                  style={todayFlag ? { backgroundColor: TODAY_COLOR } : {}}
-                >
-                  {format(day, "d")}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-
-        {/* 태스크 바 영역 */}
-        <div
-          className="relative"
-          style={{
-            height: `${Math.max(barRows.length, 3) * ROW_H + 8}px`,
-          }}
-        >
-          {/* 오늘 세로선 */}
-          {week.some((d) => isToday(d)) && (
-            <div
-              className="absolute top-0 bottom-0 w-px z-[1]"
-              style={{
-                left: `${((differenceInDays(startOfDay(new Date()), monday) + 0.5) / 7) * 100}%`,
-                backgroundColor: `${TODAY_COLOR}30`,
-              }}
-            />
-          )}
-
-          {/* 날짜 구분선 */}
-          {[1, 2, 3, 4, 5, 6].map((i) => (
+      {/* 요일 + 날짜 헤더 */}
+      <div className="grid grid-cols-7 border-b border-border">
+        {week.map((day, i) => {
+          const todayFlag = isToday(day);
+          return (
             <div
               key={i}
-              className="absolute top-0 bottom-0 w-px bg-border/30"
-              style={{ left: `${(i / 7) * 100}%` }}
-            />
-          ))}
-
-          {barRows.map((row, rowIdx) =>
-            row.map((bar) => {
-              const done = bar.task.status === "완료";
-              const leftPct = (bar.startCol / 7) * 100;
-              const widthPct = (bar.span / 7) * 100;
-
-              return (
-                <button
-                  key={bar.task.id}
-                  onClick={() => onTaskToggle?.(bar.task.id)}
-                  className={cn(
-                    "absolute text-[11px] font-medium truncate px-2 flex items-center transition-opacity hover:opacity-80",
-                    bar.isStart ? "rounded-l-md" : "",
-                    bar.isEnd ? "rounded-r-md" : "",
-                    done && "opacity-40 line-through",
-                  )}
-                  style={{
-                    left: `calc(${leftPct}% + 2px)`,
-                    width: `calc(${widthPct}% - 4px)`,
-                    top: `${rowIdx * ROW_H + 4}px`,
-                    height: `${ROW_H - 4}px`,
-                    backgroundColor: `${bar.color}20`,
-                    color: bar.color,
-                    borderLeft: bar.isStart
-                      ? `3px solid ${bar.color}`
-                      : undefined,
-                  }}
-                  title={`${bar.label} (${bar.task.status})${bar.task.assignee ? ` · ${bar.task.assignee}` : ""}`}
-                >
-                  {bar.label}
-                  {bar.task.assignee && bar.span >= 3 && (
-                    <span className="ml-1.5 opacity-60 text-[10px]">
-                      {bar.task.assignee}
-                    </span>
-                  )}
-                </button>
-              );
-            }),
-          )}
-
-          {bars.length === 0 && (
-            <div className="absolute inset-0 flex items-center justify-center text-[12px] text-neutral-300">
-              이번 주 일정이 없습니다
+              className={cn(
+                "text-center py-2.5 border-r border-border last:border-r-0",
+                todayFlag && "bg-[#F0EDE8]",
+              )}
+            >
+              <div
+                className={cn(
+                  "text-[10px]",
+                  todayFlag
+                    ? "text-neutral-600 font-semibold"
+                    : "text-neutral-400",
+                )}
+              >
+                {weekDayLabels[i]}
+              </div>
+              <div
+                className={cn(
+                  "text-[15px] font-bold mt-0.5",
+                  todayFlag ? "text-neutral-800" : "text-neutral-500",
+                )}
+              >
+                {format(day, "d")}
+              </div>
             </div>
-          )}
-        </div>
+          );
+        })}
       </div>
-    </div>
-  );
-}
 
-/** 오늘/내일 할일 요약 카드 */
-function TaskSummaryCard({
-  title,
-  tasks,
-  accentColor,
-  onToggle,
-}: {
-  title: string;
-  tasks: ChapterTask[];
-  accentColor: string;
-  onToggle?: (id: string) => void;
-}) {
-  return (
-    <div className="rounded-xl border border-border bg-white p-3">
-      <div className="flex items-center gap-2 mb-2">
-        <span
-          className="h-2 w-2 rounded-full"
-          style={{ backgroundColor: accentColor }}
-        />
-        <span className="text-[12px] font-semibold text-neutral-700">
-          {title}
-        </span>
-        <span className="text-[11px] text-neutral-400 ml-auto">
-          {tasks.length}건
-        </span>
-      </div>
-      {tasks.length === 0 ? (
-        <p className="text-[11px] text-neutral-300 py-1">할 일이 없어요</p>
-      ) : (
-        <div className="space-y-1">
-          {tasks.slice(0, 5).map((t) => {
-            const color = GROUP_COLORS[t.chapter % GROUP_COLORS.length];
-            const shortType = STAGE_SHORT[t.taskType] ?? t.taskType;
-            const label =
-              t.chapter === 0 ? shortType : `${t.chapter}장 ${shortType}`;
+      {/* 태스크 바 영역 */}
+      <div
+        className="relative"
+        style={{
+          height: `${Math.max(barRows.length, 3) * ROW_H + 12}px`,
+        }}
+      >
+        {/* 오늘 배경 칼럼 */}
+        {todayColIdx >= 0 && (
+          <div
+            className="absolute top-0 bottom-0 bg-[#F0EDE8]/60"
+            style={{
+              left: `${(todayColIdx / 7) * 100}%`,
+              width: `${(1 / 7) * 100}%`,
+            }}
+          />
+        )}
+
+        {/* 날짜 구분선 */}
+        {[1, 2, 3, 4, 5, 6].map((i) => (
+          <div
+            key={i}
+            className="absolute top-0 bottom-0 w-px bg-border/40"
+            style={{ left: `${(i / 7) * 100}%` }}
+          />
+        ))}
+
+        {/* 태스크 바 */}
+        {barRows.map((row, rowIdx) =>
+          row.map((bar) => {
+            const done = bar.task.status === "완료";
+            const leftPct = (bar.startCol / 7) * 100;
+            const widthPct = (bar.span / 7) * 100;
+
             return (
               <button
-                key={t.id}
-                onClick={() => onToggle?.(t.id)}
-                className="w-full flex items-center gap-2 text-left text-[11px] py-1 px-2 rounded-lg hover:bg-neutral-50 transition-colors"
+                key={bar.task.id}
+                onClick={() => onTaskToggle?.(bar.task.id)}
+                className={cn(
+                  "absolute text-[12px] font-semibold truncate px-2.5 flex items-center transition-all hover:brightness-95",
+                  bar.isStart ? "rounded-l-lg" : "",
+                  bar.isEnd ? "rounded-r-lg" : "",
+                  done && "opacity-35 line-through",
+                )}
+                style={{
+                  left: `calc(${leftPct}% + 3px)`,
+                  width: `calc(${widthPct}% - 6px)`,
+                  top: `${rowIdx * ROW_H + 6}px`,
+                  height: `${ROW_H - 6}px`,
+                  backgroundColor: `${bar.color}35`,
+                  color: bar.color,
+                  borderLeft: bar.isStart
+                    ? `3px solid ${bar.color}`
+                    : undefined,
+                }}
+                title={`${bar.label} (${bar.task.status})${bar.task.assignee ? ` · ${bar.task.assignee}` : ""}`}
               >
-                <span
-                  className="h-2 w-2 rounded-full shrink-0"
-                  style={{ backgroundColor: color }}
-                />
-                <span className="font-medium truncate" style={{ color }}>
-                  {label}
-                </span>
-                {t.assignee && (
-                  <span className="text-neutral-400 shrink-0 ml-auto">
-                    {t.assignee}
+                {bar.label}
+                {bar.task.assignee && bar.span >= 3 && (
+                  <span className="ml-1.5 opacity-70 text-[11px]">
+                    {bar.task.assignee}
                   </span>
                 )}
               </button>
             );
-          })}
-          {tasks.length > 5 && (
-            <p className="text-[10px] text-neutral-400 px-2">
-              +{tasks.length - 5}건 더
-            </p>
-          )}
-        </div>
-      )}
+          }),
+        )}
+
+        {bars.length === 0 && (
+          <div className="absolute inset-0 flex items-center justify-center text-[12px] text-neutral-300">
+            이번 주 일정이 없습니다
+          </div>
+        )}
+      </div>
     </div>
   );
 }
