@@ -197,7 +197,7 @@ export default function WeeklyCalendar({
           <span className="text-sm font-semibold">{monthLabel}</span>
           <button
             onClick={() => onWeekChange(new Date())}
-            className="text-[10px] font-medium px-2 py-0.5 rounded-md bg-[#E8F0FE] text-[#5A8AC0] hover:bg-[#D8E8FC] transition-colors"
+            className="text-[10px] font-medium px-2 py-0.5 rounded-md bg-neutral-100 text-neutral-500 hover:bg-neutral-200 transition-colors"
           >
             오늘
           </button>
