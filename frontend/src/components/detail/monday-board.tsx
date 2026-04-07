@@ -489,11 +489,6 @@ function MiniGantt({
                           today
                         </span>
                       )}
-                      {isFirstOfMonth && !isTodayCol && (
-                        <span className="absolute -top-0.5 left-1/2 -translate-x-1/2 text-[8px] font-bold text-neutral-500 whitespace-nowrap">
-                          {format(d, "M/d")}
-                        </span>
-                      )}
                       <div className={cn("mt-1")}>
                         {isTodayCol ? (
                           <span
@@ -503,8 +498,8 @@ function MiniGantt({
                             {format(d, "d", { locale: ko })}
                           </span>
                         ) : isFirstOfMonth ? (
-                          <span className="text-transparent select-none">
-                            1
+                          <span className="font-bold text-neutral-600">
+                            {format(d, "M/d")}
                           </span>
                         ) : (
                           format(d, "d", { locale: ko })
