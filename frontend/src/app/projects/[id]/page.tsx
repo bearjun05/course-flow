@@ -171,7 +171,7 @@ export default function ProjectDetailPage() {
                 }`}
               >
                 <Calendar className="h-3.5 w-3.5" />
-                캘린더
+                이번 주
               </button>
               <button
                 onClick={() => setScheduleTab("work-status")}
