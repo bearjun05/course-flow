@@ -50,6 +50,7 @@ export interface Project {
   paymentDate: string;
   chapterCount: number;
   chapterDurations: number[];
+  chapterTitles?: string[];
   tutor?: string;
   curriculumManager?: string;
   editor?: string;
@@ -84,9 +85,10 @@ export interface Lecture {
   chapter: number;
   lectureNumber: number;
   label: string;
+  title?: string; // 강 제목
   videoUrls: string[];
   /** 공정별 결과물 링크 (업로드 시 자동 생성) */
-  lessonPlanUrl?: string; // 교안 링크
+  lessonPlanUrl?: string; // 교안 링크 (Notion)
   rawVideoUrl?: string; // 촬영 원본 영상
   editedVideoUrl?: string; // 편집 완료 영상
   subtitleUrl?: string; // 자막 파일

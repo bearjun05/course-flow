@@ -220,6 +220,7 @@ export default function ProjectDetailPage() {
               tasks={tasks}
               lectures={project.lectures}
               chapterCount={project.chapterCount}
+              chapterTitles={project.chapterTitles}
             />
           )}
         </section>

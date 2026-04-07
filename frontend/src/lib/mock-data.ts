@@ -185,6 +185,28 @@ const project4Tasks = createChapterTasks(
   },
 );
 
+/** 강별 샘플 제목 */
+const SAMPLE_LECTURE_TITLES: Record<string, string[][]> = {
+  "proj-1": [
+    ["객체 지향 개요", "클래스와 인스턴스"],
+    ["상속과 다형성", "인터페이스 활용"],
+    ["디자인 패턴 입문"],
+    ["팩토리 패턴", "싱글톤 패턴"],
+  ],
+  "proj-2": [
+    ["실시간 통신 개요", "WebSocket 기초"],
+    ["Socket.IO 설정", "이벤트 핸들링", "네임스페이스"],
+    ["채팅방 구현", "메시지 브로드캐스트"],
+    ["Redis Pub/Sub", "스케일 아웃 전략", "로드밸런싱"],
+    ["배포와 모니터링", "장애 대응"],
+  ],
+  "proj-3": [
+    ["데이터 전처리", "판다스 기초", "결측치 처리"],
+    ["시각화 기본", "matplotlib", "seaborn"],
+    ["통계 분석 기초", "가설 검정", "회귀 분석"],
+  ],
+};
+
 function createLectures(
   projectId: string,
   chapterDurations: number[],
@@ -192,10 +214,12 @@ function createLectures(
   completedChapters = 0,
 ): Lecture[] {
   const lectures: Lecture[] = [];
+  const titles = SAMPLE_LECTURE_TITLES[projectId];
   chapterDurations.forEach((dur, idx) => {
     const ch = idx + 1;
     const count = Math.max(1, Math.round(dur));
     const hasDeliverables = ch <= completedChapters;
+    const chTitles = titles?.[idx];
     for (let l = 1; l <= count; l++) {
       lectures.push({
         id: `${projectId}-lec-${ch}-${l}`,
@@ -203,13 +227,14 @@ function createLectures(
         chapter: ch,
         lectureNumber: l,
         label: `${ch}-${l}`,
+        title: chTitles?.[l - 1],
         videoUrls:
           l <= 1
             ? [`https://videos.example.com/${projectId}/${ch}-${l}.mp4`]
             : [],
         ...(hasDeliverables
           ? {
-              lessonPlanUrl: `https://docs.google.com/document/d/${projectId}-ch${ch}-${l}`,
+              lessonPlanUrl: `https://notion.so/${projectId}-ch${ch}-${l}`,
               rawVideoUrl: `https://drive.google.com/file/d/${projectId}-raw-${ch}-${l}`,
               editedVideoUrl: `https://drive.google.com/file/d/${projectId}-edit-${ch}-${l}`,
               subtitleUrl: `https://drive.google.com/file/d/${projectId}-sub-${ch}-${l}.srt`,
@@ -297,6 +322,12 @@ export const mockProjects: Project[] = [
     paymentDate: "2026-02-15",
     chapterCount: 4,
     chapterDurations: [1.5, 2.0, 1.5, 2.0],
+    chapterTitles: [
+      "객체 지향 프로그래밍",
+      "상속과 다형성",
+      "디자인 패턴 입문",
+      "디자인 패턴 활용",
+    ],
     tutor: "구민정",
     curriculumManager: "한지민",
     slackChannel: "#courseflow-webdev-v2",
@@ -321,6 +352,13 @@ export const mockProjects: Project[] = [
     paymentDate: "2026-04-20",
     chapterCount: 5,
     chapterDurations: [2.0, 2.5, 2.0, 2.5, 2.0],
+    chapterTitles: [
+      "실시간 통신 기초",
+      "Socket.IO 심화",
+      "채팅방 구현",
+      "스케일링 전략",
+      "배포와 운영",
+    ],
     tutor: "김선용",
     curriculumManager: "최민수",
     editor: "강태경",
