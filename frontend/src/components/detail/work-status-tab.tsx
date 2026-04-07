@@ -85,8 +85,7 @@ function getLectureDeliverableUrl(
 /*  Grid                                                               */
 /* ------------------------------------------------------------------ */
 
-const GRID_COLS =
-  "grid-cols-[minmax(120px,2fr)_repeat(6,1fr)_minmax(80px,auto)]";
+const GRID_COLS = "grid-cols-[auto_repeat(6,1fr)_minmax(80px,auto)]";
 
 /* ------------------------------------------------------------------ */
 /*  Sub-components                                                     */
