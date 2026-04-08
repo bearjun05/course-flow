@@ -25,6 +25,7 @@ interface DetailHeaderProps {
   onDelete?: () => void;
   onSuspend?: () => void;
   onTrafficLightChange?: (light: TrafficLight) => void;
+  backHref?: string;
 }
 
 const TRAFFIC_LIGHTS: {
@@ -62,6 +63,7 @@ export default function DetailHeader({
   onDelete,
   onSuspend,
   onTrafficLightChange,
+  backHref = "/",
 }: DetailHeaderProps) {
   const versionNum = parseFloat(project.version.replace("v", ""));
   const hasVersionHistory = versionNum >= 2.0;
@@ -76,7 +78,7 @@ export default function DetailHeader({
       {/* Left: Back + Title + Version + Traffic Light */}
       <div className="flex items-center gap-3 min-w-0">
         <Link
-          href="/"
+          href={backHref}
           className="inline-flex items-center justify-center h-8 w-8 rounded-lg text-neutral-400 hover:bg-neutral-100 hover:text-neutral-600 transition-colors shrink-0"
         >
           <ChevronLeft className="h-4 w-4" />

@@ -16,6 +16,7 @@ import InfoGuideTab from "@/components/detail/info-guide-tab";
 import MondayBoard from "@/components/detail/monday-board";
 import WorkStatusTab from "@/components/detail/work-status-tab";
 import WeeklyCalendar from "@/components/detail/weekly-calendar";
+import { TaskCalendar } from "@/components/dashboard/task-calendar";
 import { Separator } from "@/components/ui/separator";
 
 type ScheduleTab = "schedule" | "calendar" | "work-status";
@@ -188,16 +189,19 @@ export default function ProjectDetailPage() {
           </div>
 
           {scheduleTab === "schedule" && (
-            <MondayBoard
-              tasks={tasks}
-              onTasksChange={handleTasksChange}
-              onAddChapter={handleAddChapter}
-              onDeleteChapter={handleDeleteChapter}
-              projectStartDate={project.createdAt}
-              paymentDate={project.paymentDate}
-              tutor={project.tutor}
-              pm="박진영"
-            />
+            <div className="space-y-6">
+              <MondayBoard
+                tasks={tasks}
+                onTasksChange={handleTasksChange}
+                onAddChapter={handleAddChapter}
+                onDeleteChapter={handleDeleteChapter}
+                projectStartDate={project.createdAt}
+                paymentDate={project.paymentDate}
+                tutor={project.tutor}
+                pm="박진영"
+              />
+              <TaskCalendar projects={[project]} basePath="/projects" />
+            </div>
           )}
           {scheduleTab === "calendar" && (
             <WeeklyCalendar

@@ -102,24 +102,34 @@ export function ChapterPipeline({ project }: ChapterPipelineProps) {
     ...getChapterProgress(project, ch),
   }));
 
+  const CHUNK = chapterData.length <= 6 ? chapterData.length : 5;
+  const rowCount = Math.ceil(chapterData.length / CHUNK);
+  const rows = Array.from({ length: rowCount }, (_, ri) =>
+    chapterData.slice(ri * CHUNK, (ri + 1) * CHUNK),
+  );
+
   return (
-    <div className="flex w-full gap-2">
-      {chapterData.map(({ ch, filledCount, stageName }) => (
-        <div key={ch} className="flex-1 flex flex-col gap-1">
-          <div className="flex gap-[2px]">
-            {Array.from({ length: 6 }, (_, i) => (
-              <div
-                key={i}
-                className={cn(
-                  "h-[4px] flex-1 rounded-full",
-                  i < filledCount ? SLOT_FILLED_COLORS[i] : "bg-black/8",
-                )}
-              />
-            ))}
-          </div>
-          <span className="text-[9px] text-neutral-400 leading-none truncate">
-            {ch}장 · {stageName}
-          </span>
+    <div className={cn("flex flex-col", rows.length > 1 ? "gap-2" : "")}>
+      {rows.map((row, ri) => (
+        <div key={ri} className="flex w-full gap-2">
+          {row.map(({ ch, filledCount, stageName }) => (
+            <div key={ch} className="flex-1 flex flex-col gap-1">
+              <div className="flex gap-[2px]">
+                {Array.from({ length: 6 }, (_, i) => (
+                  <div
+                    key={i}
+                    className={cn(
+                      "h-[4px] flex-1 rounded-full",
+                      i < filledCount ? SLOT_FILLED_COLORS[i] : "bg-black/8",
+                    )}
+                  />
+                ))}
+              </div>
+              <span className="text-[9px] text-neutral-400 leading-none truncate">
+                {ch}장 · {stageName}
+              </span>
+            </div>
+          ))}
         </div>
       ))}
     </div>

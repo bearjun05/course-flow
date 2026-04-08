@@ -20,18 +20,18 @@ import { cn } from "@/lib/utils";
 import type { ChapterTask, Lecture } from "@/lib/types";
 
 const GROUP_COLORS = [
-  "#B0B0B0",
-  "#E4A0A0",
-  "#E4B89C",
-  "#E4CC9C",
-  "#E0D49C",
-  "#C8D89C",
-  "#9CD4B0",
-  "#9CCCC8",
-  "#9CB8D8",
-  "#B0A8D8",
-  "#D0A8C8",
-  "#C8BCB0",
+  "#909090",
+  "#D07070",
+  "#D08A6A",
+  "#D0A858",
+  "#C4A840",
+  "#8AAE50",
+  "#50B880",
+  "#50AAAA",
+  "#5090C0",
+  "#8070C0",
+  "#B870A0",
+  "#A89070",
 ];
 
 const STAGE_SHORT: Record<string, string> = {

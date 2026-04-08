@@ -8,9 +8,17 @@ import { DotMatrixTable } from "./dot-matrix-table";
 
 interface ProgressTableProps {
   projects: Project[];
+  title?: string;
+  basePath?: string;
+  personParam?: string;
 }
 
-export function ProgressTable({ projects }: ProgressTableProps) {
+export function ProgressTable({
+  projects,
+  title = "진행 중인 강의",
+  basePath,
+  personParam,
+}: ProgressTableProps) {
   const activeProjects = projects
     .filter((p) => isProjectActive(p.status) && getEffectiveKanbanColumn(p))
     .sort((a, b) => getDday(a.rolloutDate) - getDday(b.rolloutDate));
@@ -18,15 +26,17 @@ export function ProgressTable({ projects }: ProgressTableProps) {
   return (
     <div>
       <div className="mb-4 flex items-center gap-2">
-        <h2 className="text-sm font-semibold text-foreground">
-          진행 중인 강의
-        </h2>
+        <h2 className="text-sm font-semibold text-foreground">{title}</h2>
         <Badge variant="secondary" className="text-[10px] font-normal">
           {activeProjects.length}
         </Badge>
       </div>
 
-      <DotMatrixTable projects={activeProjects} />
+      <DotMatrixTable
+        projects={activeProjects}
+        basePath={basePath}
+        personParam={personParam}
+      />
     </div>
   );
 }

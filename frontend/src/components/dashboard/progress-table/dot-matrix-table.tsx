@@ -1,13 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { BookOpen } from "lucide-react";
+import { parseISO, isBefore, startOfDay } from "date-fns";
 import type { Project } from "@/lib/types";
 import { getDday, formatDday, getDdayColor, cn } from "@/lib/utils";
 import { getChapterDetailedStage } from "@/lib/process-helpers";
 
 interface DotMatrixTableProps {
   projects: Project[];
+  basePath?: string;
+  personParam?: string;
 }
 
 const DETAIL_COLUMNS = [
@@ -58,6 +61,17 @@ const THEME_COLORS: Record<
     progress: "#C4CF87",
   },
 };
+
+const OVERDUE_COLOR = "#F9919E";
+
+/** 해당 챕터의 현재 진행 중 태스크가 마감 초과인지 확인 */
+function isChapterOverdue(project: Project, chapter: number): boolean {
+  const today = startOfDay(new Date());
+  const tasks = project.tasks.filter(
+    (t) => t.chapter === chapter && t.status !== "완료",
+  );
+  return tasks.some((t) => t.endDate && isBefore(parseISO(t.endDate), today));
+}
 
 /** SVG 원형 진척 바 */
 function CircleProgress({
@@ -110,9 +124,13 @@ function CircleProgress({
 function ProjectRow({
   project,
   theme,
+  basePath,
+  personParam,
 }: {
   project: Project;
   theme: ColorTheme;
+  basePath?: string;
+  personParam?: string;
 }) {
   const dday = getDday(project.rolloutDate);
   const chapters = Array.from(
@@ -121,7 +139,39 @@ function ProjectRow({
   );
   const colors = THEME_COLORS[theme];
 
-  const chaptersByStage: Record<DetailColumn, number[]> = {
+  // 각 챕터의 단계 계산
+  const chapterStages = chapters.map((ch) => ({
+    ch,
+    stage: getChapterDetailedStage(project, ch) as DetailColumn,
+  }));
+
+  // 5장 단위 그룹화: 같은 단계면 묶음
+  const CHUNK = 5;
+  type DotItem =
+    | { type: "single"; ch: number; stage: DetailColumn }
+    | { type: "group"; from: number; to: number; stage: DetailColumn };
+  const dotItems: DotItem[] = [];
+
+  for (let i = 0; i < chapterStages.length; i += CHUNK) {
+    const chunk = chapterStages.slice(i, i + CHUNK);
+    const allSameStage =
+      chunk.length >= 5 && chunk.every((c) => c.stage === chunk[0].stage);
+    if (allSameStage) {
+      dotItems.push({
+        type: "group",
+        from: chunk[0].ch,
+        to: chunk[chunk.length - 1].ch,
+        stage: chunk[0].stage,
+      });
+    } else {
+      for (const c of chunk) {
+        dotItems.push({ type: "single", ch: c.ch, stage: c.stage });
+      }
+    }
+  }
+
+  // 단계별로 도트 아이템 그룹화
+  const itemsByStage: Record<DetailColumn, DotItem[]> = {
     교안: [],
     촬영: [],
     편집: [],
@@ -129,12 +179,8 @@ function ProjectRow({
     검수: [],
     승인: [],
   };
-
-  for (const ch of chapters) {
-    const stage = getChapterDetailedStage(project, ch) as DetailColumn;
-    if (chaptersByStage[stage]) {
-      chaptersByStage[stage].push(ch);
-    }
+  for (const item of dotItems) {
+    itemsByStage[item.stage].push(item);
   }
 
   const totalSteps = chapters.length * DETAIL_COLUMNS.length;
@@ -145,8 +191,23 @@ function ProjectRow({
   const progressPct =
     totalSteps > 0 ? Math.round((doneSteps / totalSteps) * 100) : 0;
 
+  const router = useRouter();
+  const handleClick = () => {
+    if (!basePath) return;
+    const params = personParam
+      ? `?person=${encodeURIComponent(personParam)}`
+      : "";
+    router.push(`${basePath}/${project.id}${params}`);
+  };
+
   return (
-    <tr className="border-b border-border/40 last:border-b-0 hover:bg-accent/20 transition-colors">
+    <tr
+      className={cn(
+        "border-b border-border/40 last:border-b-0 hover:bg-accent/20 transition-colors",
+        basePath && "cursor-pointer",
+      )}
+      onClick={handleClick}
+    >
       <td className="px-4 py-3">
         <div className="flex items-center gap-2">
           <CircleProgress percent={progressPct} color={colors.progress} />
@@ -171,11 +232,10 @@ function ProjectRow({
             />
           ))}
           {DETAIL_COLUMNS.map((col) => {
-            const items = chaptersByStage[col];
+            const items = itemsByStage[col];
             if (items.length === 0) return null;
             const order = STAGE_ORDER[col];
             const centerPct = ((order + 0.5) / DETAIL_COLUMNS.length) * 100;
-            const dotSize = 20;
 
             return (
               <div
@@ -183,19 +243,45 @@ function ProjectRow({
                 className="absolute flex items-center gap-[3px] -translate-x-1/2"
                 style={{ left: `${centerPct}%` }}
               >
-                {items.map((ch) => (
-                  <span
-                    key={ch}
-                    className="inline-flex items-center justify-center rounded-full text-[9px] font-extrabold text-white shadow-sm"
-                    style={{
-                      width: dotSize,
-                      height: dotSize,
-                      backgroundColor: colors.stages[col],
-                    }}
-                  >
-                    {ch}
-                  </span>
-                ))}
+                {items.map((item) => {
+                  if (item.type === "group") {
+                    const groupSize = 28;
+                    const hasOverdue = chapters
+                      .filter((ch) => ch >= item.from && ch <= item.to)
+                      .some((ch) => isChapterOverdue(project, ch));
+                    return (
+                      <span
+                        key={`g-${item.from}`}
+                        className="inline-flex items-center justify-center rounded-full text-[7px] font-bold text-white shadow-sm leading-none"
+                        style={{
+                          width: groupSize,
+                          height: groupSize,
+                          backgroundColor: hasOverdue
+                            ? OVERDUE_COLOR
+                            : colors.stages[col],
+                        }}
+                      >
+                        {item.from}-{item.to}
+                      </span>
+                    );
+                  }
+                  const overdue = isChapterOverdue(project, item.ch);
+                  return (
+                    <span
+                      key={item.ch}
+                      className="inline-flex items-center justify-center rounded-full text-[9px] font-extrabold text-white shadow-sm"
+                      style={{
+                        width: 20,
+                        height: 20,
+                        backgroundColor: overdue
+                          ? OVERDUE_COLOR
+                          : colors.stages[col],
+                      }}
+                    >
+                      {item.ch}
+                    </span>
+                  );
+                })}
               </div>
             );
           })}
@@ -216,7 +302,11 @@ function ProjectRow({
   );
 }
 
-export function DotMatrixTable({ projects }: DotMatrixTableProps) {
+export function DotMatrixTable({
+  projects,
+  basePath,
+  personParam,
+}: DotMatrixTableProps) {
   const theme: ColorTheme = "green";
 
   return (
@@ -253,7 +343,13 @@ export function DotMatrixTable({ projects }: DotMatrixTableProps) {
           </thead>
           <tbody>
             {projects.map((project) => (
-              <ProjectRow key={project.id} project={project} theme={theme} />
+              <ProjectRow
+                key={project.id}
+                project={project}
+                theme={theme}
+                basePath={basePath}
+                personParam={personParam}
+              />
             ))}
           </tbody>
         </table>

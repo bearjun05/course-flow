@@ -8,21 +8,17 @@ import {
   Subtitles,
   Search,
   ThumbsUp,
+  Upload,
   ExternalLink,
-  Circle,
+  CheckCircle2,
+  Lock,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { ChapterTask, Lecture, TaskStatus } from "@/lib/types";
+import type { Project, ChapterTask, Lecture, TaskStatus } from "@/lib/types";
 
-/* ------------------------------------------------------------------ */
-/*  Types                                                              */
-/* ------------------------------------------------------------------ */
-
-interface WorkStatusTabProps {
-  tasks: ChapterTask[];
-  lectures: Lecture[];
-  chapterCount: number;
-  chapterTitles?: string[];
+interface UploadTabProps {
+  project: Project;
+  person: string;
 }
 
 interface ChapterRow {
@@ -32,10 +28,6 @@ interface ChapterRow {
   lectures: Lecture[];
   taskStatuses: Record<string, TaskStatus>;
 }
-
-/* ------------------------------------------------------------------ */
-/*  Constants                                                          */
-/* ------------------------------------------------------------------ */
 
 const FILE_COLUMNS = [
   { key: "교안제작", label: "교안", icon: FileText },
@@ -61,6 +53,30 @@ const GROUP_COLORS = [
   "#A89070",
 ];
 
+/** 해당 공정이 이 사람에게 배정된 것인지 */
+function isMyTask(taskKey: string, project: Project, person: string): boolean {
+  // 직접 assignee 체크
+  const task = project.tasks.find(
+    (t) => t.taskType === taskKey && t.chapter > 0,
+  );
+  if (task?.assignee === person) return true;
+
+  // 역할 기반 매핑
+  if (
+    project.tutor === person &&
+    (taskKey === "교안제작" || taskKey === "촬영")
+  )
+    return true;
+  if (project.editor === person && taskKey === "편집") return true;
+  if (project.reviewer === person && taskKey === "검수") return true;
+  if (
+    project.curriculumManager === person &&
+    (taskKey === "커리큘럼 기획" || taskKey === "승인")
+  )
+    return true;
+  return false;
+}
+
 function getLectureDeliverableUrl(
   lecture: Lecture,
   taskKey: string,
@@ -81,28 +97,49 @@ function getLectureDeliverableUrl(
   }
 }
 
-/* ------------------------------------------------------------------ */
-/*  Grid                                                               */
-/* ------------------------------------------------------------------ */
-
 const GRID_COLS = "grid-cols-[200px_repeat(6,1fr)_100px]";
 
-/* ------------------------------------------------------------------ */
-/*  Sub-components                                                     */
-/* ------------------------------------------------------------------ */
-
-/** 강별 결과물 링크 셀 — 업로드 완료/대기 강조 */
+/** 결과물 셀 — 내 담당이면 업로드/확인 버튼, 아니면 비활성 */
 function DeliverableCell({
   lecture,
   taskKey,
   color,
+  isMine,
 }: {
   lecture: Lecture;
   taskKey: string;
   color: string;
+  isMine: boolean;
 }) {
   const url = getLectureDeliverableUrl(lecture, taskKey);
 
+  // 내 담당이 아니면 비활성 표시
+  if (!isMine) {
+    if (url) {
+      return (
+        <div className="flex items-center justify-center">
+          <span
+            className="inline-flex items-center justify-center h-7 w-7 rounded-lg border"
+            style={{
+              backgroundColor: `${color}10`,
+              borderColor: `${color}30`,
+            }}
+          >
+            <CheckCircle2 className="h-3.5 w-3.5" style={{ color }} />
+          </span>
+        </div>
+      );
+    }
+    return (
+      <div className="flex items-center justify-center">
+        <span className="inline-flex items-center justify-center h-7 w-7 rounded-lg bg-neutral-50 border border-neutral-100">
+          <Lock className="h-3 w-3 text-neutral-200" />
+        </span>
+      </div>
+    );
+  }
+
+  // 내 담당 — 이미 업로드됨
   if (url) {
     return (
       <div className="flex items-center justify-center">
@@ -110,26 +147,40 @@ function DeliverableCell({
           href={url}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center justify-center h-7 w-7 rounded-lg border transition-all hover:scale-110"
+          className="inline-flex items-center gap-1 h-7 px-2 rounded-lg border text-[10px] font-medium transition-all hover:scale-105"
           style={{
-            backgroundColor: `${color}15`,
-            borderColor: `${color}50`,
+            backgroundColor: `${color}25`,
+            borderColor: `${color}80`,
             color,
           }}
-          title="결과물 보기"
+          title="결과물 확인"
         >
-          <ExternalLink className="h-3.5 w-3.5" />
+          <CheckCircle2 className="h-3 w-3" />
+          확인
         </a>
       </div>
     );
   }
 
-  // 업로드 대기 — 빈 점선
+  // 내 담당 — 업로드 대기
   return (
     <div className="flex items-center justify-center">
-      <span className="inline-flex items-center justify-center h-7 w-7 rounded-lg border-2 border-dashed border-neutral-200">
-        <Circle className="h-2.5 w-2.5 text-neutral-300" />
-      </span>
+      <button
+        className="inline-flex items-center gap-1 h-7 px-2 rounded-lg border-2 border-dashed text-[10px] font-medium transition-all hover:scale-105 hover:border-solid"
+        style={{
+          borderColor: `${color}90`,
+          color,
+        }}
+        onClick={(e) => {
+          e.stopPropagation();
+          // TODO: 실제 업로드 기능 연결
+          alert("업로드 기능은 백엔드 연결 후 사용할 수 있습니다.");
+        }}
+        title="결과물 업로드"
+      >
+        <Upload className="h-3 w-3" />
+        업로드
+      </button>
     </div>
   );
 }
@@ -160,22 +211,13 @@ function ChapterProgress({
   );
 }
 
-/* ------------------------------------------------------------------ */
-/*  Main Component                                                     */
-/* ------------------------------------------------------------------ */
-
-export default function WorkStatusTab({
-  tasks,
-  lectures,
-  chapterCount,
-  chapterTitles,
-}: WorkStatusTabProps) {
+export default function UploadTab({ project, person }: UploadTabProps) {
   const chapters: ChapterRow[] = useMemo(() => {
     const rows: ChapterRow[] = [];
 
-    for (let ch = 1; ch <= chapterCount; ch++) {
-      const chTasks = tasks.filter((t) => t.chapter === ch);
-      const chLectures = lectures
+    for (let ch = 1; ch <= project.chapterCount; ch++) {
+      const chTasks = project.tasks.filter((t) => t.chapter === ch);
+      const chLectures = project.lectures
         .filter((l) => l.chapter === ch)
         .sort((a, b) => a.lectureNumber - b.lectureNumber);
 
@@ -187,14 +229,23 @@ export default function WorkStatusTab({
       rows.push({
         chapter: ch,
         label: `${ch}장`,
-        title: chapterTitles?.[ch - 1],
+        title: project.chapterTitles?.[ch - 1],
         lectures: chLectures,
         taskStatuses,
       });
     }
 
     return rows;
-  }, [tasks, lectures, chapterCount, chapterTitles]);
+  }, [project]);
+
+  // 내 담당 공정 목록
+  const myTaskKeys = useMemo(
+    () =>
+      FILE_COLUMNS.filter((col) => isMyTask(col.key, project, person)).map(
+        (col) => col.key,
+      ),
+    [project, person],
+  );
 
   if (chapters.length === 0) {
     return (
@@ -215,17 +266,28 @@ export default function WorkStatusTab({
         )}
       >
         <div className="px-4 py-2" />
-        {FILE_COLUMNS.map((col) => (
-          <div
-            key={col.key}
-            className="px-1 py-2 text-center text-[11px] font-medium text-neutral-400"
-          >
-            <div className="flex flex-col items-center gap-0.5">
-              <col.icon className="h-3.5 w-3.5" />
-              <span>{col.label}</span>
+        {FILE_COLUMNS.map((col) => {
+          const mine = myTaskKeys.includes(col.key);
+          return (
+            <div
+              key={col.key}
+              className={cn(
+                "px-1 py-2 text-center text-[11px] font-medium",
+                mine ? "text-neutral-600" : "text-neutral-300",
+              )}
+            >
+              <div className="flex flex-col items-center gap-0.5">
+                <col.icon className="h-3.5 w-3.5" />
+                <span>{col.label}</span>
+                {mine && (
+                  <span className="text-[8px] font-bold text-emerald-500">
+                    내 작업
+                  </span>
+                )}
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
         <div className="px-1 py-2" />
       </div>
 
@@ -238,7 +300,6 @@ export default function WorkStatusTab({
 
         return (
           <div key={chapter.chapter}>
-            {/* 장 헤더 — 같은 그리드 사용, 마지막 칼럼에 진행률 */}
             <div
               className={cn(
                 "grid",
@@ -260,14 +321,12 @@ export default function WorkStatusTab({
                   </span>
                 )}
               </div>
-              {/* 교안~승인 칼럼 빈 칸 (6개) */}
               <div />
               <div />
               <div />
               <div />
               <div />
               <div />
-              {/* 8번째: 진행률 */}
               <div className="px-2 py-2.5 flex items-center justify-end gap-2">
                 <ChapterProgress
                   completed={completedCount}
@@ -304,15 +363,19 @@ export default function WorkStatusTab({
                     </span>
                   )}
                 </div>
-                {FILE_COLUMNS.map((col) => (
-                  <div key={col.key} className="px-1 py-1.5">
-                    <DeliverableCell
-                      lecture={lecture}
-                      taskKey={col.key}
-                      color={color}
-                    />
-                  </div>
-                ))}
+                {FILE_COLUMNS.map((col) => {
+                  const mine = myTaskKeys.includes(col.key);
+                  return (
+                    <div key={col.key} className="px-1 py-1.5">
+                      <DeliverableCell
+                        lecture={lecture}
+                        taskKey={col.key}
+                        color={color}
+                        isMine={mine}
+                      />
+                    </div>
+                  );
+                })}
                 <div />
               </div>
             ))}

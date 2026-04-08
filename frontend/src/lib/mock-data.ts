@@ -151,7 +151,7 @@ const project3Tasks = createChapterTasks(
   (ch, type) => {
     const idx = TASK_TYPES_PER_CHAPTER.indexOf(type);
     if (idx <= 2) return { start: "2026-02-01", end: "2026-02-28" };
-    if (idx === 3) return { start: "2026-03-01", end: undefined };
+    if (idx === 3) return { start: "2026-03-01", end: "2026-04-05" }; // 자막 마감 초과
     return {};
   },
 );
@@ -497,37 +497,54 @@ export const mockProjects: Project[] = [
     productionType: "신규",
     rolloutDate: "2026-05-10",
     paymentDate: "2026-06-10",
-    chapterCount: 4,
-    chapterDurations: [2.0, 2.0, 2.0, 2.0],
+    chapterCount: 7,
+    chapterDurations: [2.0, 2.0, 2.0, 2.0, 1.5, 2.0, 1.5],
+    chapterTitles: [
+      "파이썬 기초와 환경설정",
+      "파일 자동화",
+      "웹 크롤링",
+      "엑셀 자동화",
+      "이메일 자동화",
+      "업무 스케줄링",
+      "종합 프로젝트",
+    ],
     tutor: "이현우",
     curriculumManager: "김민지",
     editor: "정민호",
     slackChannel: "#courseflow-python-auto",
     trafficLight: "green",
-    tasks: createChapterTasks("proj-7", 4, (ch, type) => {
+    tasks: createChapterTasks("proj-7", 7, (ch, type) => {
       if (ch === 0) return type === "커리큘럼 기획" ? "완료" : "대기";
-      // 1장: 교안 단계
-      if (ch === 1) {
-        if (type === "교안제작") return "진행";
-        return "대기";
-      }
-      // 2장: 촬영 단계
-      if (ch === 2) {
-        if (type === "교안제작") return "완료";
-        if (type === "촬영") return "진행";
-        return "대기";
-      }
-      // 3장: 편집 단계 (편집 진행 중)
+      // 1~2장: 전부 완료
+      if (ch <= 2) return "완료";
+      // 3장: 검수 진행
       if (ch === 3) {
+        const idx = TASK_TYPES_PER_CHAPTER.indexOf(type);
+        if (idx <= 3) return "완료";
+        if (idx === 4) return "진행";
+        return "대기";
+      }
+      // 4장: 편집 진행
+      if (ch === 4) {
         if (type === "교안제작" || type === "촬영") return "완료";
         if (type === "편집") return "진행";
         return "대기";
       }
-      // 4장: 롤아웃 단계 (모두 완료)
-      if (ch === 4) return "완료";
+      // 5장: 촬영 진행
+      if (ch === 5) {
+        if (type === "교안제작") return "완료";
+        if (type === "촬영") return "진행";
+        return "대기";
+      }
+      // 6장: 교안 진행
+      if (ch === 6) {
+        if (type === "교안제작") return "진행";
+        return "대기";
+      }
+      // 7장: 대기
       return "대기";
     }),
-    lectures: createLectures("proj-7", [2.0, 2.0, 2.0, 2.0]),
+    lectures: createLectures("proj-7", [2.0, 2.0, 2.0, 2.0, 1.5, 2.0, 1.5]),
     videoFeedbacks: [],
     createdAt: "2026-02-01T09:00:00Z",
   },
@@ -632,5 +649,79 @@ export const mockProjects: Project[] = [
     lectures: createLectures("proj-10", [2.0, 2.5, 2.0, 2.5, 2.0]),
     videoFeedbacks: [],
     createdAt: "2026-02-10T09:00:00Z",
+  },
+  {
+    id: "proj-11",
+    title: "AI 서비스 기획부터 배포까지 완전 정복",
+    version: "v1.0",
+    status: "편집·검수",
+    businessUnit: "KDT",
+    trackName: "AI",
+    productionType: "신규",
+    rolloutDate: "2026-05-20",
+    paymentDate: "2026-06-20",
+    chapterCount: 10,
+    chapterDurations: [2.0, 1.5, 2.5, 2.0, 1.5, 2.0, 2.5, 2.0, 1.5, 2.0],
+    chapterTitles: [
+      "AI 서비스 기획",
+      "데이터 수집과 전처리",
+      "모델 선정과 학습",
+      "프롬프트 엔지니어링",
+      "API 설계와 구현",
+      "프론트엔드 연동",
+      "테스트와 품질 관리",
+      "배포 파이프라인",
+      "모니터링과 운영",
+      "비용 최적화와 스케일링",
+    ],
+    tutor: "김선용",
+    curriculumManager: "이소영",
+    editor: "강태경",
+    reviewer: "박민서",
+    slackChannel: "#courseflow-ai-fullstack",
+    trafficLight: "yellow",
+    tasks: createChapterTasks(
+      "proj-11",
+      10,
+      (ch, type) => {
+        if (ch === 0) return type === "커리큘럼 기획" ? "완료" : "대기";
+        // 전체 장: 교안~편집 완료, 자막 진행
+        const idx = TASK_TYPES_PER_CHAPTER.indexOf(type);
+        if (idx <= 2) return "완료"; // 교안, 촬영, 편집
+        if (idx === 3) return "진행"; // 자막
+        return "대기"; // 검수, 승인
+      },
+      (ch, type) => {
+        if (ch === 0) return type === "커리큘럼 기획" ? "이소영" : undefined;
+        if (type === "편집") return "강태경";
+        if (type === "검수") return "박민서";
+        return undefined;
+      },
+      (ch, type) => {
+        if (ch === 0)
+          return type === "커리큘럼 기획"
+            ? { start: "2026-01-15", end: "2026-01-20" }
+            : {};
+        const idx = TASK_TYPES_PER_CHAPTER.indexOf(type);
+        const baseWeek = Math.ceil(ch / 2);
+        const startDay = 5 + baseWeek * 7 + idx * 3;
+        const s = `2026-03-${String(Math.min(28, startDay)).padStart(2, "0")}`;
+        const e = `2026-03-${String(Math.min(28, startDay + 2)).padStart(2, "0")}`;
+        if (ch <= 5 && idx <= 3) return { start: s, end: e };
+        if (ch <= 7 && idx <= 2) return { start: s, end: e };
+        if (ch === 8 && idx <= 1)
+          return { start: "2026-04-06", end: "2026-04-10" };
+        if (ch === 9 && idx === 0)
+          return { start: "2026-04-08", end: "2026-04-15" };
+        return {};
+      },
+    ),
+    lectures: createLectures(
+      "proj-11",
+      [2.0, 1.5, 2.5, 2.0, 1.5, 2.0, 2.5, 2.0, 1.5, 2.0],
+      3,
+    ),
+    videoFeedbacks: [],
+    createdAt: "2026-01-10T09:00:00Z",
   },
 ];
