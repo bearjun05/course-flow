@@ -27,11 +27,6 @@ interface WorkStatusTabProps {
   chapterCount: number;
   chapterTitles?: string[];
   chapterDriveLinks?: string[];
-  onTaskStatusChange?: (
-    chapter: number,
-    taskType: string,
-    status: TaskStatus,
-  ) => void;
   onLectureUrlChange?: (lectureId: string, field: string, url: string) => void;
 }
 
@@ -198,39 +193,6 @@ function DeliverableCell({
   );
 }
 
-/** 상태 자동변경 셀 — 촬영/편집/검수 */
-function StatusCell({
-  taskKey,
-  status,
-  color,
-  onToggle,
-}: {
-  taskKey: string;
-  status?: TaskStatus;
-  color: string;
-  onToggle?: () => void;
-}) {
-  if (!onToggle || taskKey === "승인") return null;
-
-  const isComplete = status === "완료";
-  const statusLabel = status ?? "대기";
-
-  return (
-    <button
-      onClick={onToggle}
-      className={cn(
-        "absolute -top-0.5 -right-0.5 h-3.5 w-3.5 rounded-full border text-[7px] font-bold flex items-center justify-center transition-all",
-        isComplete
-          ? "bg-emerald-500 border-emerald-400 text-white"
-          : "bg-white border-neutral-300 text-neutral-400 hover:border-neutral-400",
-      )}
-      title={`${statusLabel} — 클릭하여 상태 변경`}
-    >
-      {isComplete ? "✓" : ""}
-    </button>
-  );
-}
-
 /** 장 진행률 바 */
 function ChapterProgress({
   completed,
@@ -267,7 +229,6 @@ export default function WorkStatusTab({
   chapterCount,
   chapterTitles,
   chapterDriveLinks,
-  onTaskStatusChange,
   onLectureUrlChange,
 }: WorkStatusTabProps) {
   const chapters: ChapterRow[] = useMemo(() => {
@@ -424,37 +385,16 @@ export default function WorkStatusTab({
                     </span>
                   )}
                 </div>
-                {FILE_COLUMNS.map((col) => {
-                  const taskStatus = chapter.taskStatuses[col.key];
-                  return (
-                    <div key={col.key} className="px-1 py-1.5">
-                      <div className="relative inline-flex w-full justify-center">
-                        <DeliverableCell
-                          lecture={lecture}
-                          taskKey={col.key}
-                          color={color}
-                          onUploadUrl={onLectureUrlChange}
-                        />
-                        {onTaskStatusChange &&
-                          col.key !== "교안제작" &&
-                          col.key !== "승인" && (
-                            <StatusCell
-                              taskKey={col.key}
-                              status={taskStatus}
-                              color={color}
-                              onToggle={() =>
-                                onTaskStatusChange(
-                                  chapter.chapter,
-                                  col.key,
-                                  taskStatus === "완료" ? "대기" : "완료",
-                                )
-                              }
-                            />
-                          )}
-                      </div>
-                    </div>
-                  );
-                })}
+                {FILE_COLUMNS.map((col) => (
+                  <div key={col.key} className="px-1 py-1.5">
+                    <DeliverableCell
+                      lecture={lecture}
+                      taskKey={col.key}
+                      color={color}
+                      onUploadUrl={onLectureUrlChange}
+                    />
+                  </div>
+                ))}
                 <div />
               </div>
             ))}

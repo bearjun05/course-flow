@@ -262,7 +262,6 @@ export default function ProjectDetailPage() {
               chapterCount={project.chapterCount}
               chapterTitles={project.chapterTitles}
               chapterDriveLinks={project.chapterDriveLinks}
-              onTaskStatusChange={handleTaskStatusChange}
               onLectureUrlChange={handleLectureUrlChange}
             />
           )}
