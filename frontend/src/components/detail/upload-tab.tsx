@@ -123,20 +123,26 @@ function DeliverableCell({
   const [inputValue, setInputValue] = useState("");
   const url = getLectureDeliverableUrl(lecture, taskKey);
 
-  // 내 담당이 아니면 비활성 표시
+  // 내 담당이 아닌 경우
   if (!isMine) {
     if (url) {
+      // 업로드된 결과물은 볼 수 있음
       return (
         <div className="flex items-center justify-center">
-          <span
-            className="inline-flex items-center justify-center h-7 w-7 rounded-lg border"
+          <a
+            href={url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center justify-center h-7 w-7 rounded-lg border transition-all hover:scale-110"
             style={{
               backgroundColor: `${color}10`,
               borderColor: `${color}30`,
+              color,
             }}
+            title="결과물 보기"
           >
-            <CheckCircle2 className="h-3.5 w-3.5" style={{ color }} />
-          </span>
+            <ExternalLink className="h-3.5 w-3.5" />
+          </a>
         </div>
       );
     }

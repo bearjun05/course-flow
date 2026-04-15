@@ -95,6 +95,7 @@ export interface Lecture {
   editedVideoUrl?: string; // 편집 완료 영상
   subtitleUrl?: string; // 자막 파일
   reviewUrl?: string; // 검수 (백오피스 링크)
+  approved?: boolean; // 승인 여부 (강 단위)
 }
 
 export interface ReviewScore {

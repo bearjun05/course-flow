@@ -262,8 +262,12 @@ export default function ProjectDetailPage() {
               chapterCount={project.chapterCount}
               chapterTitles={project.chapterTitles}
               chapterDriveLinks={project.chapterDriveLinks}
-              onApprovalToggle={(chapter, status) =>
-                handleTaskStatusChange(chapter, "승인", status)
+              onApprovalToggle={(lectureId, approved) =>
+                setProjectLectures((prev) =>
+                  prev.map((l) =>
+                    l.id === lectureId ? { ...l, approved } : l,
+                  ),
+                )
               }
               onLectureUrlChange={handleLectureUrlChange}
             />
