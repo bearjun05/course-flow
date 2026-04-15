@@ -43,11 +43,11 @@ export function ProjectCard({ project }: ProjectCardProps) {
     >
       {/* 제목 + 상태 배지 + D-Day */}
       <div className="flex items-start justify-between gap-2 mb-3">
-        <div className="flex items-center gap-1.5 flex-1 min-w-0">
+        <div className="flex items-start gap-1.5 flex-1 min-w-0">
           <p className="text-[13.5px] font-semibold text-neutral-800 leading-snug line-clamp-2">
             {project.title}
           </p>
-          <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-md shrink-0 bg-[#F0F0F0] text-[#6B6B6B]">
+          <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-md shrink-0 bg-[#F0F0F0] text-[#6B6B6B] mt-0.5">
             {project.status}
           </span>
         </div>
