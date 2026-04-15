@@ -60,18 +60,16 @@ const GROUP_COLORS = [
   "#A89070",
 ];
 
-/** 해당 공정이 이 사람에게 배정된 것인지 */
+/** 해당 공정이 이 사람에게 배정된 것인지 (교안·승인은 에듀옵스 전용) */
 function isMyTask(taskKey: string, project: Project, person: string): boolean {
+  if (taskKey === "교안제작" || taskKey === "승인") return false;
+
   const task = project.tasks.find(
     (t) => t.taskType === taskKey && t.chapter > 0,
   );
   if (task?.assignee === person) return true;
 
-  if (
-    project.tutor === person &&
-    (taskKey === "교안제작" || taskKey === "촬영")
-  )
-    return true;
+  if (project.tutor === person && taskKey === "촬영") return true;
   if (project.editor === person && (taskKey === "편집" || taskKey === "자막"))
     return true;
   if (project.reviewer === person && taskKey === "검수") return true;
