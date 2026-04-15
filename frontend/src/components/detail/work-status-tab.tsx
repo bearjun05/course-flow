@@ -372,6 +372,18 @@ export default function WorkStatusTab({
                     {chapter.title}
                   </span>
                 )}
+                {driveLink && (
+                  <a
+                    href={driveLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 h-5 px-1.5 rounded border border-neutral-200 text-[10px] text-neutral-400 hover:text-neutral-600 hover:border-neutral-300 transition-colors shrink-0"
+                    title="구글 드라이브"
+                  >
+                    <HardDrive className="h-2.5 w-2.5" />
+                    드라이브
+                  </a>
+                )}
               </div>
               {/* 5개 빈 칸 */}
               <div />
@@ -379,7 +391,7 @@ export default function WorkStatusTab({
               <div />
               <div />
               <div />
-              {/* 진행률 + 드라이브 링크 */}
+              {/* 진행률 */}
               <div className="px-2 py-2.5 flex items-center justify-end gap-2">
                 <ChapterProgress
                   completed={completedCount}
@@ -389,18 +401,6 @@ export default function WorkStatusTab({
                 <span className="text-[10px] text-neutral-400 shrink-0">
                   {chapter.lectures.length}강
                 </span>
-                {driveLink && (
-                  <a
-                    href={driveLink}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 h-6 px-2 rounded-md border border-neutral-200 text-[10px] text-neutral-400 hover:text-neutral-600 hover:border-neutral-300 transition-colors shrink-0"
-                    title="구글 드라이브"
-                  >
-                    <HardDrive className="h-3 w-3" />
-                    드라이브
-                  </a>
-                )}
               </div>
             </div>
 

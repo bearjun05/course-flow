@@ -433,6 +433,18 @@ export default function UploadTab({
                     {chapter.title}
                   </span>
                 )}
+                {driveLink && (
+                  <a
+                    href={driveLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 h-5 px-1.5 rounded border border-neutral-200 text-[10px] text-neutral-400 hover:text-neutral-600 hover:border-neutral-300 transition-colors shrink-0"
+                    title="구글 드라이브"
+                  >
+                    <HardDrive className="h-2.5 w-2.5" />
+                    드라이브
+                  </a>
+                )}
               </div>
               <div />
               <div />
@@ -448,18 +460,6 @@ export default function UploadTab({
                 <span className="text-[10px] text-neutral-400 shrink-0">
                   {chapter.lectures.length}강
                 </span>
-                {driveLink && (
-                  <a
-                    href={driveLink}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 h-6 px-2 rounded-md border border-neutral-200 text-[10px] text-neutral-400 hover:text-neutral-600 hover:border-neutral-300 transition-colors shrink-0"
-                    title="구글 드라이브"
-                  >
-                    <HardDrive className="h-3 w-3" />
-                    드라이브
-                  </a>
-                )}
               </div>
             </div>
 
