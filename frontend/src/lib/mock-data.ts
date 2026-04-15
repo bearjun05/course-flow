@@ -350,7 +350,7 @@ export const mockProjects: Project[] = [
     ],
     tutor: "구민정",
     curriculumManager: "한지민",
-    slackChannel: "#courseflow-webdev-v2",
+    slackChannel: "https://teamsparta.slack.com/archives/C06WEBDEV2",
     slackChannelId: "C06WEBDEV2",
     driveLink: "https://drive.google.com/drive/folders/proj1",
     chapterDriveLinks: [
@@ -390,8 +390,6 @@ export const mockProjects: Project[] = [
     curriculumManager: "최민수",
     editor: "강태경",
     reviewer: "유재성",
-    slackChannel: "#courseflow-chat-arch",
-    slackChannelId: "C06CHATARCH",
     driveLink: "https://drive.google.com/drive/folders/proj2",
     chapterDriveLinks: [
       "https://drive.google.com/drive/folders/proj2-ch1",
@@ -426,7 +424,7 @@ export const mockProjects: Project[] = [
     curriculumManager: "정수진",
     editor: "김다은",
     reviewer: "박지훈",
-    slackChannel: "#courseflow-llm-finetuning",
+    slackChannel: "https://teamsparta.slack.com/archives/C06LLMFINE",
     slackChannelId: "C06LLMFINE",
     driveLink: "https://drive.google.com/drive/folders/proj3",
     lessonPlanLink: "https://docs.google.com/document/d/proj3-lesson",
@@ -451,7 +449,7 @@ export const mockProjects: Project[] = [
     chapterDurations: [1.5, 2.0, 1.5, 2.0, 1.5, 2.0],
     tutor: "박서연",
     curriculumManager: "윤서현",
-    slackChannel: "#courseflow-data-analysis",
+    slackChannel: "https://teamsparta.slack.com/archives/C06DATAAN",
     driveLink: "https://drive.google.com/drive/folders/proj4",
     lessonPlanLink: "https://docs.google.com/document/d/proj4-lesson",
     backofficeLink: "https://backoffice.example.com/proj-4",
@@ -475,7 +473,7 @@ export const mockProjects: Project[] = [
     chapterCount: 3,
     chapterDurations: [2.0, 2.0, 2.0],
     tutor: "김선우",
-    slackChannel: "#courseflow-marketing",
+    slackChannel: "https://teamsparta.slack.com/archives/C06MARKET",
     trafficLight: "green",
     tasks: project6Tasks,
     lectures: createLectures("proj-6", [2.0, 2.0, 2.0], 3),
@@ -494,7 +492,7 @@ export const mockProjects: Project[] = [
     chapterCount: 0,
     chapterDurations: [],
     curriculumManager: "송미래",
-    slackChannel: "#courseflow-senior-ai",
+    slackChannel: "https://teamsparta.slack.com/archives/C06SENRAI",
     driveLink: "https://drive.google.com/drive/folders/proj5",
     backofficeLink: "https://backoffice.example.com/proj-5",
     trafficLight: "green",
@@ -527,7 +525,7 @@ export const mockProjects: Project[] = [
     tutor: "이현우",
     curriculumManager: "김민지",
     editor: "정민호",
-    slackChannel: "#courseflow-python-auto",
+    slackChannel: "https://teamsparta.slack.com/archives/C06PYTHON",
     trafficLight: "green",
     tasks: createChapterTasks("proj-7", 7, (ch, type) => {
       if (ch === 0) return type === "커리큘럼 기획" ? "완료" : "대기";
@@ -578,7 +576,7 @@ export const mockProjects: Project[] = [
     tutor: "최유진",
     curriculumManager: "박현아",
     editor: "정민호",
-    slackChannel: "#courseflow-sheets",
+    slackChannel: "https://teamsparta.slack.com/archives/C06SHEETS",
     trafficLight: "yellow",
     tasks: createChapterTasks("proj-8", 3, (ch, type) => {
       if (ch === 0) return type === "커리큘럼 기획" ? "완료" : "대기";
@@ -606,7 +604,7 @@ export const mockProjects: Project[] = [
     curriculumManager: "이소영",
     editor: "김태준",
     reviewer: "박민서",
-    slackChannel: "#courseflow-sql",
+    slackChannel: "https://teamsparta.slack.com/archives/C06SQLMAS",
     trafficLight: "yellow",
     tasks: createChapterTasks("proj-9", 4, (ch, type) => {
       if (ch === 0) return type === "커리큘럼 기획" ? "완료" : "대기";
@@ -640,7 +638,7 @@ export const mockProjects: Project[] = [
     curriculumManager: "이수빈",
     editor: "김하늘",
     reviewer: "정예린",
-    slackChannel: "#courseflow-nextjs",
+    slackChannel: "https://teamsparta.slack.com/archives/C06NEXTJS",
     trafficLight: "yellow",
     tasks: createChapterTasks("proj-10", 5, (ch, type) => {
       if (ch === 0) return type === "커리큘럼 기획" ? "완료" : "대기";
@@ -694,7 +692,7 @@ export const mockProjects: Project[] = [
     curriculumManager: "이소영",
     editor: "강태경",
     reviewer: "박민서",
-    slackChannel: "#courseflow-ai-fullstack",
+    slackChannel: "https://teamsparta.slack.com/archives/C06AIFULL",
     trafficLight: "yellow",
     tasks: createChapterTasks(
       "proj-11",
