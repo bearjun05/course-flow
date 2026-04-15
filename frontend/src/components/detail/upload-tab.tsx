@@ -1,17 +1,19 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import {
   FileText,
   Video,
   Scissors,
-  Subtitles,
   Search,
   ThumbsUp,
   Upload,
   ExternalLink,
   CheckCircle2,
   Lock,
+  HardDrive,
+  Link as LinkIcon,
+  Check,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Project, ChapterTask, Lecture, TaskStatus } from "@/lib/types";
@@ -19,6 +21,12 @@ import type { Project, ChapterTask, Lecture, TaskStatus } from "@/lib/types";
 interface UploadTabProps {
   project: Project;
   person: string;
+  onTaskStatusChange?: (
+    chapter: number,
+    taskType: string,
+    status: TaskStatus,
+  ) => void;
+  onLectureUrlChange?: (lectureId: string, field: string, url: string) => void;
 }
 
 interface ChapterRow {
@@ -32,8 +40,7 @@ interface ChapterRow {
 const FILE_COLUMNS = [
   { key: "교안제작", label: "교안", icon: FileText },
   { key: "촬영", label: "촬영", icon: Video },
-  { key: "편집", label: "편집", icon: Scissors },
-  { key: "자막", label: "자막", icon: Subtitles },
+  { key: "편집", label: "편집·자막", icon: Scissors },
   { key: "검수", label: "검수", icon: Search },
   { key: "승인", label: "승인", icon: ThumbsUp },
 ] as const;
@@ -55,19 +62,18 @@ const GROUP_COLORS = [
 
 /** 해당 공정이 이 사람에게 배정된 것인지 */
 function isMyTask(taskKey: string, project: Project, person: string): boolean {
-  // 직접 assignee 체크
   const task = project.tasks.find(
     (t) => t.taskType === taskKey && t.chapter > 0,
   );
   if (task?.assignee === person) return true;
 
-  // 역할 기반 매핑
   if (
     project.tutor === person &&
     (taskKey === "교안제작" || taskKey === "촬영")
   )
     return true;
-  if (project.editor === person && taskKey === "편집") return true;
+  if (project.editor === person && (taskKey === "편집" || taskKey === "자막"))
+    return true;
   if (project.reviewer === person && taskKey === "검수") return true;
   if (
     project.curriculumManager === person &&
@@ -87,9 +93,7 @@ function getLectureDeliverableUrl(
     case "촬영":
       return lecture.rawVideoUrl;
     case "편집":
-      return lecture.editedVideoUrl;
-    case "자막":
-      return lecture.subtitleUrl;
+      return lecture.editedVideoUrl ?? lecture.subtitleUrl;
     case "검수":
       return lecture.reviewUrl;
     default:
@@ -97,20 +101,28 @@ function getLectureDeliverableUrl(
   }
 }
 
-const GRID_COLS = "grid-cols-[200px_repeat(6,1fr)_100px]";
+const GRID_COLS = "grid-cols-[200px_repeat(5,1fr)_100px]";
 
-/** 결과물 셀 — 내 담당이면 업로드/확인 버튼, 아니면 비활성 */
+/** 결과물 셀 — 내 담당이면 업로드/상태변경 가능 */
 function DeliverableCell({
   lecture,
   taskKey,
   color,
   isMine,
+  taskStatus,
+  onUploadUrl,
+  onToggleStatus,
 }: {
   lecture: Lecture;
   taskKey: string;
   color: string;
   isMine: boolean;
+  taskStatus?: TaskStatus;
+  onUploadUrl?: (lectureId: string, field: string, url: string) => void;
+  onToggleStatus?: () => void;
 }) {
+  const [showInput, setShowInput] = useState(false);
+  const [inputValue, setInputValue] = useState("");
   const url = getLectureDeliverableUrl(lecture, taskKey);
 
   // 내 담당이 아니면 비활성 표시
@@ -135,6 +147,90 @@ function DeliverableCell({
         <span className="inline-flex items-center justify-center h-7 w-7 rounded-lg bg-neutral-50 border border-neutral-100">
           <Lock className="h-3 w-3 text-neutral-200" />
         </span>
+      </div>
+    );
+  }
+
+  // 검수 — 완료 토글 기능
+  if (taskKey === "검수" && onToggleStatus) {
+    const isComplete = taskStatus === "완료";
+    return (
+      <div className="flex items-center justify-center">
+        <button
+          onClick={onToggleStatus}
+          className={cn(
+            "inline-flex items-center gap-1 h-7 px-2 rounded-lg border text-[10px] font-medium transition-all hover:scale-105",
+            isComplete
+              ? "border-emerald-300 bg-emerald-50 text-emerald-600"
+              : "border-dashed border-neutral-300 text-neutral-500 hover:border-solid",
+          )}
+        >
+          {isComplete ? (
+            <>
+              <CheckCircle2 className="h-3 w-3" />
+              완료
+            </>
+          ) : (
+            <>
+              <Search className="h-3 w-3" />
+              검수
+            </>
+          )}
+        </button>
+      </div>
+    );
+  }
+
+  // 교안 링크 업로드
+  if (taskKey === "교안제작" && !url && onUploadUrl) {
+    if (showInput) {
+      return (
+        <div className="flex items-center justify-center">
+          <div className="flex items-center gap-0.5">
+            <input
+              autoFocus
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && inputValue.trim()) {
+                  onUploadUrl(lecture.id, "lessonPlanUrl", inputValue.trim());
+                  setShowInput(false);
+                  setInputValue("");
+                }
+                if (e.key === "Escape") {
+                  setShowInput(false);
+                  setInputValue("");
+                }
+              }}
+              placeholder="링크"
+              className="w-16 h-6 text-[10px] px-1 rounded border border-neutral-300 focus:outline-none focus:ring-1 focus:ring-primary"
+            />
+            <button
+              onClick={() => {
+                if (inputValue.trim()) {
+                  onUploadUrl(lecture.id, "lessonPlanUrl", inputValue.trim());
+                }
+                setShowInput(false);
+                setInputValue("");
+              }}
+              className="h-6 w-6 flex items-center justify-center rounded border border-neutral-200 hover:bg-neutral-50"
+            >
+              <Check className="h-3 w-3 text-neutral-500" />
+            </button>
+          </div>
+        </div>
+      );
+    }
+    return (
+      <div className="flex items-center justify-center">
+        <button
+          onClick={() => setShowInput(true)}
+          className="inline-flex items-center gap-0.5 h-7 px-1.5 rounded-lg border-2 border-dashed text-[10px] font-medium transition-all hover:scale-105 hover:border-solid"
+          style={{ borderColor: `${color}60`, color }}
+          title="교안 링크 등록"
+        >
+          <LinkIcon className="h-3 w-3" />
+        </button>
       </div>
     );
   }
@@ -173,7 +269,6 @@ function DeliverableCell({
         }}
         onClick={(e) => {
           e.stopPropagation();
-          // TODO: 실제 업로드 기능 연결
           alert("업로드 기능은 백엔드 연결 후 사용할 수 있습니다.");
         }}
         title="결과물 업로드"
@@ -211,7 +306,12 @@ function ChapterProgress({
   );
 }
 
-export default function UploadTab({ project, person }: UploadTabProps) {
+export default function UploadTab({
+  project,
+  person,
+  onTaskStatusChange,
+  onLectureUrlChange,
+}: UploadTabProps) {
   const chapters: ChapterRow[] = useMemo(() => {
     const rows: ChapterRow[] = [];
 
@@ -224,6 +324,15 @@ export default function UploadTab({ project, person }: UploadTabProps) {
       const taskStatuses: Record<string, TaskStatus> = {};
       for (const t of chTasks) {
         taskStatuses[t.taskType] = t.status;
+      }
+      // 편집·자막 합산
+      if (taskStatuses["편집"] && taskStatuses["자막"]) {
+        taskStatuses["편집"] =
+          taskStatuses["편집"] === "완료" && taskStatuses["자막"] === "완료"
+            ? "완료"
+            : taskStatuses["편집"] === "완료" || taskStatuses["자막"] === "완료"
+              ? "진행"
+              : taskStatuses["편집"];
       }
 
       rows.push({
@@ -238,7 +347,6 @@ export default function UploadTab({ project, person }: UploadTabProps) {
     return rows;
   }, [project]);
 
-  // 내 담당 공정 목록
   const myTaskKeys = useMemo(
     () =>
       FILE_COLUMNS.filter((col) => isMyTask(col.key, project, person)).map(
@@ -297,6 +405,7 @@ export default function UploadTab({ project, person }: UploadTabProps) {
         const completedCount = FILE_COLUMNS.filter(
           (col) => chapter.taskStatuses[col.key] === "완료",
         ).length;
+        const driveLink = project.chapterDriveLinks?.[chapter.chapter - 1];
 
         return (
           <div key={chapter.chapter}>
@@ -326,8 +435,18 @@ export default function UploadTab({ project, person }: UploadTabProps) {
               <div />
               <div />
               <div />
-              <div />
               <div className="px-2 py-2.5 flex items-center justify-end gap-2">
+                {driveLink && (
+                  <a
+                    href={driveLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center justify-center h-6 w-6 rounded-md border border-neutral-200 text-neutral-400 hover:text-neutral-600 hover:border-neutral-300 transition-colors"
+                    title="구글 드라이브"
+                  >
+                    <HardDrive className="h-3 w-3" />
+                  </a>
+                )}
                 <ChapterProgress
                   completed={completedCount}
                   total={FILE_COLUMNS.length}
@@ -372,6 +491,20 @@ export default function UploadTab({ project, person }: UploadTabProps) {
                         taskKey={col.key}
                         color={color}
                         isMine={mine}
+                        taskStatus={chapter.taskStatuses[col.key]}
+                        onUploadUrl={mine ? onLectureUrlChange : undefined}
+                        onToggleStatus={
+                          mine && col.key === "검수" && onTaskStatusChange
+                            ? () =>
+                                onTaskStatusChange(
+                                  chapter.chapter,
+                                  "검수",
+                                  chapter.taskStatuses["검수"] === "완료"
+                                    ? "대기"
+                                    : "완료",
+                                )
+                            : undefined
+                        }
                       />
                     </div>
                   );

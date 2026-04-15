@@ -91,7 +91,7 @@ function QuestionCard({
   children: React.ReactNode;
 }) {
   return (
-    <div className="rounded-xl border border-[#e2e8d8] bg-white p-5 shadow-sm">
+    <div className="rounded-xl border border-neutral-200 bg-white p-5 shadow-sm">
       <div className="mb-4">
         <h3 className="text-[15px] font-medium text-foreground">
           {question}
@@ -117,8 +117,8 @@ function SectionBanner({
   description: string;
 }) {
   return (
-    <div className="overflow-hidden rounded-xl border border-[#e2e8d8] bg-white shadow-sm">
-      <div className="h-2 bg-[#b5c98a]" />
+    <div className="overflow-hidden rounded-xl border border-neutral-200 bg-white shadow-sm">
+      <div className="h-2 bg-neutral-300" />
       <div className="px-5 py-4">
         <h2 className="text-base font-semibold text-foreground">{title}</h2>
         <p className="mt-0.5 text-xs text-muted-foreground">{description}</p>
@@ -187,9 +187,9 @@ export function ProjectRequestForm() {
   if (submitted) {
     return (
       <div className="mx-auto max-w-xl">
-        <div className="flex flex-col items-center gap-5 rounded-xl border border-[#e2e8d8] bg-white px-8 py-16 shadow-sm">
-          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#EDF2DC]">
-            <CheckCircle2 className="h-7 w-7 text-[#7A9445]" />
+        <div className="flex flex-col items-center gap-5 rounded-xl border border-neutral-200 bg-white px-8 py-16 shadow-sm">
+          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-neutral-100">
+            <CheckCircle2 className="h-7 w-7 text-neutral-500" />
           </div>
           <div className="text-center">
             <h2 className="text-lg font-semibold text-foreground">

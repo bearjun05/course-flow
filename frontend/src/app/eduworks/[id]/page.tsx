@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams, useSearchParams } from "next/navigation";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import Link from "next/link";
 import { CalendarDays, ClipboardList, Calendar, Upload } from "lucide-react";
 import { mockProjects } from "@/lib/mock-data";
@@ -20,10 +20,42 @@ export default function EduworksDetailPage() {
   const projectId = params.id;
   const person = searchParams.get("person") ?? "";
 
-  const project = useMemo(
+  const baseProject = useMemo(
     () => mockProjects.find((p) => p.id === projectId) ?? null,
     [projectId],
   );
+
+  const [tasks, setTasks] = useState(baseProject?.tasks ?? []);
+  const [lectures, setLectures] = useState(baseProject?.lectures ?? []);
+
+  const project = useMemo(() => {
+    if (!baseProject) return null;
+    return { ...baseProject, tasks, lectures };
+  }, [baseProject, tasks, lectures]);
+
+  const handleTaskStatusChange = (
+    chapter: number,
+    taskType: string,
+    newStatus: "대기" | "진행" | "리뷰" | "완료",
+  ) => {
+    setTasks((prev) =>
+      prev.map((t) =>
+        t.chapter === chapter && t.taskType === taskType
+          ? { ...t, status: newStatus }
+          : t,
+      ),
+    );
+  };
+
+  const handleLectureUrlChange = (
+    lectureId: string,
+    field: string,
+    url: string,
+  ) => {
+    setLectures((prev) =>
+      prev.map((l) => (l.id === lectureId ? { ...l, [field]: url } : l)),
+    );
+  };
 
   const tabParam = searchParams.get("tab");
   const defaultTab: ScheduleTab =
@@ -121,7 +153,12 @@ export default function EduworksDetailPage() {
             />
           )}
           {scheduleTab === "upload" && (
-            <UploadTab project={project} person={person} />
+            <UploadTab
+              project={project}
+              person={person}
+              onTaskStatusChange={handleTaskStatusChange}
+              onLectureUrlChange={handleLectureUrlChange}
+            />
           )}
         </section>
       </div>

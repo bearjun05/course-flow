@@ -56,7 +56,9 @@ export interface Project {
   editor?: string;
   reviewer?: string;
   slackChannel?: string;
+  slackChannelId?: string;
   driveLink?: string;
+  chapterDriveLinks?: string[];
   lessonPlanLink?: string;
   backofficeLink?: string;
   trafficLight: TrafficLight;

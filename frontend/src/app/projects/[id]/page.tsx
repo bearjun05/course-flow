@@ -47,6 +47,9 @@ export default function ProjectDetailPage() {
     baseProject?.chapterDurations ?? [],
   );
   const [note, setNote] = useState(baseProject?.note ?? "");
+  const [projectLectures, setProjectLectures] = useState(
+    baseProject?.lectures ?? [],
+  );
   const [scheduleTab, setScheduleTab] = useState<ScheduleTab>("schedule");
   const [weekStart, setWeekStart] = useState(() => {
     const d = new Date();
@@ -66,6 +69,7 @@ export default function ProjectDetailPage() {
       paymentDate,
       chapterDurations,
       note,
+      lectures: projectLectures,
     };
   }, [
     baseProject,
@@ -76,11 +80,38 @@ export default function ProjectDetailPage() {
     paymentDate,
     chapterDurations,
     note,
+    projectLectures,
   ]);
 
   const handleTasksChange = useCallback((newTasks: ChapterTask[]) => {
     setTasks(newTasks);
   }, []);
+
+  const handleTaskStatusChange = useCallback(
+    (
+      chapter: number,
+      taskType: string,
+      newStatus: "대기" | "진행" | "리뷰" | "완료",
+    ) => {
+      setTasks((prev) =>
+        prev.map((t) =>
+          t.chapter === chapter && t.taskType === taskType
+            ? { ...t, status: newStatus }
+            : t,
+        ),
+      );
+    },
+    [],
+  );
+
+  const handleLectureUrlChange = useCallback(
+    (lectureId: string, field: string, url: string) => {
+      setProjectLectures((prev) =>
+        prev.map((l) => (l.id === lectureId ? { ...l, [field]: url } : l)),
+      );
+    },
+    [],
+  );
 
   const handleAddChapter = useCallback(() => {
     const maxChapter = tasks.reduce((max, t) => Math.max(max, t.chapter), 0);
@@ -227,9 +258,12 @@ export default function ProjectDetailPage() {
           {scheduleTab === "work-status" && (
             <WorkStatusTab
               tasks={tasks}
-              lectures={project.lectures}
+              lectures={projectLectures}
               chapterCount={project.chapterCount}
               chapterTitles={project.chapterTitles}
+              chapterDriveLinks={project.chapterDriveLinks}
+              onTaskStatusChange={handleTaskStatusChange}
+              onLectureUrlChange={handleLectureUrlChange}
             />
           )}
         </section>

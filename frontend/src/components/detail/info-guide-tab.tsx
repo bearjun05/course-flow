@@ -15,6 +15,8 @@ import {
   BookOpen,
   Pencil,
   Check,
+  Copy,
+  X,
 } from "lucide-react";
 import {
   Select,
@@ -23,6 +25,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import type { Project, ProjectStatus, TrafficLight } from "@/lib/types";
 import { PROJECT_STATUSES, PRODUCTION_TYPES } from "@/lib/constants";
 import {
@@ -226,6 +234,134 @@ function LinkChip({
       {label}
       <ExternalLink className="h-3 w-3 opacity-30 group-hover:opacity-50 transition-opacity" />
     </a>
+  );
+}
+
+/** 슬랙 칩 — 클릭 시 채널 ID / 링크를 보여주는 모달 */
+function SlackChip({
+  channel,
+  channelId,
+}: {
+  channel?: string;
+  channelId?: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const [copied, setCopied] = useState<string | null>(null);
+
+  const slackLink = channel
+    ? `https://slack.com/app_redirect?channel=${channel.replace("#", "")}`
+    : undefined;
+
+  const handleCopy = (text: string, label: string) => {
+    navigator.clipboard.writeText(text);
+    setCopied(label);
+    setTimeout(() => setCopied(null), 1500);
+  };
+
+  // 링크 없으면 추가 버튼
+  if (!channel) {
+    return (
+      <button className="inline-flex items-center gap-2 h-9 px-3.5 text-xs rounded-xl border border-dashed border-neutral-200 text-neutral-400 hover:border-neutral-300 hover:text-neutral-500 transition-all">
+        <Plus className="h-3.5 w-3.5" />
+        슬랙
+      </button>
+    );
+  }
+
+  return (
+    <>
+      <button
+        onClick={() => setOpen(true)}
+        className="group relative inline-flex items-center gap-2 h-9 px-3.5 text-xs font-medium rounded-xl border border-neutral-200 bg-white text-neutral-600 transition-all duration-300 hover:border-neutral-100 hover:shadow-[0_0_20px_4px_rgba(255,255,255,0.9),_0_0_6px_0px_rgba(0,0,0,0.06)] hover:text-neutral-700"
+      >
+        <Hash className="h-3.5 w-3.5 shrink-0 text-neutral-300 group-hover:text-neutral-400 transition-colors" />
+        {channel}
+      </button>
+
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="text-sm">Slack 채널 정보</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3 pt-1">
+            {/* 채널명 */}
+            <div className="space-y-1">
+              <span className="text-[11px] font-medium text-neutral-400">
+                채널명
+              </span>
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-medium text-foreground">
+                  {channel}
+                </span>
+                <button
+                  onClick={() => handleCopy(channel, "channel")}
+                  className="text-neutral-300 hover:text-neutral-500 transition-colors"
+                >
+                  {copied === "channel" ? (
+                    <Check className="h-3.5 w-3.5 text-emerald-500" />
+                  ) : (
+                    <Copy className="h-3.5 w-3.5" />
+                  )}
+                </button>
+              </div>
+            </div>
+
+            {/* 채널 ID */}
+            {channelId && (
+              <div className="space-y-1">
+                <span className="text-[11px] font-medium text-neutral-400">
+                  채널 ID
+                </span>
+                <div className="flex items-center gap-2">
+                  <code className="text-sm font-mono text-foreground bg-neutral-50 px-2 py-0.5 rounded">
+                    {channelId}
+                  </code>
+                  <button
+                    onClick={() => handleCopy(channelId, "channelId")}
+                    className="text-neutral-300 hover:text-neutral-500 transition-colors"
+                  >
+                    {copied === "channelId" ? (
+                      <Check className="h-3.5 w-3.5 text-emerald-500" />
+                    ) : (
+                      <Copy className="h-3.5 w-3.5" />
+                    )}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Slack 링크 */}
+            {slackLink && (
+              <div className="space-y-1">
+                <span className="text-[11px] font-medium text-neutral-400">
+                  Slack 링크
+                </span>
+                <div className="flex items-center gap-2">
+                  <a
+                    href={slackLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm text-primary hover:underline truncate"
+                  >
+                    채널 열기
+                  </a>
+                  <button
+                    onClick={() => handleCopy(slackLink, "link")}
+                    className="text-neutral-300 hover:text-neutral-500 transition-colors"
+                  >
+                    {copied === "link" ? (
+                      <Check className="h-3.5 w-3.5 text-emerald-500" />
+                    ) : (
+                      <Copy className="h-3.5 w-3.5" />
+                    )}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
 
@@ -490,14 +626,9 @@ export default function InfoGuideTab({
                 label="커리큘럼"
                 href={project.curriculumSheetLink}
               />
-              <LinkChip
-                icon={<Hash className="h-4 w-4" />}
-                label={project.slackChannel ?? "슬랙"}
-                href={
-                  project.slackChannel
-                    ? `https://slack.com/app_redirect?channel=${project.slackChannel.replace("#", "")}`
-                    : undefined
-                }
+              <SlackChip
+                channel={project.slackChannel}
+                channelId={project.slackChannelId}
               />
             </div>
           </div>
