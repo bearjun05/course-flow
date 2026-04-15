@@ -27,6 +27,7 @@ interface WorkStatusTabProps {
   chapterCount: number;
   chapterTitles?: string[];
   chapterDriveLinks?: string[];
+  onReviewToggle?: (lectureId: string, reviewed: boolean) => void;
   onApprovalToggle?: (lectureId: string, approved: boolean) => void;
   onLectureUrlChange?: (lectureId: string, field: string, url: string) => void;
 }
@@ -234,6 +235,42 @@ function ApprovalCell({
   );
 }
 
+/** 검수 셀 — 강 단위 */
+function ReviewCell({
+  lecture,
+  color,
+  onToggle,
+}: {
+  lecture: Lecture;
+  color: string;
+  onToggle: (lectureId: string, reviewed: boolean) => void;
+}) {
+  const isReviewed = lecture.reviewed === true;
+  return (
+    <div className="flex items-center justify-center">
+      <button
+        onClick={() => onToggle(lecture.id, !isReviewed)}
+        className={cn(
+          "inline-flex items-center justify-center h-7 w-7 rounded-lg border transition-all hover:scale-110",
+          isReviewed ? "" : "border-2 border-dashed",
+        )}
+        style={{
+          backgroundColor: isReviewed ? `${color}20` : undefined,
+          borderColor: isReviewed ? `${color}50` : `${color}40`,
+          color: isReviewed ? color : `${color}80`,
+        }}
+        title={isReviewed ? "검수 완료" : "검수 처리"}
+      >
+        {isReviewed ? (
+          <Check className="h-4 w-4" />
+        ) : (
+          <Search className="h-3.5 w-3.5" />
+        )}
+      </button>
+    </div>
+  );
+}
+
 /** 장 진행률 바 */
 function ChapterProgress({
   completed,
@@ -270,6 +307,7 @@ export default function WorkStatusTab({
   chapterCount,
   chapterTitles,
   chapterDriveLinks,
+  onReviewToggle,
   onApprovalToggle,
   onLectureUrlChange,
 }: WorkStatusTabProps) {
@@ -437,6 +475,12 @@ export default function WorkStatusTab({
                         lectureLabel={lecture.label}
                         color={color}
                         onToggle={onApprovalToggle}
+                      />
+                    ) : col.key === "검수" && onReviewToggle ? (
+                      <ReviewCell
+                        lecture={lecture}
+                        color={color}
+                        onToggle={onReviewToggle}
                       />
                     ) : (
                       <DeliverableCell

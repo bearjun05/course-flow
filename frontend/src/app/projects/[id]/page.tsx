@@ -262,6 +262,13 @@ export default function ProjectDetailPage() {
               chapterCount={project.chapterCount}
               chapterTitles={project.chapterTitles}
               chapterDriveLinks={project.chapterDriveLinks}
+              onReviewToggle={(lectureId, reviewed) =>
+                setProjectLectures((prev) =>
+                  prev.map((l) =>
+                    l.id === lectureId ? { ...l, reviewed } : l,
+                  ),
+                )
+              }
               onApprovalToggle={(lectureId, approved) =>
                 setProjectLectures((prev) =>
                   prev.map((l) =>

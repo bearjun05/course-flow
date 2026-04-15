@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams, useSearchParams } from "next/navigation";
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo } from "react";
 import Link from "next/link";
 import { CalendarDays, ClipboardList, Calendar, Upload } from "lucide-react";
 import { mockProjects } from "@/lib/mock-data";
@@ -33,17 +33,9 @@ export default function EduworksDetailPage() {
     return { ...baseProject, tasks, lectures };
   }, [baseProject, tasks, lectures]);
 
-  const handleTaskStatusChange = (
-    chapter: number,
-    taskType: string,
-    newStatus: "대기" | "진행" | "리뷰" | "완료",
-  ) => {
-    setTasks((prev) =>
-      prev.map((t) =>
-        t.chapter === chapter && t.taskType === taskType
-          ? { ...t, status: newStatus }
-          : t,
-      ),
+  const handleReviewToggle = (lectureId: string, reviewed: boolean) => {
+    setLectures((prev) =>
+      prev.map((l) => (l.id === lectureId ? { ...l, reviewed } : l)),
     );
   };
 
@@ -156,7 +148,7 @@ export default function EduworksDetailPage() {
             <UploadTab
               project={project}
               person={person}
-              onTaskStatusChange={handleTaskStatusChange}
+              onReviewToggle={handleReviewToggle}
               onLectureUrlChange={handleLectureUrlChange}
             />
           )}

@@ -21,11 +21,7 @@ import type { Project, ChapterTask, Lecture, TaskStatus } from "@/lib/types";
 interface UploadTabProps {
   project: Project;
   person: string;
-  onTaskStatusChange?: (
-    chapter: number,
-    taskType: string,
-    status: TaskStatus,
-  ) => void;
+  onReviewToggle?: (lectureId: string, reviewed: boolean) => void;
   onLectureUrlChange?: (lectureId: string, field: string, url: string) => void;
 }
 
@@ -107,17 +103,13 @@ function DeliverableCell({
   taskKey,
   color,
   isMine,
-  taskStatus,
   onUploadUrl,
-  onToggleStatus,
 }: {
   lecture: Lecture;
   taskKey: string;
   color: string;
   isMine: boolean;
-  taskStatus?: TaskStatus;
   onUploadUrl?: (lectureId: string, field: string, url: string) => void;
-  onToggleStatus?: () => void;
 }) {
   const [showInput, setShowInput] = useState(false);
   const [inputValue, setInputValue] = useState("");
@@ -151,36 +143,6 @@ function DeliverableCell({
         <span className="inline-flex items-center justify-center h-7 w-7 rounded-lg bg-neutral-50 border border-neutral-100">
           <Lock className="h-3 w-3 text-neutral-200" />
         </span>
-      </div>
-    );
-  }
-
-  // 검수 — 완료 토글 기능
-  if (taskKey === "검수" && onToggleStatus) {
-    const isComplete = taskStatus === "완료";
-    return (
-      <div className="flex items-center justify-center">
-        <button
-          onClick={onToggleStatus}
-          className={cn(
-            "inline-flex items-center gap-1 h-7 px-2 rounded-lg border text-[10px] font-medium transition-all hover:scale-105",
-            isComplete
-              ? "border-emerald-300 bg-emerald-50 text-emerald-600"
-              : "border-dashed border-neutral-300 text-neutral-500 hover:border-solid",
-          )}
-        >
-          {isComplete ? (
-            <>
-              <CheckCircle2 className="h-3 w-3" />
-              완료
-            </>
-          ) : (
-            <>
-              <Search className="h-3 w-3" />
-              검수
-            </>
-          )}
-        </button>
       </div>
     );
   }
@@ -285,6 +247,72 @@ function DeliverableCell({
 }
 
 /** 장 진행률 바 */
+/** 검수 셀 — 강 단위 (에듀웍스) */
+function ReviewCell({
+  lecture,
+  color,
+  isMine,
+  onToggle,
+}: {
+  lecture: Lecture;
+  color: string;
+  isMine: boolean;
+  onToggle?: (lectureId: string, reviewed: boolean) => void;
+}) {
+  const isReviewed = lecture.reviewed === true;
+
+  // 내 담당이 아니면 상태만 표시
+  if (!isMine) {
+    if (isReviewed) {
+      return (
+        <div className="flex items-center justify-center">
+          <span
+            className="inline-flex items-center justify-center h-7 w-7 rounded-lg border"
+            style={{
+              backgroundColor: `${color}10`,
+              borderColor: `${color}30`,
+              color,
+            }}
+          >
+            <ExternalLink className="h-3.5 w-3.5" />
+          </span>
+        </div>
+      );
+    }
+    return (
+      <div className="flex items-center justify-center">
+        <span className="inline-flex items-center justify-center h-7 w-7 rounded-lg bg-neutral-50 border border-neutral-100">
+          <Lock className="h-3 w-3 text-neutral-200" />
+        </span>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex items-center justify-center">
+      <button
+        onClick={() => onToggle?.(lecture.id, !isReviewed)}
+        className={cn(
+          "inline-flex items-center justify-center h-7 w-7 rounded-lg border transition-all hover:scale-110",
+          isReviewed ? "" : "border-2 border-dashed",
+        )}
+        style={{
+          backgroundColor: isReviewed ? `${color}20` : undefined,
+          borderColor: isReviewed ? `${color}50` : `${color}40`,
+          color: isReviewed ? color : `${color}80`,
+        }}
+        title={isReviewed ? "검수 완료" : "검수 처리"}
+      >
+        {isReviewed ? (
+          <Check className="h-4 w-4" />
+        ) : (
+          <Search className="h-3.5 w-3.5" />
+        )}
+      </button>
+    </div>
+  );
+}
+
 function ChapterProgress({
   completed,
   total,
@@ -313,7 +341,7 @@ function ChapterProgress({
 export default function UploadTab({
   project,
   person,
-  onTaskStatusChange,
+  onReviewToggle,
   onLectureUrlChange,
 }: UploadTabProps) {
   const chapters: ChapterRow[] = useMemo(() => {
@@ -491,26 +519,22 @@ export default function UploadTab({
                   const mine = myTaskKeys.includes(col.key);
                   return (
                     <div key={col.key} className="px-1 py-1.5">
-                      <DeliverableCell
-                        lecture={lecture}
-                        taskKey={col.key}
-                        color={color}
-                        isMine={mine}
-                        taskStatus={chapter.taskStatuses[col.key]}
-                        onUploadUrl={mine ? onLectureUrlChange : undefined}
-                        onToggleStatus={
-                          mine && col.key === "검수" && onTaskStatusChange
-                            ? () =>
-                                onTaskStatusChange(
-                                  chapter.chapter,
-                                  "검수",
-                                  chapter.taskStatuses["검수"] === "완료"
-                                    ? "대기"
-                                    : "완료",
-                                )
-                            : undefined
-                        }
-                      />
+                      {col.key === "검수" ? (
+                        <ReviewCell
+                          lecture={lecture}
+                          color={color}
+                          isMine={mine}
+                          onToggle={onReviewToggle}
+                        />
+                      ) : (
+                        <DeliverableCell
+                          lecture={lecture}
+                          taskKey={col.key}
+                          color={color}
+                          isMine={mine}
+                          onUploadUrl={mine ? onLectureUrlChange : undefined}
+                        />
+                      )}
                     </div>
                   );
                 })}
