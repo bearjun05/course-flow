@@ -43,7 +43,9 @@ interface FormData {
   rolloutDate: string;
   paymentDate: string;
   needSchedule: "yes" | "no" | "";
-  customSchedule: string;
+  scheduleCurriculum: string;
+  scheduleLessonPlan: string;
+  scheduleFilming: string;
   estimatedDuration: string;
   estimatedChapters: string;
   hasCurriculum: "yes" | "no" | "";
@@ -60,13 +62,15 @@ const DEFAULT_FORM: FormData = {
   businessUnitOther: "",
   productionType: "",
   renewalType: "",
-  previousTitleSame: true,
+  previousTitleSame: false,
   previousTitle: "",
   renewalScope: "",
   rolloutDate: "",
   paymentDate: "",
   needSchedule: "",
-  customSchedule: "",
+  scheduleCurriculum: "",
+  scheduleLessonPlan: "",
+  scheduleFilming: "",
   estimatedDuration: "",
   estimatedChapters: "",
   hasCurriculum: "",
@@ -89,7 +93,7 @@ function QuestionCard({
   return (
     <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
       <div className="mb-4">
-        <h3 className="text-[13px] font-medium text-foreground">
+        <h3 className="text-[15px] font-medium text-foreground">
           {question}
           {required && <span className="ml-0.5 text-red-500">*</span>}
         </h3>
@@ -266,11 +270,7 @@ export function ProjectRequestForm() {
       </QuestionCard>
 
       {/* Q3. 사용처 */}
-      <QuestionCard
-        question="이 강의는 어디에서 사용되나요?"
-        description="KDT를 선택하시면 트랙을 추가로 선택해 주셔야 합니다."
-        required
-      >
+      <QuestionCard question="이 강의는 어디에서 사용되나요?" required>
         <div className="space-y-3">
           <RadioGroup
             value={form.businessUnit}
@@ -442,25 +442,40 @@ export function ProjectRequestForm() {
         <div className="grid grid-cols-2 gap-3">
           <div>
             <Label className="text-xs text-muted-foreground">
-              예상 총 분량
+              예상 총 분량 (시간)
             </Label>
-            <Input
-              value={form.estimatedDuration}
-              onChange={(e) => update("estimatedDuration", e.target.value)}
-              placeholder="예: 총 10시간"
-              className="mt-1"
-            />
+            <div className="relative mt-1">
+              <Input
+                type="number"
+                min={0}
+                step={0.5}
+                value={form.estimatedDuration}
+                onChange={(e) => update("estimatedDuration", e.target.value)}
+                placeholder="10"
+                className="pr-12"
+              />
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
+                시간
+              </span>
+            </div>
           </div>
           <div>
             <Label className="text-xs text-muted-foreground">
-              예상 챕터 수
+              예상 챕터 수 (선택)
             </Label>
-            <Input
-              value={form.estimatedChapters}
-              onChange={(e) => update("estimatedChapters", e.target.value)}
-              placeholder="예: 8챕터"
-              className="mt-1"
-            />
+            <div className="relative mt-1">
+              <Input
+                type="number"
+                min={0}
+                value={form.estimatedChapters}
+                onChange={(e) => update("estimatedChapters", e.target.value)}
+                placeholder="8"
+                className="pr-12"
+              />
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
+                챕터
+              </span>
+            </div>
           </div>
         </div>
       </QuestionCard>
@@ -519,20 +534,20 @@ export function ProjectRequestForm() {
       <div className="pt-4">
         <SectionBanner
           title="일정"
-          description="목표 출시일과 제작 일정에 대해 알려 주세요."
+          description="롤아웃 마감일과 강의 지급일(출시일), 제작 일정에 대해 알려 주세요."
         />
       </div>
 
       {/* Q7. 롤아웃 & 지급일 */}
       <QuestionCard
-        question="롤아웃 일정을 알려 주세요"
-        description="목표 출시일과 강의 지급일을 선택해 주세요."
+        question="일정을 알려 주세요"
+        description="롤아웃은 내부 최종 마감일이고, 강의 지급일이 실제 출시일입니다."
         required
       >
         <div className="grid grid-cols-2 gap-3">
           <div>
             <Label className="text-xs text-muted-foreground">
-              롤아웃 (목표 출시일)
+              롤아웃 (내부 마감일)
             </Label>
             <Input
               type="date"
@@ -542,7 +557,9 @@ export function ProjectRequestForm() {
             />
           </div>
           <div>
-            <Label className="text-xs text-muted-foreground">강의 지급일</Label>
+            <Label className="text-xs text-muted-foreground">
+              강의 지급일 (출시일)
+            </Label>
             <Input
               type="date"
               value={form.paymentDate}
@@ -553,40 +570,88 @@ export function ProjectRequestForm() {
         </div>
       </QuestionCard>
 
-      {/* Q8. 세부 일정 산정 */}
+      {/* Q8. 세부 제작 일정 */}
       <QuestionCard
-        question="세부 제작 일정 산정이 필요하신가요?"
-        description="필요하시면 PM이 예상 분량과 롤아웃을 기준으로 일정을 산정해 드립니다. 산정된 일정을 토대로 튜터와 논의하여 확정해 주세요."
+        question="세부 제작 일정을 알려 주세요"
+        description="직접 산정한 일정이 있으면 입력해 주시고, 없으면 PM이 예상 분량과 롤아웃을 기준으로 산정해 드립니다."
       >
         <div className="space-y-3">
           <RadioGroup
             value={form.needSchedule}
             onValueChange={(v) => {
               update("needSchedule", v as "yes" | "no");
-              if (v === "yes") update("customSchedule", "");
+              if (v === "yes") {
+                update("scheduleCurriculum", "");
+                update("scheduleLessonPlan", "");
+                update("scheduleFilming", "");
+              }
             }}
             className="flex gap-6"
           >
             <div className="flex items-center gap-2">
-              <RadioGroupItem value="yes" id="sched-yes" />
-              <Label htmlFor="sched-yes" className="text-sm font-normal">
-                네, PM에게 요청합니다
+              <RadioGroupItem value="no" id="sched-no" />
+              <Label htmlFor="sched-no" className="text-sm font-normal">
+                직접 산정했습니다
               </Label>
             </div>
             <div className="flex items-center gap-2">
-              <RadioGroupItem value="no" id="sched-no" />
-              <Label htmlFor="sched-no" className="text-sm font-normal">
-                아니요, 직접 산정했습니다
+              <RadioGroupItem value="yes" id="sched-yes" />
+              <Label htmlFor="sched-yes" className="text-sm font-normal">
+                PM에게 산정 요청
               </Label>
             </div>
           </RadioGroup>
           {form.needSchedule === "no" && (
-            <Textarea
-              value={form.customSchedule}
-              onChange={(e) => update("customSchedule", e.target.value)}
-              placeholder="산정하신 제작 일정을 공유해 주세요"
-              className="min-h-[60px]"
-            />
+            <div className="space-y-3 rounded-lg border border-border bg-muted/30 p-4">
+              <p className="text-xs text-muted-foreground">
+                각 단계의 예상 완료일을 입력해 주세요.
+              </p>
+              <div className="grid grid-cols-3 gap-3">
+                <div>
+                  <Label className="text-xs text-muted-foreground">
+                    커리큘럼 기획
+                  </Label>
+                  <Input
+                    type="date"
+                    value={form.scheduleCurriculum}
+                    onChange={(e) =>
+                      update("scheduleCurriculum", e.target.value)
+                    }
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label className="text-xs text-muted-foreground">
+                    교안 제작
+                  </Label>
+                  <Input
+                    type="date"
+                    value={form.scheduleLessonPlan}
+                    onChange={(e) =>
+                      update("scheduleLessonPlan", e.target.value)
+                    }
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label className="text-xs text-muted-foreground">
+                    강의 촬영
+                  </Label>
+                  <Input
+                    type="date"
+                    value={form.scheduleFilming}
+                    onChange={(e) => update("scheduleFilming", e.target.value)}
+                    className="mt-1"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+          {form.needSchedule === "yes" && (
+            <p className="text-xs text-muted-foreground">
+              PM이 예상 분량과 롤아웃 일정을 기준으로 세부 일정을 산정해
+              드립니다. 해당 일정을 토대로 튜터와 논의하여 확정해 주세요.
+            </p>
           )}
         </div>
       </QuestionCard>
