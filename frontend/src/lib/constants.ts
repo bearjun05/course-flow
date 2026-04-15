@@ -31,12 +31,11 @@ export const KANBAN_TO_STATUS: Record<KanbanColumn, ProjectStatus> = {
   롤아웃: "롤아웃",
 };
 
-export const BUSINESS_UNITS = ["KDT", "KDC", "신사업"] as const;
+export const BUSINESS_UNITS = ["KDT", "KDC", "기타"] as const;
 
 export const PRODUCTION_TYPES = [
   { value: "신규", label: "신규 제작" },
-  { value: "부분리뉴얼", label: "부분 리뉴얼" },
-  { value: "전체리뉴얼", label: "전체 리뉴얼" },
+  { value: "리뉴얼", label: "리뉴얼" },
 ] as const;
 
 export const KDT_TRACKS = [

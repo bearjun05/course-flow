@@ -7,9 +7,9 @@ export type ProjectStatus =
   | "완료"
   | "중단";
 
-export type BusinessUnit = "KDT" | "KDC" | "신사업";
+export type BusinessUnit = "KDT" | "KDC" | "기타";
 
-export type ProductionType = "신규" | "부분리뉴얼" | "전체리뉴얼";
+export type ProductionType = "신규" | "리뉴얼";
 
 export type TrafficLight = "green" | "yellow" | "red";
 
