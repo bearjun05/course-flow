@@ -47,6 +47,12 @@ export default function ProjectDetailPage() {
     baseProject?.chapterDurations ?? [],
   );
   const [note, setNote] = useState(baseProject?.note ?? "");
+  const [slackChannel, setSlackChannel] = useState(
+    baseProject?.slackChannel ?? "",
+  );
+  const [slackChannelId, setSlackChannelId] = useState(
+    baseProject?.slackChannelId ?? "",
+  );
   const [projectLectures, setProjectLectures] = useState(
     baseProject?.lectures ?? [],
   );
@@ -69,6 +75,8 @@ export default function ProjectDetailPage() {
       paymentDate,
       chapterDurations,
       note,
+      slackChannel: slackChannel || undefined,
+      slackChannelId: slackChannelId || undefined,
       lectures: projectLectures,
     };
   }, [
@@ -80,6 +88,8 @@ export default function ProjectDetailPage() {
     paymentDate,
     chapterDurations,
     note,
+    slackChannel,
+    slackChannelId,
     projectLectures,
   ]);
 
@@ -175,6 +185,10 @@ export default function ProjectDetailPage() {
           onPaymentDateChange={setPaymentDate}
           onChapterDurationsChange={setChapterDurations}
           onNoteChange={setNote}
+          onSlackChange={(ch, id) => {
+            setSlackChannel(ch);
+            setSlackChannelId(id);
+          }}
         />
 
         <Separator />

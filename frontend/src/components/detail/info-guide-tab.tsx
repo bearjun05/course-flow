@@ -53,6 +53,7 @@ interface InfoGuideTabProps {
   onPaymentDateChange?: (date: string) => void;
   onChapterDurationsChange?: (durations: number[]) => void;
   onNoteChange?: (note: string) => void;
+  onSlackChange?: (channel: string, channelId: string) => void;
 }
 
 /* ------------------------------------------------------------------ */
@@ -237,16 +238,21 @@ function LinkChip({
   );
 }
 
-/** 슬랙 칩 — 클릭 시 채널 ID / 링크를 보여주는 모달 */
+/** 슬랙 칩 — 클릭 시 채널 ID / 링크를 보여주는 모달, 미등록 시 추가 모달 */
 function SlackChip({
   channel,
   channelId,
+  onSave,
 }: {
   channel?: string;
   channelId?: string;
+  onSave?: (channel: string, channelId: string) => void;
 }) {
   const [open, setOpen] = useState(false);
+  const [addOpen, setAddOpen] = useState(false);
   const [copied, setCopied] = useState<string | null>(null);
+  const [newChannel, setNewChannel] = useState(channel ?? "");
+  const [newChannelId, setNewChannelId] = useState(channelId ?? "");
 
   const slackLink = channel
     ? `https://slack.com/app_redirect?channel=${channel.replace("#", "")}`
@@ -261,10 +267,68 @@ function SlackChip({
   // 링크 없으면 추가 버튼
   if (!channel) {
     return (
-      <button className="inline-flex items-center gap-2 h-9 px-3.5 text-xs rounded-xl border border-dashed border-neutral-200 text-neutral-400 hover:border-neutral-300 hover:text-neutral-500 transition-all">
-        <Plus className="h-3.5 w-3.5" />
-        슬랙
-      </button>
+      <>
+        <button
+          onClick={() => {
+            setNewChannel("");
+            setNewChannelId("");
+            setAddOpen(true);
+          }}
+          className="inline-flex items-center gap-2 h-9 px-3.5 text-xs rounded-xl border border-dashed border-neutral-200 text-neutral-400 hover:border-neutral-300 hover:text-neutral-500 transition-all"
+        >
+          <Plus className="h-3.5 w-3.5" />
+          슬랙
+        </button>
+        <Dialog open={addOpen} onOpenChange={setAddOpen}>
+          <DialogContent className="max-w-sm">
+            <DialogHeader>
+              <DialogTitle className="text-sm">Slack 채널 등록</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-3 pt-1">
+              <div className="space-y-1">
+                <label className="text-[11px] font-medium text-neutral-400">
+                  채널명 <span className="text-red-400">*</span>
+                </label>
+                <input
+                  value={newChannel}
+                  onChange={(e) => setNewChannel(e.target.value)}
+                  placeholder="#courseflow-강의명"
+                  className="w-full h-9 px-3 text-sm rounded-lg border border-neutral-200 focus:outline-none focus:ring-1 focus:ring-primary"
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-[11px] font-medium text-neutral-400">
+                  채널 ID
+                </label>
+                <input
+                  value={newChannelId}
+                  onChange={(e) => setNewChannelId(e.target.value)}
+                  placeholder="C06XXXXXXX"
+                  className="w-full h-9 px-3 text-sm font-mono rounded-lg border border-neutral-200 focus:outline-none focus:ring-1 focus:ring-primary"
+                />
+                <p className="text-[10px] text-neutral-400">
+                  Slack 채널 상세 → 하단에서 채널 ID를 확인할 수 있습니다.
+                </p>
+              </div>
+              <button
+                onClick={() => {
+                  if (newChannel.trim()) {
+                    const ch = newChannel.trim().startsWith("#")
+                      ? newChannel.trim()
+                      : `#${newChannel.trim()}`;
+                    onSave?.(ch, newChannelId.trim());
+                    setAddOpen(false);
+                  }
+                }}
+                disabled={!newChannel.trim()}
+                className="w-full h-9 rounded-lg bg-primary text-primary-foreground text-sm font-medium disabled:opacity-40 transition-opacity"
+              >
+                등록
+              </button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </>
     );
   }
 
@@ -376,6 +440,7 @@ export default function InfoGuideTab({
   onPaymentDateChange,
   onChapterDurationsChange,
   onNoteChange,
+  onSlackChange,
 }: InfoGuideTabProps) {
   const [editingDurations, setEditingDurations] = useState(false);
   const [draftDurations, setDraftDurations] = useState<number[]>([]);
@@ -629,6 +694,7 @@ export default function InfoGuideTab({
               <SlackChip
                 channel={project.slackChannel}
                 channelId={project.slackChannelId}
+                onSave={onSlackChange}
               />
             </div>
           </div>
