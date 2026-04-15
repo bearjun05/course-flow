@@ -4,9 +4,9 @@ import { ProjectRequestForm } from "@/components/form/project-request-form";
 
 export default function NewProjectPage() {
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-muted/40">
       <header className="sticky top-0 z-10 border-b border-border bg-card/80 px-6 py-4 backdrop-blur-sm">
-        <div className="mx-auto flex max-w-2xl items-center gap-3">
+        <div className="mx-auto flex max-w-xl items-center gap-3">
           <Link
             href="/"
             className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-accent hover:text-foreground"
