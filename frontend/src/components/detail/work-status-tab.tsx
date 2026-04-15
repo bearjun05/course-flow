@@ -101,14 +101,12 @@ function DeliverableCell({
   color,
   taskStatus,
   onUploadUrl,
-  onToggleApproval,
 }: {
   lecture: Lecture;
   taskKey: string;
   color: string;
   taskStatus?: TaskStatus;
   onUploadUrl?: (lectureId: string, field: string, url: string) => void;
-  onToggleApproval?: () => void;
 }) {
   const [showInput, setShowInput] = useState(false);
   const [inputValue, setInputValue] = useState("");
@@ -163,31 +161,6 @@ function DeliverableCell({
           title="교안 링크 등록"
         >
           <LinkIcon className="h-3 w-3" />
-        </button>
-      </div>
-    );
-  }
-
-  // 승인 — 체크 토글
-  if (taskKey === "승인" && onToggleApproval) {
-    const isApproved = taskStatus === "완료";
-    return (
-      <div className="flex items-center justify-center">
-        <button
-          onClick={onToggleApproval}
-          className={cn(
-            "inline-flex items-center justify-center h-7 w-7 rounded-lg border transition-all hover:scale-110",
-            isApproved
-              ? "bg-emerald-50 border-emerald-300 text-emerald-600"
-              : "border-2 border-dashed border-neutral-200 text-neutral-300 hover:border-neutral-300 hover:text-neutral-400",
-          )}
-          title={isApproved ? "승인 완료" : "승인 처리"}
-        >
-          {isApproved ? (
-            <Check className="h-4 w-4" />
-          ) : (
-            <ThumbsUp className="h-3.5 w-3.5" />
-          )}
         </button>
       </div>
     );
@@ -362,12 +335,52 @@ export default function WorkStatusTab({
                   </span>
                 )}
               </div>
-              {/* 5개 빈 칸 */}
+              {/* 교안~검수 빈 칸 (4개) */}
               <div />
               <div />
               <div />
               <div />
-              <div />
+              {/* 승인 — 장 단위 토글 */}
+              <div className="flex items-center justify-center">
+                {onApprovalToggle && (
+                  <button
+                    onClick={() =>
+                      onApprovalToggle(
+                        chapter.chapter,
+                        chapter.taskStatuses["승인"] === "완료"
+                          ? "대기"
+                          : "완료",
+                      )
+                    }
+                    className={cn(
+                      "inline-flex items-center justify-center h-7 w-7 rounded-lg border transition-all hover:scale-110",
+                      chapter.taskStatuses["승인"] === "완료"
+                        ? "text-white"
+                        : "border-2 border-dashed border-neutral-200 text-neutral-300 hover:border-neutral-300 hover:text-neutral-400",
+                    )}
+                    style={
+                      chapter.taskStatuses["승인"] === "완료"
+                        ? {
+                            backgroundColor: `${color}30`,
+                            borderColor: `${color}60`,
+                            color,
+                          }
+                        : undefined
+                    }
+                    title={
+                      chapter.taskStatuses["승인"] === "완료"
+                        ? "승인 완료"
+                        : "승인 처리"
+                    }
+                  >
+                    {chapter.taskStatuses["승인"] === "완료" ? (
+                      <Check className="h-4 w-4" />
+                    ) : (
+                      <ThumbsUp className="h-3.5 w-3.5" />
+                    )}
+                  </button>
+                )}
+              </div>
               {/* 진행률 + 드라이브 링크 */}
               <div className="px-2 py-2.5 flex items-center justify-end gap-2">
                 {driveLink && (
@@ -418,24 +431,17 @@ export default function WorkStatusTab({
                 </div>
                 {FILE_COLUMNS.map((col) => (
                   <div key={col.key} className="px-1 py-1.5">
-                    <DeliverableCell
-                      lecture={lecture}
-                      taskKey={col.key}
-                      color={color}
-                      taskStatus={chapter.taskStatuses[col.key]}
-                      onUploadUrl={onLectureUrlChange}
-                      onToggleApproval={
-                        col.key === "승인" && onApprovalToggle
-                          ? () =>
-                              onApprovalToggle(
-                                chapter.chapter,
-                                chapter.taskStatuses["승인"] === "완료"
-                                  ? "대기"
-                                  : "완료",
-                              )
-                          : undefined
-                      }
-                    />
+                    {col.key === "승인" ? (
+                      <div />
+                    ) : (
+                      <DeliverableCell
+                        lecture={lecture}
+                        taskKey={col.key}
+                        color={color}
+                        taskStatus={chapter.taskStatuses[col.key]}
+                        onUploadUrl={onLectureUrlChange}
+                      />
+                    )}
                   </div>
                 ))}
                 <div />
