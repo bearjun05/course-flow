@@ -215,19 +215,13 @@ function ApprovalCell({
         onClick={() => onToggle(lecture.id, !isApproved)}
         className={cn(
           "inline-flex items-center justify-center h-7 w-7 rounded-lg border transition-all hover:scale-110",
-          isApproved
-            ? ""
-            : "border-2 border-dashed border-neutral-200 text-neutral-300 hover:border-neutral-300 hover:text-neutral-400",
+          isApproved ? "" : "border-2 border-dashed",
         )}
-        style={
-          isApproved
-            ? {
-                backgroundColor: `${color}20`,
-                borderColor: `${color}50`,
-                color,
-              }
-            : undefined
-        }
+        style={{
+          backgroundColor: isApproved ? `${color}20` : undefined,
+          borderColor: isApproved ? `${color}50` : `${color}40`,
+          color: isApproved ? color : `${color}80`,
+        }}
         title={isApproved ? "승인 완료" : "승인 처리"}
       >
         {isApproved ? (
@@ -387,17 +381,6 @@ export default function WorkStatusTab({
               <div />
               {/* 진행률 + 드라이브 링크 */}
               <div className="px-2 py-2.5 flex items-center justify-end gap-2">
-                {driveLink && (
-                  <a
-                    href={driveLink}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center h-6 w-6 rounded-md border border-neutral-200 text-neutral-400 hover:text-neutral-600 hover:border-neutral-300 transition-colors"
-                    title="구글 드라이브"
-                  >
-                    <HardDrive className="h-3 w-3" />
-                  </a>
-                )}
                 <ChapterProgress
                   completed={completedCount}
                   total={FILE_COLUMNS.length}
@@ -406,6 +389,18 @@ export default function WorkStatusTab({
                 <span className="text-[10px] text-neutral-400 shrink-0">
                   {chapter.lectures.length}강
                 </span>
+                {driveLink && (
+                  <a
+                    href={driveLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 h-6 px-2 rounded-md border border-neutral-200 text-[10px] text-neutral-400 hover:text-neutral-600 hover:border-neutral-300 transition-colors shrink-0"
+                    title="구글 드라이브"
+                  >
+                    <HardDrive className="h-3 w-3" />
+                    드라이브
+                  </a>
+                )}
               </div>
             </div>
 

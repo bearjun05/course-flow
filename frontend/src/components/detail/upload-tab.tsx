@@ -440,17 +440,6 @@ export default function UploadTab({
               <div />
               <div />
               <div className="px-2 py-2.5 flex items-center justify-end gap-2">
-                {driveLink && (
-                  <a
-                    href={driveLink}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center h-6 w-6 rounded-md border border-neutral-200 text-neutral-400 hover:text-neutral-600 hover:border-neutral-300 transition-colors"
-                    title="구글 드라이브"
-                  >
-                    <HardDrive className="h-3 w-3" />
-                  </a>
-                )}
                 <ChapterProgress
                   completed={completedCount}
                   total={FILE_COLUMNS.length}
@@ -459,6 +448,18 @@ export default function UploadTab({
                 <span className="text-[10px] text-neutral-400 shrink-0">
                   {chapter.lectures.length}강
                 </span>
+                {driveLink && (
+                  <a
+                    href={driveLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 h-6 px-2 rounded-md border border-neutral-200 text-[10px] text-neutral-400 hover:text-neutral-600 hover:border-neutral-300 transition-colors shrink-0"
+                    title="구글 드라이브"
+                  >
+                    <HardDrive className="h-3 w-3" />
+                    드라이브
+                  </a>
+                )}
               </div>
             </div>
 
