@@ -95,7 +95,7 @@ function getLectureDeliverableUrl(
   }
 }
 
-const GRID_COLS = "grid-cols-[200px_repeat(5,1fr)_100px]";
+const GRID_COLS = "grid-cols-[minmax(240px,1.5fr)_repeat(5,1fr)_100px]";
 
 /** 결과물 셀 — 내 담당이면 업로드/상태변경 가능 */
 function DeliverableCell({
