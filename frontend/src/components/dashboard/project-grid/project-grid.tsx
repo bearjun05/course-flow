@@ -25,13 +25,9 @@ type TabMode = "active" | "all";
 export function ProjectGrid({ projects }: ProjectGridProps) {
   const [tab, setTab] = useState<TabMode>("active");
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState<ProjectStatus | "all">(
-    "all",
-  );
-  const [businessFilter, setBusinessFilter] = useState<BusinessUnit | "all">(
-    "all",
-  );
-  const [trackFilter, setTrackFilter] = useState<string>("all");
+  const [statusFilter, setStatusFilter] = useState<ProjectStatus | "">("");
+  const [businessFilter, setBusinessFilter] = useState<BusinessUnit | "">("");
+  const [trackFilter, setTrackFilter] = useState<string>("");
 
   // 공통 필터 (검색/사업부/트랙/상태)
   function applyFilters(list: Project[]): Project[] {
@@ -42,15 +38,15 @@ export function ProjectGrid({ projects }: ProjectGridProps) {
       result = result.filter((p) => p.title.toLowerCase().includes(q));
     }
 
-    if (statusFilter !== "all") {
+    if (statusFilter) {
       result = result.filter((p) => p.status === statusFilter);
     }
 
-    if (businessFilter !== "all") {
+    if (businessFilter) {
       result = result.filter((p) => p.businessUnit === businessFilter);
     }
 
-    if (businessFilter === "KDT" && trackFilter !== "all") {
+    if (businessFilter === "KDT" && trackFilter) {
       result = result.filter((p) => p.trackName === trackFilter);
     }
 
@@ -129,18 +125,15 @@ export function ProjectGrid({ projects }: ProjectGridProps) {
         <div className="flex items-center gap-2">
           <Filter className="h-3.5 w-3.5 text-muted-foreground" />
           <Select
-            value={statusFilter}
-            onValueChange={(v) => {
-              if (v) setStatusFilter(v as ProjectStatus | "all");
-            }}
+            value={statusFilter || undefined}
+            onValueChange={(v) =>
+              setStatusFilter((v || "") as ProjectStatus | "")
+            }
           >
             <SelectTrigger className="h-8 w-auto gap-1 border-border text-xs">
               <SelectValue placeholder="전체 상태" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all" className="text-xs">
-                전체 상태
-              </SelectItem>
               {PROJECT_STATUSES.map((s) => (
                 <SelectItem key={s.value} value={s.value} className="text-xs">
                   {s.label}
@@ -150,21 +143,16 @@ export function ProjectGrid({ projects }: ProjectGridProps) {
           </Select>
 
           <Select
-            value={businessFilter}
+            value={businessFilter || undefined}
             onValueChange={(v) => {
-              if (v) {
-                setBusinessFilter(v as BusinessUnit | "all");
-                if (v !== "KDT") setTrackFilter("all");
-              }
+              setBusinessFilter((v || "") as BusinessUnit | "");
+              if (v !== "KDT") setTrackFilter("");
             }}
           >
             <SelectTrigger className="h-8 w-auto gap-1 border-border text-xs">
               <SelectValue placeholder="전체 사업부" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all" className="text-xs">
-                전체 사업부
-              </SelectItem>
               {BUSINESS_UNITS.map((bu) => (
                 <SelectItem key={bu} value={bu} className="text-xs">
                   {bu}
@@ -175,18 +163,13 @@ export function ProjectGrid({ projects }: ProjectGridProps) {
 
           {businessFilter === "KDT" && (
             <Select
-              value={trackFilter}
-              onValueChange={(v) => {
-                if (v) setTrackFilter(v);
-              }}
+              value={trackFilter || undefined}
+              onValueChange={(v) => setTrackFilter(v || "")}
             >
               <SelectTrigger className="h-8 w-auto gap-1 border-border text-xs">
-                <SelectValue placeholder="트랙" />
+                <SelectValue placeholder="전체 트랙" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all" className="text-xs">
-                  전체 트랙
-                </SelectItem>
                 {KDT_TRACKS.map((t) => (
                   <SelectItem key={t} value={t} className="text-xs">
                     {t}
