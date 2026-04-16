@@ -150,7 +150,6 @@ export function ProjectRequestForm() {
     form.estimatedDuration &&
     form.hasCurriculum &&
     (form.hasCurriculum !== "yes" || form.curriculumLink) &&
-    (form.hasCurriculum !== "no" || form.conceptDescription) &&
     form.needSchedule &&
     (form.needSchedule !== "no" ||
       (form.scheduleCurriculum &&
