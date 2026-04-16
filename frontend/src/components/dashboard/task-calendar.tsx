@@ -41,20 +41,20 @@ interface DayEvent {
   type: "start" | "middle" | "end" | "single";
 }
 
-/** 더 선명한 챕터 색상 (0=롤아웃 회색, 1~=챕터별) */
+/** 챕터 색상 — WorkStatusTab의 GROUP_COLORS와 동일 */
 const CHAPTER_COLORS = [
   "#909090",
-  "#D46A6A",
-  "#D4876A",
-  "#D4A36A",
-  "#C8B44A",
-  "#8AB44A",
-  "#4AB48A",
-  "#4AA8B4",
-  "#4A7CB4",
-  "#7A5CB4",
-  "#B45CA8",
-  "#A8886A",
+  "#D07070",
+  "#D08A6A",
+  "#D0A858",
+  "#C4A840",
+  "#8AAE50",
+  "#50B880",
+  "#50AAAA",
+  "#5090C0",
+  "#8070C0",
+  "#B870A0",
+  "#A89070",
 ];
 
 const TASK_TYPE_SHORT: Record<string, string> = {
