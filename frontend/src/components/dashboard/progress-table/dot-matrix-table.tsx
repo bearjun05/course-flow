@@ -111,6 +111,8 @@ function ProjectRow({
     (_, i) => i + 1,
   );
 
+  const isPlanning = project.status === "기획";
+
   // 각 챕터의 단계 계산
   const chapterStages = chapters.map((ch) => ({
     ch,
@@ -124,20 +126,22 @@ function ProjectRow({
     | { type: "group"; from: number; to: number; stage: DetailColumn };
   const dotItems: DotItem[] = [];
 
-  for (let i = 0; i < chapterStages.length; i += CHUNK) {
-    const chunk = chapterStages.slice(i, i + CHUNK);
-    const allSameStage =
-      chunk.length >= 5 && chunk.every((c) => c.stage === chunk[0].stage);
-    if (allSameStage) {
-      dotItems.push({
-        type: "group",
-        from: chunk[0].ch,
-        to: chunk[chunk.length - 1].ch,
-        stage: chunk[0].stage,
-      });
-    } else {
-      for (const c of chunk) {
-        dotItems.push({ type: "single", ch: c.ch, stage: c.stage });
+  if (!isPlanning) {
+    for (let i = 0; i < chapterStages.length; i += CHUNK) {
+      const chunk = chapterStages.slice(i, i + CHUNK);
+      const allSameStage =
+        chunk.length >= 5 && chunk.every((c) => c.stage === chunk[0].stage);
+      if (allSameStage) {
+        dotItems.push({
+          type: "group",
+          from: chunk[0].ch,
+          to: chunk[chunk.length - 1].ch,
+          stage: chunk[0].stage,
+        });
+      } else {
+        for (const c of chunk) {
+          dotItems.push({ type: "single", ch: c.ch, stage: c.stage });
+        }
       }
     }
   }
@@ -156,11 +160,13 @@ function ProjectRow({
     itemsByStage[item.stage].push(item);
   }
 
-  const totalSteps = chapters.length * DETAIL_COLUMNS.length;
-  const doneSteps = chapters.reduce((sum, ch) => {
-    const stage = getChapterDetailedStage(project, ch) as DetailColumn;
-    return sum + STAGE_ORDER[stage];
-  }, 0);
+  const totalSteps = isPlanning ? 1 : chapters.length * DETAIL_COLUMNS.length;
+  const doneSteps = isPlanning
+    ? 0
+    : chapters.reduce((sum, ch) => {
+        const stage = getChapterDetailedStage(project, ch) as DetailColumn;
+        return sum + STAGE_ORDER[stage];
+      }, 0);
   const progressPct =
     totalSteps > 0 ? Math.round((doneSteps / totalSteps) * 100) : 0;
 
@@ -204,58 +210,74 @@ function ProjectRow({
               style={{ left: `${(i / DETAIL_COLUMNS.length) * 100}%` }}
             />
           ))}
-          {DETAIL_COLUMNS.map((col) => {
-            const items = itemsByStage[col];
-            if (items.length === 0) return null;
-            const order = STAGE_ORDER[col];
-            const centerPct = ((order + 0.5) / DETAIL_COLUMNS.length) * 100;
-
-            return (
-              <div
-                key={col}
-                className="absolute flex items-center gap-[3px] -translate-x-1/2"
-                style={{ left: `${centerPct}%` }}
+          {/* 기획 프로젝트: 기획 열에 단일 노드 */}
+          {isPlanning && (
+            <div
+              className="absolute flex items-center -translate-x-1/2"
+              style={{ left: `${(0.5 / DETAIL_COLUMNS.length) * 100}%` }}
+            >
+              <span
+                className="inline-flex items-center justify-center rounded-full text-[8px] font-bold text-white shadow-sm"
+                style={{ width: 22, height: 22, backgroundColor: DOT_COLOR }}
               >
-                {items.map((item) => {
-                  if (item.type === "group") {
-                    const groupSize = 28;
-                    const hasOverdue = chapters
-                      .filter((ch) => ch >= item.from && ch <= item.to)
-                      .some((ch) => isChapterOverdue(project, ch));
+                기획
+              </span>
+            </div>
+          )}
+          {/* 일반 프로젝트: 장별 도트 */}
+          {!isPlanning &&
+            DETAIL_COLUMNS.map((col) => {
+              const items = itemsByStage[col];
+              if (items.length === 0) return null;
+              const order = STAGE_ORDER[col];
+              const centerPct = ((order + 0.5) / DETAIL_COLUMNS.length) * 100;
+
+              return (
+                <div
+                  key={col}
+                  className="absolute flex items-center gap-[3px] -translate-x-1/2"
+                  style={{ left: `${centerPct}%` }}
+                >
+                  {items.map((item) => {
+                    if (item.type === "group") {
+                      const groupSize = 28;
+                      const hasOverdue = chapters
+                        .filter((ch) => ch >= item.from && ch <= item.to)
+                        .some((ch) => isChapterOverdue(project, ch));
+                      return (
+                        <span
+                          key={`g-${item.from}`}
+                          className="inline-flex items-center justify-center rounded-full text-[7px] font-bold text-white shadow-sm leading-none"
+                          style={{
+                            width: groupSize,
+                            height: groupSize,
+                            backgroundColor: hasOverdue
+                              ? OVERDUE_COLOR
+                              : DOT_COLOR,
+                          }}
+                        >
+                          {item.from}-{item.to}
+                        </span>
+                      );
+                    }
+                    const overdue = isChapterOverdue(project, item.ch);
                     return (
                       <span
-                        key={`g-${item.from}`}
-                        className="inline-flex items-center justify-center rounded-full text-[7px] font-bold text-white shadow-sm leading-none"
+                        key={item.ch}
+                        className="inline-flex items-center justify-center rounded-full text-[9px] font-extrabold text-white shadow-sm"
                         style={{
-                          width: groupSize,
-                          height: groupSize,
-                          backgroundColor: hasOverdue
-                            ? OVERDUE_COLOR
-                            : DOT_COLOR,
+                          width: 20,
+                          height: 20,
+                          backgroundColor: overdue ? OVERDUE_COLOR : DOT_COLOR,
                         }}
                       >
-                        {item.from}-{item.to}
+                        {item.ch}
                       </span>
                     );
-                  }
-                  const overdue = isChapterOverdue(project, item.ch);
-                  return (
-                    <span
-                      key={item.ch}
-                      className="inline-flex items-center justify-center rounded-full text-[9px] font-extrabold text-white shadow-sm"
-                      style={{
-                        width: 20,
-                        height: 20,
-                        backgroundColor: overdue ? OVERDUE_COLOR : DOT_COLOR,
-                      }}
-                    >
-                      {item.ch}
-                    </span>
-                  );
-                })}
-              </div>
-            );
-          })}
+                  })}
+                </div>
+              );
+            })}
         </div>
       </td>
 

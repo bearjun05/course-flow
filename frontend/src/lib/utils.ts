@@ -54,7 +54,7 @@ export function getProgressText(tasks: ChapterTask[]): string {
 }
 
 export function isProjectActive(status: ProjectStatus): boolean {
-  return !["완료", "중단", "기획"].includes(status);
+  return !["완료", "중단"].includes(status);
 }
 
 export function isProjectOverdue(project: Project): boolean {

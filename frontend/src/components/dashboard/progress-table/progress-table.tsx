@@ -20,7 +20,11 @@ export function ProgressTable({
   personParam,
 }: ProgressTableProps) {
   const activeProjects = projects
-    .filter((p) => isProjectActive(p.status) && getEffectiveKanbanColumn(p))
+    .filter(
+      (p) =>
+        isProjectActive(p.status) &&
+        (p.status === "기획" || getEffectiveKanbanColumn(p)),
+    )
     .sort((a, b) => getDday(a.rolloutDate) - getDday(b.rolloutDate));
 
   return (
