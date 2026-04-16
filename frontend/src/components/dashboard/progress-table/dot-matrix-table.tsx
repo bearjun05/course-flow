@@ -13,15 +13,23 @@ interface DotMatrixTableProps {
   personParam?: string;
 }
 
-const DETAIL_COLUMNS = ["교안", "촬영", "편집.자막", "검수", "완료"] as const;
+const DETAIL_COLUMNS = [
+  "교안",
+  "촬영",
+  "편집·자막",
+  "검수",
+  "승인",
+  "완료",
+] as const;
 type DetailColumn = (typeof DETAIL_COLUMNS)[number];
 
 const STAGE_ORDER: Record<DetailColumn, number> = {
   교안: 0,
   촬영: 1,
-  "편집.자막": 2,
+  "편집·자막": 2,
   검수: 3,
-  완료: 4,
+  승인: 4,
+  완료: 5,
 };
 
 const DOT_COLOR = "#8AAE50";
@@ -136,8 +144,9 @@ function ProjectRow({
   const itemsByStage: Record<DetailColumn, DotItem[]> = {
     교안: [],
     촬영: [],
-    "편집.자막": [],
+    "편집·자막": [],
     검수: [],
+    승인: [],
     완료: [],
   };
   for (const item of dotItems) {
