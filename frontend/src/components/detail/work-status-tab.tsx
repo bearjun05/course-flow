@@ -7,6 +7,7 @@ import {
   Scissors,
   Search,
   ThumbsUp,
+  CheckCircle2,
   ExternalLink,
   Circle,
   HardDrive,
@@ -50,6 +51,7 @@ const FILE_COLUMNS = [
   { key: "편집", label: "편집·자막", icon: Scissors },
   { key: "검수", label: "검수", icon: Search },
   { key: "승인", label: "승인", icon: ThumbsUp },
+  { key: "완료", label: "완료", icon: CheckCircle2 },
 ] as const;
 
 const GROUP_COLORS = [
@@ -89,7 +91,7 @@ function getLectureDeliverableUrl(
 /*  Grid                                                               */
 /* ------------------------------------------------------------------ */
 
-const GRID_COLS = "grid-cols-[minmax(240px,1.5fr)_repeat(5,1fr)_100px]";
+const GRID_COLS = "grid-cols-[minmax(240px,1.5fr)_repeat(6,1fr)_100px]";
 
 /* ------------------------------------------------------------------ */
 /*  Sub-components                                                     */
@@ -423,7 +425,8 @@ export default function WorkStatusTab({
                   </a>
                 )}
               </div>
-              {/* 5개 빈 칸 */}
+              {/* 6개 빈 칸 */}
+              <div />
               <div />
               <div />
               <div />
@@ -443,59 +446,109 @@ export default function WorkStatusTab({
             </div>
 
             {/* 강별 행 */}
-            {chapter.lectures.map((lecture) => (
-              <div
-                key={lecture.id}
-                className={cn(
-                  "grid",
-                  GRID_COLS,
-                  "items-center border-b border-neutral-100/50 hover:bg-accent/10 transition-colors",
-                )}
-                style={{ borderLeft: `3px solid ${color}20` }}
-              >
-                <div className="px-4 pl-7 py-2 flex items-center gap-2 min-w-0">
-                  <span
-                    className="text-[12px] font-medium shrink-0"
-                    style={{ color }}
-                  >
-                    {lecture.label}
-                  </span>
-                  {lecture.title && (
-                    <span className="text-[11px] text-neutral-500 truncate">
-                      {lecture.title}
-                    </span>
+            {chapter.lectures.map((lecture) => {
+              // 현재 단계 판단: 가장 오른쪽에서 완료된 단계의 다음 단계가 현재
+              const stageKeys = [
+                "교안제작",
+                "촬영",
+                "편집",
+                "검수",
+                "승인",
+                "완료",
+              ];
+              const isApproved = lecture.approved === true;
+              const isReviewed = lecture.reviewed === true;
+              const hasEditSubtitle = !!(
+                lecture.editedVideoUrl && lecture.subtitleUrl
+              );
+              const hasRawVideo = !!lecture.rawVideoUrl;
+              const hasLessonPlan = !!lecture.lessonPlanUrl;
+
+              let currentStageKey = "교안제작";
+              if (isApproved) currentStageKey = "완료";
+              else if (isReviewed) currentStageKey = "승인";
+              else if (hasEditSubtitle) currentStageKey = "검수";
+              else if (hasRawVideo) currentStageKey = "편집";
+              else if (hasLessonPlan) currentStageKey = "촬영";
+
+              return (
+                <div
+                  key={lecture.id}
+                  className={cn(
+                    "grid",
+                    GRID_COLS,
+                    "items-center border-b border-neutral-100/50 hover:bg-accent/10 transition-colors",
                   )}
-                </div>
-                {FILE_COLUMNS.map((col) => (
-                  <div key={col.key} className="px-1 py-1.5">
-                    {col.key === "승인" && onApprovalToggle ? (
-                      <ApprovalCell
-                        lecture={lecture}
-                        chapter={chapter.chapter}
-                        lectureLabel={lecture.label}
-                        color={color}
-                        onToggle={onApprovalToggle}
-                      />
-                    ) : col.key === "검수" && onReviewToggle ? (
-                      <ReviewCell
-                        lecture={lecture}
-                        color={color}
-                        onToggle={onReviewToggle}
-                      />
-                    ) : (
-                      <DeliverableCell
-                        lecture={lecture}
-                        taskKey={col.key}
-                        color={color}
-                        taskStatus={chapter.taskStatuses[col.key]}
-                        onUploadUrl={onLectureUrlChange}
-                      />
+                  style={{ borderLeft: `3px solid ${color}20` }}
+                >
+                  <div className="px-4 pl-7 py-2 flex items-center gap-2 min-w-0">
+                    <span
+                      className="text-[12px] font-medium shrink-0"
+                      style={{ color }}
+                    >
+                      {lecture.label}
+                    </span>
+                    {lecture.title && (
+                      <span className="text-[11px] text-neutral-500 truncate">
+                        {lecture.title}
+                      </span>
                     )}
                   </div>
-                ))}
-                <div />
-              </div>
-            ))}
+                  {FILE_COLUMNS.map((col) => {
+                    const isCurrentStage = col.key === currentStageKey;
+                    return (
+                      <div
+                        key={col.key}
+                        className={cn(
+                          "px-1 py-1.5 rounded-sm",
+                          isCurrentStage && "bg-accent/20",
+                        )}
+                      >
+                        {col.key === "완료" ? (
+                          <div className="flex items-center justify-center">
+                            {isApproved ? (
+                              <span
+                                className="inline-flex items-center justify-center h-7 w-7 rounded-lg"
+                                style={{ backgroundColor: `${color}20`, color }}
+                              >
+                                <CheckCircle2 className="h-4 w-4" />
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center justify-center h-7 w-7 rounded-lg border-2 border-dashed border-neutral-200">
+                                <Circle className="h-2.5 w-2.5 text-neutral-300" />
+                              </span>
+                            )}
+                          </div>
+                        ) : col.key === "승인" && onApprovalToggle ? (
+                          <ApprovalCell
+                            lecture={lecture}
+                            chapter={chapter.chapter}
+                            lectureLabel={lecture.label}
+                            color={color}
+                            onToggle={onApprovalToggle}
+                          />
+                        ) : col.key === "검수" && onReviewToggle ? (
+                          <ReviewCell
+                            lecture={lecture}
+                            color={color}
+                            onToggle={onReviewToggle}
+                          />
+                        ) : (
+                          <DeliverableCell
+                            lecture={lecture}
+                            taskKey={col.key}
+                            color={color}
+                            taskStatus={chapter.taskStatuses[col.key]}
+                            onUploadUrl={onLectureUrlChange}
+                          />
+                        )}
+                      </div>
+                    );
+                  })}
+                  <div />
+                </div>
+              );
+            })}
           </div>
         );
       })}
