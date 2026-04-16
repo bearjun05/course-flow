@@ -213,7 +213,7 @@ export function ProjectRequestForm() {
       >
         <div className="space-y-3">
           <RadioGroup
-            value={form.tutorAssigned}
+            value={form.tutorAssigned || undefined}
             onValueChange={(v) => {
               update("tutorAssigned", v as "yes" | "no");
               if (v === "no") update("tutorName", "");
@@ -247,7 +247,7 @@ export function ProjectRequestForm() {
       <QuestionCard question="이 강의는 어디에서 사용되나요?" required>
         <div className="space-y-3">
           <RadioGroup
-            value={form.businessUnit}
+            value={form.businessUnit || undefined}
             onValueChange={(v) => {
               update("businessUnit", v as BusinessUnit);
               if (v !== "KDT") update("trackName", "");
@@ -311,7 +311,7 @@ export function ProjectRequestForm() {
       >
         <div className="space-y-3">
           <RadioGroup
-            value={form.productionType}
+            value={form.productionType || undefined}
             onValueChange={(v) => {
               update("productionType", v as ProductionType);
               if (v === "신규") {
@@ -342,7 +342,7 @@ export function ProjectRequestForm() {
               <div className="space-y-2">
                 <Label className="text-xs font-medium">리뉴얼 범위</Label>
                 <RadioGroup
-                  value={form.renewalType}
+                  value={form.renewalType || undefined}
                   onValueChange={(v) =>
                     update("renewalType", v as "부분" | "전체")
                   }
@@ -462,7 +462,7 @@ export function ProjectRequestForm() {
       >
         <div className="space-y-3">
           <RadioGroup
-            value={form.hasCurriculum}
+            value={form.hasCurriculum || undefined}
             onValueChange={(v) => {
               update("hasCurriculum", v as "yes" | "no");
               if (v === "yes") update("conceptDescription", "");
@@ -549,7 +549,7 @@ export function ProjectRequestForm() {
       >
         <div className="space-y-3">
           <RadioGroup
-            value={form.needSchedule}
+            value={form.needSchedule || undefined}
             onValueChange={(v) => {
               update("needSchedule", v as "yes" | "no");
               if (v === "yes") {
