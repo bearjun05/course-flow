@@ -386,7 +386,7 @@ export default function WorkStatusTab({
         style={{ borderLeft: "4px solid #7C8DBC" }}
       >
         <ClipboardCheck className="h-4 w-4 text-[#7C8DBC]" />
-        <span className="text-sm font-semibold text-[#7C8DBC]">사전 준비</span>
+        <span className="text-sm font-semibold text-[#7C8DBC]">기획</span>
         <div className="flex-1" />
         <span
           className={cn(
@@ -420,7 +420,7 @@ export default function WorkStatusTab({
           >
             <div className="text-center">
               <h3 className="text-base font-semibold">
-                사전 준비를 완료하시겠습니까?
+                기획 단계를 완료하시겠습니까?
               </h3>
               <p className="text-xs text-muted-foreground mt-1">
                 아래 항목을 확인해 주세요

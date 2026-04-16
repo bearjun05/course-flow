@@ -56,6 +56,9 @@ export default function ProjectDetailPage() {
   const [projectLectures, setProjectLectures] = useState(
     baseProject?.lectures ?? [],
   );
+  const [planningComplete, setPlanningComplete] = useState(
+    baseProject?.status !== "기획",
+  );
   const [scheduleTab, setScheduleTab] = useState<ScheduleTab>("work-status");
   const [weekStart, setWeekStart] = useState(() => {
     const d = new Date();
@@ -241,6 +244,12 @@ export default function ProjectDetailPage() {
                 chapterCount={project.chapterCount}
                 chapterTitles={project.chapterTitles}
                 chapterDriveLinks={project.chapterDriveLinks}
+                planningComplete={planningComplete}
+                onPlanningComplete={() => setPlanningComplete(true)}
+                onAddChapter={handleAddChapter}
+                hasCurriculumLink={!!project.lessonPlanLink}
+                hasRolloutDate={!!rolloutDate}
+                hasChapterDurations={chapterDurations.length > 0}
                 onReviewToggle={(lectureId, reviewed) =>
                   setProjectLectures((prev) =>
                     prev.map((l) =>
