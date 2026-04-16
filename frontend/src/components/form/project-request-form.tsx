@@ -1,15 +1,8 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import {
-  Save,
-  Send,
-  Trash2,
-  CheckCircle2,
-  ArrowRight,
-  Link as LinkIcon,
-} from "lucide-react";
+import { Send, CheckCircle2, ArrowRight, Link as LinkIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -25,8 +18,6 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
 import type { BusinessUnit, ProductionType } from "@/lib/types";
 import { KDT_TRACKS } from "@/lib/constants";
-
-const DRAFT_KEY = "courseflow_draft_project";
 
 interface FormData {
   title: string;
@@ -130,21 +121,8 @@ function SectionBanner({
 export function ProjectRequestForm() {
   const router = useRouter();
   const [form, setForm] = useState<FormData>(DEFAULT_FORM);
-  const [hasDraft, setHasDraft] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [newProjectId, setNewProjectId] = useState("");
-
-  useEffect(() => {
-    const saved = localStorage.getItem(DRAFT_KEY);
-    if (saved) {
-      try {
-        setForm(JSON.parse(saved));
-        setHasDraft(true);
-      } catch {
-        /* ignore corrupt data */
-      }
-    }
-  }, []);
 
   const update = useCallback(
     <K extends keyof FormData>(key: K, value: FormData[K]) => {
@@ -153,20 +131,8 @@ export function ProjectRequestForm() {
     [],
   );
 
-  const saveDraft = () => {
-    localStorage.setItem(DRAFT_KEY, JSON.stringify(form));
-    setHasDraft(true);
-  };
-
-  const clearDraft = () => {
-    localStorage.removeItem(DRAFT_KEY);
-    setForm(DEFAULT_FORM);
-    setHasDraft(false);
-  };
-
   const handleSubmit = () => {
     const newId = `proj-${Date.now()}`;
-    localStorage.removeItem(DRAFT_KEY);
     setNewProjectId(newId);
     setSubmitted(true);
   };
@@ -181,7 +147,15 @@ export function ProjectRequestForm() {
     (form.productionType !== "리뉴얼" || form.renewalType) &&
     form.rolloutDate &&
     form.paymentDate &&
-    form.estimatedDuration;
+    form.estimatedDuration &&
+    form.hasCurriculum &&
+    (form.hasCurriculum !== "yes" || form.curriculumLink) &&
+    (form.hasCurriculum !== "no" || form.conceptDescription) &&
+    form.needSchedule &&
+    (form.needSchedule !== "no" ||
+      (form.scheduleCurriculum &&
+        form.scheduleLessonPlan &&
+        form.scheduleFilming));
 
   /* ── 제출 완료 화면 ── */
   if (submitted) {
@@ -484,6 +458,7 @@ export function ProjectRequestForm() {
       <QuestionCard
         question="커리큘럼 초안이 있으신가요?"
         description="초안이 있으면 링크를, 아직 없다면 강의 컨셉을 간단히 적어 주세요. 최종 커리큘럼에는 각 장별·강별 예상 분량이 포함되어야 하며, 이를 기준으로 촬영 일정을 산정합니다."
+        required
       >
         <div className="space-y-3">
           <RadioGroup
@@ -570,6 +545,7 @@ export function ProjectRequestForm() {
       <QuestionCard
         question="세부 제작 일정을 알려 주세요"
         description="직접 산정한 일정이 있으면 입력해 주시고, 없으면 PM이 예상 분량과 롤아웃을 기준으로 산정해 드립니다."
+        required
       >
         <div className="space-y-3">
           <RadioGroup
@@ -653,30 +629,7 @@ export function ProjectRequestForm() {
       </QuestionCard>
 
       {/* ── 하단 버튼 ── */}
-      <div className="flex items-center justify-between pb-10 pt-4">
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={saveDraft}
-            className="gap-1.5 text-xs"
-          >
-            <Save className="h-3.5 w-3.5" />
-            임시 저장
-          </Button>
-          {hasDraft && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={clearDraft}
-              className="gap-1.5 text-xs text-muted-foreground"
-            >
-              <Trash2 className="h-3.5 w-3.5" />
-              초기화
-            </Button>
-          )}
-        </div>
-
+      <div className="flex items-center justify-end pb-10 pt-4">
         <Button
           onClick={handleSubmit}
           disabled={!isComplete}
