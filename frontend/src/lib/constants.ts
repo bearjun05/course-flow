@@ -1,12 +1,5 @@
 import type { KanbanColumn, ProjectStatus, DdayGroup } from "./types";
 
-export const KANBAN_COLUMNS: { id: KanbanColumn; label: string }[] = [
-  { id: "교안", label: "교안" },
-  { id: "촬영", label: "촬영" },
-  { id: "편집·검수", label: "편집·검수" },
-  { id: "롤아웃", label: "롤아웃" },
-];
-
 export const PROJECT_STATUSES: { value: ProjectStatus; label: string }[] = [
   { value: "기획", label: "기획" },
   { value: "교안", label: "교안" },
@@ -18,13 +11,6 @@ export const PROJECT_STATUSES: { value: ProjectStatus; label: string }[] = [
 ];
 
 export const STATUS_TO_KANBAN: Partial<Record<ProjectStatus, KanbanColumn>> = {
-  교안: "교안",
-  촬영: "촬영",
-  "편집·검수": "편집·검수",
-  롤아웃: "롤아웃",
-};
-
-export const KANBAN_TO_STATUS: Record<KanbanColumn, ProjectStatus> = {
   교안: "교안",
   촬영: "촬영",
   "편집·검수": "편집·검수",
@@ -69,13 +55,6 @@ export const TRAFFIC_LIGHT_COLORS = {
   yellow: { bg: "bg-amber-500", text: "text-amber-500", label: "주의" },
   red: { bg: "bg-red-500", text: "text-red-500", label: "위험" },
 } as const;
-
-export const PRODUCTION_PROCESSES = [
-  { taskType: "촬영" as const, label: "촬영" },
-  { taskType: "편집" as const, label: "컷" },
-  { taskType: "자막" as const, label: "자막" },
-  { taskType: "검수" as const, label: "검수" },
-] as const;
 
 export const STATUS_BADGE_VARIANT: Record<ProjectStatus, string> = {
   기획: "bg-neutral-100 text-neutral-500",

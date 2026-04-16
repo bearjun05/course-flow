@@ -4,8 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
-  GraduationCap,
-  Settings,
+  Users,
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
@@ -14,8 +13,7 @@ import { useState } from "react";
 
 const NAV_ITEMS = [
   { href: "/", label: "대시보드", icon: LayoutDashboard },
-  { href: "/tutor", label: "튜터 대시보드", icon: GraduationCap },
-  { href: "/settings", label: "설정", icon: Settings },
+  { href: "/eduworks", label: "에듀웍스", icon: Users },
 ];
 
 export function AppSidebar() {

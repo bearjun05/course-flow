@@ -1,39 +1,5 @@
 import type { Project, TaskType, KanbanColumn } from "./types";
-import { STATUS_TO_KANBAN, KANBAN_COLUMNS } from "./constants";
-
-export interface ProcessInfo {
-  activeChapters: number[];
-  doneCount: number;
-  total: number;
-  allDone: boolean;
-  noneStarted: boolean;
-}
-
-export function getProcessInfo(
-  project: Project,
-  taskType: TaskType,
-): ProcessInfo | null {
-  const tasks = project.tasks.filter(
-    (t) => t.chapter > 0 && t.taskType === taskType,
-  );
-  if (tasks.length === 0) return null;
-
-  const activeChapters = tasks
-    .filter((t) => t.status === "진행" || t.status === "리뷰")
-    .map((t) => t.chapter)
-    .sort((a, b) => a - b);
-
-  const doneCount = tasks.filter((t) => t.status === "완료").length;
-  const total = tasks.length;
-
-  return {
-    activeChapters,
-    doneCount,
-    total,
-    allDone: doneCount === total,
-    noneStarted: doneCount === 0 && activeChapters.length === 0,
-  };
-}
+import { STATUS_TO_KANBAN } from "./constants";
 
 /**
  * 칸반 배치 열을 결정한다.
@@ -74,54 +40,6 @@ const CHAPTER_TASK_TYPES: TaskType[] = [
   "검수",
   "승인",
 ];
-
-/**
- * 특정 장의 현재 공정 단계를 칸반 열로 매핑한다.
- * chapter-pipeline.tsx의 getChapterProgress와 동일한 역순 탐색 로직 사용.
- */
-export function getChapterKanbanColumn(
-  project: Project,
-  chapter: number,
-): KanbanColumn {
-  const tasks = project.tasks.filter((t) => t.chapter === chapter);
-  if (tasks.length === 0) return "교안";
-
-  for (let i = CHAPTER_TASK_TYPES.length - 1; i >= 0; i--) {
-    const taskType = CHAPTER_TASK_TYPES[i];
-    const task = tasks.find((t) => t.taskType === taskType);
-    if (
-      task &&
-      (task.status === "완료" ||
-        task.status === "진행" ||
-        task.status === "리뷰")
-    ) {
-      return TASK_TYPE_TO_KANBAN[taskType];
-    }
-  }
-
-  return "교안";
-}
-
-/**
- * 프로젝트의 모든 장을 칸반 열별로 그룹화하여 반환한다.
- */
-export function getChaptersGroupedByColumn(
-  project: Project,
-): Record<KanbanColumn, number[]> {
-  const result: Record<KanbanColumn, number[]> = {
-    교안: [],
-    촬영: [],
-    "편집·검수": [],
-    롤아웃: [],
-  };
-
-  for (let ch = 1; ch <= project.chapterCount; ch++) {
-    const col = getChapterKanbanColumn(project, ch);
-    result[col].push(ch);
-  }
-
-  return result;
-}
 
 /**
  * 장의 현재 세부 공정명을 반환한다.
