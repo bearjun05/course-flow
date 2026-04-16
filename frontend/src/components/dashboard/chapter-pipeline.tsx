@@ -83,7 +83,7 @@ function summarizeChapters(chapterData: ChapterData[]): StageGroup[] {
     label:
       g.chapters.length === 1
         ? `${g.chapters[0]}장`
-        : `${g.chapters[0]}-${g.chapters[g.chapters.length - 1]}장`,
+        : `${g.chapters[0]}~${g.chapters[g.chapters.length - 1]}장`,
   }));
 }
 
