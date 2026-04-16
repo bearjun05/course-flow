@@ -516,18 +516,23 @@ export default function WorkStatusTab({
         <div className="px-1 py-2" />
       </div>
 
+      {/* 장이 없을 때 안내 문구 (블러 밖) */}
+      {chapters.length === 0 && (
+        <div className="flex items-center justify-center h-24 text-sm text-muted-foreground">
+          {planningComplete
+            ? "아래 버튼을 눌러 장 추가를 해주세요!"
+            : "기획 완료 후 장을 추가할 수 있습니다."}
+        </div>
+      )}
+
       {/* Chapter rows (블러 처리: 기획 미완료 시) */}
-      <div
-        className={cn(
-          !planningComplete && "opacity-30 pointer-events-none blur-[1px]",
-        )}
-      >
-        {chapters.length === 0 ? (
-          <div className="flex items-center justify-center h-24 text-sm text-muted-foreground">
-            기획 완료 후 장을 추가할 수 있습니다.
-          </div>
-        ) : (
-          chapters.map((chapter) => {
+      {chapters.length > 0 && (
+        <div
+          className={cn(
+            !planningComplete && "opacity-30 pointer-events-none blur-[1px]",
+          )}
+        >
+          {chapters.map((chapter) => {
             const color = GROUP_COLORS[chapter.chapter % GROUP_COLORS.length];
             const completedCount = FILE_COLUMNS.filter(
               (col) => chapter.taskStatuses[col.key] === "완료",
@@ -699,9 +704,9 @@ export default function WorkStatusTab({
                 })}
               </div>
             );
-          })
-        )}
-      </div>
+          })}
+        </div>
+      )}
 
       {/* 장 추가 버튼 */}
       {onAddChapter && planningComplete && (
