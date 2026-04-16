@@ -368,14 +368,6 @@ export default function WorkStatusTab({
     return rows;
   }, [tasks, lectures, chapterCount, chapterTitles]);
 
-  if (chapters.length === 0) {
-    return (
-      <div className="rounded-2xl border border-neutral-100 bg-white shadow-sm flex items-center justify-center h-32 text-sm text-muted-foreground">
-        등록된 장이 없습니다.
-      </div>
-    );
-  }
-
   const allChecked = checks.curriculum && checks.dates && checks.durations;
 
   return (
@@ -388,24 +380,18 @@ export default function WorkStatusTab({
         <ClipboardCheck className="h-4 w-4 text-[#7C8DBC]" />
         <span className="text-sm font-semibold text-[#7C8DBC]">기획</span>
         <div className="flex-1" />
-        <span
-          className={cn(
-            "text-[11px] font-medium px-2.5 py-1 rounded-full",
-            planningComplete
-              ? "bg-emerald-50 text-emerald-600"
-              : "bg-amber-50 text-amber-600",
-          )}
-        >
-          {planningComplete ? "완료" : "진행 중"}
-        </span>
-        {!planningComplete && onPlanningComplete && (
+        {planningComplete ? (
+          <span className="text-[11px] font-medium px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-600">
+            완료
+          </span>
+        ) : onPlanningComplete ? (
           <button
             onClick={() => setShowPlanningModal(true)}
             className="h-7 px-3 rounded-lg border border-[#7C8DBC] text-[#7C8DBC] text-xs font-medium hover:bg-[#7C8DBC]/10 transition-colors"
           >
             완료하기
           </button>
-        )}
+        ) : null}
       </div>
 
       {/* 기획 완료 모달 */}
@@ -536,179 +522,185 @@ export default function WorkStatusTab({
           !planningComplete && "opacity-30 pointer-events-none blur-[1px]",
         )}
       >
-        {chapters.map((chapter) => {
-          const color = GROUP_COLORS[chapter.chapter % GROUP_COLORS.length];
-          const completedCount = FILE_COLUMNS.filter(
-            (col) => chapter.taskStatuses[col.key] === "완료",
-          ).length;
-          const driveLink = chapterDriveLinks?.[chapter.chapter - 1];
+        {chapters.length === 0 ? (
+          <div className="flex items-center justify-center h-24 text-sm text-muted-foreground">
+            기획 완료 후 장을 추가할 수 있습니다.
+          </div>
+        ) : (
+          chapters.map((chapter) => {
+            const color = GROUP_COLORS[chapter.chapter % GROUP_COLORS.length];
+            const completedCount = FILE_COLUMNS.filter(
+              (col) => chapter.taskStatuses[col.key] === "완료",
+            ).length;
+            const driveLink = chapterDriveLinks?.[chapter.chapter - 1];
 
-          return (
-            <div key={chapter.chapter}>
-              {/* 장 헤더 */}
-              <div
-                className={cn(
-                  "grid",
-                  GRID_COLS,
-                  "items-center border-b border-neutral-200 bg-neutral-50/70",
-                )}
-                style={{ borderLeft: `3px solid ${color}` }}
-              >
-                <div className="px-4 py-2.5 flex items-center gap-2 min-w-0">
-                  <span
-                    className="text-[13px] font-bold shrink-0"
-                    style={{ color }}
-                  >
-                    {chapter.label}
-                  </span>
-                  {chapter.title && (
-                    <span className="text-[12px] font-semibold text-neutral-700 truncate">
-                      {chapter.title}
-                    </span>
+            return (
+              <div key={chapter.chapter}>
+                {/* 장 헤더 */}
+                <div
+                  className={cn(
+                    "grid",
+                    GRID_COLS,
+                    "items-center border-b border-neutral-200 bg-neutral-50/70",
                   )}
-                  {driveLink && (
-                    <a
-                      href={driveLink}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 h-5 px-1.5 rounded border border-neutral-200 text-[10px] text-neutral-400 hover:text-neutral-600 hover:border-neutral-300 transition-colors shrink-0"
-                      title="구글 드라이브"
+                  style={{ borderLeft: `3px solid ${color}` }}
+                >
+                  <div className="px-4 py-2.5 flex items-center gap-2 min-w-0">
+                    <span
+                      className="text-[13px] font-bold shrink-0"
+                      style={{ color }}
                     >
-                      <HardDrive className="h-2.5 w-2.5" />
-                      드라이브
-                    </a>
-                  )}
-                </div>
-                {/* 6개 빈 칸 */}
-                <div />
-                <div />
-                <div />
-                <div />
-                <div />
-                <div />
-                {/* 진행률 */}
-                <div className="px-2 py-2.5 flex items-center justify-end gap-2">
-                  <ChapterProgress
-                    completed={completedCount}
-                    total={FILE_COLUMNS.length}
-                    color={color}
-                  />
-                  <span className="text-[10px] text-neutral-400 shrink-0">
-                    {chapter.lectures.length}강
-                  </span>
-                </div>
-              </div>
-
-              {/* 강별 행 */}
-              {chapter.lectures.map((lecture) => {
-                // 현재 단계 판단: 가장 오른쪽에서 완료된 단계의 다음 단계가 현재
-                const stageKeys = [
-                  "교안제작",
-                  "촬영",
-                  "편집",
-                  "검수",
-                  "승인",
-                  "완료",
-                ];
-                const isApproved = lecture.approved === true;
-                const isReviewed = lecture.reviewed === true;
-                const hasEditSubtitle = !!(
-                  lecture.editedVideoUrl && lecture.subtitleUrl
-                );
-                const hasRawVideo = !!lecture.rawVideoUrl;
-                const hasLessonPlan = !!lecture.lessonPlanUrl;
-
-                let currentStageKey = "교안제작";
-                if (isApproved) currentStageKey = "완료";
-                else if (isReviewed) currentStageKey = "승인";
-                else if (hasEditSubtitle) currentStageKey = "검수";
-                else if (hasRawVideo) currentStageKey = "편집";
-                else if (hasLessonPlan) currentStageKey = "촬영";
-
-                return (
-                  <div
-                    key={lecture.id}
-                    className={cn(
-                      "grid",
-                      GRID_COLS,
-                      "items-center border-b border-neutral-100/50 hover:bg-accent/10 transition-colors",
-                    )}
-                    style={{ borderLeft: `3px solid ${color}20` }}
-                  >
-                    <div className="px-4 pl-7 py-2 flex items-center gap-2 min-w-0">
-                      <span
-                        className="text-[12px] font-medium shrink-0"
-                        style={{ color }}
-                      >
-                        {lecture.label}
+                      {chapter.label}
+                    </span>
+                    {chapter.title && (
+                      <span className="text-[12px] font-semibold text-neutral-700 truncate">
+                        {chapter.title}
                       </span>
-                      {lecture.title && (
-                        <span className="text-[11px] text-neutral-500 truncate">
-                          {lecture.title}
-                        </span>
-                      )}
-                    </div>
-                    {FILE_COLUMNS.map((col) => {
-                      const isCurrentStage = col.key === currentStageKey;
-                      return (
-                        <div
-                          key={col.key}
-                          className={cn(
-                            "px-1 py-1.5 rounded-sm",
-                            isCurrentStage && "bg-accent/20",
-                          )}
-                        >
-                          {col.key === "완료" ? (
-                            <div className="flex items-center justify-center">
-                              {isApproved ? (
-                                <span
-                                  className="inline-flex items-center justify-center h-7 w-7 rounded-lg"
-                                  style={{
-                                    backgroundColor: `${color}20`,
-                                    color,
-                                  }}
-                                >
-                                  <CheckCircle2 className="h-4 w-4" />
-                                </span>
-                              ) : (
-                                <span className="inline-flex items-center justify-center h-7 w-7 rounded-lg border-2 border-dashed border-neutral-200">
-                                  <Circle className="h-2.5 w-2.5 text-neutral-300" />
-                                </span>
-                              )}
-                            </div>
-                          ) : col.key === "승인" && onApprovalToggle ? (
-                            <ApprovalCell
-                              lecture={lecture}
-                              chapter={chapter.chapter}
-                              lectureLabel={lecture.label}
-                              color={color}
-                              onToggle={onApprovalToggle}
-                            />
-                          ) : col.key === "검수" && onReviewToggle ? (
-                            <ReviewCell
-                              lecture={lecture}
-                              color={color}
-                              onToggle={onReviewToggle}
-                            />
-                          ) : (
-                            <DeliverableCell
-                              lecture={lecture}
-                              taskKey={col.key}
-                              color={color}
-                              taskStatus={chapter.taskStatuses[col.key]}
-                              onUploadUrl={onLectureUrlChange}
-                            />
-                          )}
-                        </div>
-                      );
-                    })}
-                    <div />
+                    )}
+                    {driveLink && (
+                      <a
+                        href={driveLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 h-5 px-1.5 rounded border border-neutral-200 text-[10px] text-neutral-400 hover:text-neutral-600 hover:border-neutral-300 transition-colors shrink-0"
+                        title="구글 드라이브"
+                      >
+                        <HardDrive className="h-2.5 w-2.5" />
+                        드라이브
+                      </a>
+                    )}
                   </div>
-                );
-              })}
-            </div>
-          );
-        })}
+                  {/* 6개 빈 칸 */}
+                  <div />
+                  <div />
+                  <div />
+                  <div />
+                  <div />
+                  <div />
+                  {/* 진행률 */}
+                  <div className="px-2 py-2.5 flex items-center justify-end gap-2">
+                    <ChapterProgress
+                      completed={completedCount}
+                      total={FILE_COLUMNS.length}
+                      color={color}
+                    />
+                    <span className="text-[10px] text-neutral-400 shrink-0">
+                      {chapter.lectures.length}강
+                    </span>
+                  </div>
+                </div>
+
+                {/* 강별 행 */}
+                {chapter.lectures.map((lecture) => {
+                  // 현재 단계 판단: 가장 오른쪽에서 완료된 단계의 다음 단계가 현재
+                  const stageKeys = [
+                    "교안제작",
+                    "촬영",
+                    "편집",
+                    "검수",
+                    "승인",
+                    "완료",
+                  ];
+                  const isApproved = lecture.approved === true;
+                  const isReviewed = lecture.reviewed === true;
+                  const hasEditSubtitle = !!(
+                    lecture.editedVideoUrl && lecture.subtitleUrl
+                  );
+                  const hasRawVideo = !!lecture.rawVideoUrl;
+                  const hasLessonPlan = !!lecture.lessonPlanUrl;
+
+                  let currentStageKey = "교안제작";
+                  if (isApproved) currentStageKey = "완료";
+                  else if (isReviewed) currentStageKey = "승인";
+                  else if (hasEditSubtitle) currentStageKey = "검수";
+                  else if (hasRawVideo) currentStageKey = "편집";
+                  else if (hasLessonPlan) currentStageKey = "촬영";
+
+                  return (
+                    <div
+                      key={lecture.id}
+                      className={cn(
+                        "grid",
+                        GRID_COLS,
+                        "items-center border-b border-neutral-100/50 hover:bg-accent/10 transition-colors",
+                      )}
+                      style={{ borderLeft: `3px solid ${color}20` }}
+                    >
+                      <div className="px-4 pl-7 py-2 flex items-center gap-2 min-w-0">
+                        <span
+                          className="text-[12px] font-medium shrink-0"
+                          style={{ color }}
+                        >
+                          {lecture.label}
+                        </span>
+                        {lecture.title && (
+                          <span className="text-[11px] text-neutral-500 truncate">
+                            {lecture.title}
+                          </span>
+                        )}
+                      </div>
+                      {FILE_COLUMNS.map((col) => {
+                        const isCurrentStage = col.key === currentStageKey;
+                        return (
+                          <div
+                            key={col.key}
+                            className={cn(
+                              "px-1 py-1.5 rounded-sm",
+                              isCurrentStage && "bg-accent/20",
+                            )}
+                          >
+                            {col.key === "완료" ? (
+                              <div className="flex items-center justify-center">
+                                {isApproved ? (
+                                  <span
+                                    className="inline-flex items-center justify-center h-7 w-7 rounded-lg"
+                                    style={{
+                                      backgroundColor: `${color}20`,
+                                      color,
+                                    }}
+                                  >
+                                    <CheckCircle2 className="h-4 w-4" />
+                                  </span>
+                                ) : (
+                                  <span className="inline-flex items-center justify-center h-7 w-7 rounded-lg border-2 border-dashed border-neutral-200">
+                                    <Circle className="h-2.5 w-2.5 text-neutral-300" />
+                                  </span>
+                                )}
+                              </div>
+                            ) : col.key === "승인" && onApprovalToggle ? (
+                              <ApprovalCell
+                                lecture={lecture}
+                                chapter={chapter.chapter}
+                                lectureLabel={lecture.label}
+                                color={color}
+                                onToggle={onApprovalToggle}
+                              />
+                            ) : col.key === "검수" && onReviewToggle ? (
+                              <ReviewCell
+                                lecture={lecture}
+                                color={color}
+                                onToggle={onReviewToggle}
+                              />
+                            ) : (
+                              <DeliverableCell
+                                lecture={lecture}
+                                taskKey={col.key}
+                                color={color}
+                                taskStatus={chapter.taskStatuses[col.key]}
+                                onUploadUrl={onLectureUrlChange}
+                              />
+                            )}
+                          </div>
+                        );
+                      })}
+                      <div />
+                    </div>
+                  );
+                })}
+              </div>
+            );
+          })
+        )}
       </div>
 
       {/* 장 추가 버튼 */}
