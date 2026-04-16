@@ -13,54 +13,19 @@ interface DotMatrixTableProps {
   personParam?: string;
 }
 
-const DETAIL_COLUMNS = [
-  "교안",
-  "촬영",
-  "편집",
-  "자막",
-  "검수",
-  "승인",
-] as const;
+const DETAIL_COLUMNS = ["교안", "촬영", "편집.자막", "검수", "완료"] as const;
 type DetailColumn = (typeof DETAIL_COLUMNS)[number];
 
 const STAGE_ORDER: Record<DetailColumn, number> = {
   교안: 0,
   촬영: 1,
-  편집: 2,
-  자막: 3,
-  검수: 4,
-  승인: 5,
+  "편집.자막": 2,
+  검수: 3,
+  완료: 4,
 };
 
-type ColorTheme = "blue" | "green";
-
-const THEME_COLORS: Record<
-  ColorTheme,
-  { stages: Record<DetailColumn, string>; progress: string }
-> = {
-  blue: {
-    stages: {
-      교안: "#DEEEFF",
-      촬영: "#D0E7FF",
-      편집: "#C2E0FF",
-      자막: "#B4D9FF",
-      검수: "#A6D2FF",
-      승인: "#98CBFF",
-    },
-    progress: "#98CBFF",
-  },
-  green: {
-    stages: {
-      교안: "#ECF2C8",
-      촬영: "#E4EBBB",
-      편집: "#DCE4AE",
-      자막: "#D4DDA1",
-      검수: "#CCD694",
-      승인: "#C4CF87",
-    },
-    progress: "#C4CF87",
-  },
-};
+const DOT_COLOR = "#8AAE50";
+const PROGRESS_COLOR = "#8AAE50";
 
 const OVERDUE_COLOR = "#F9919E";
 
@@ -123,12 +88,10 @@ function CircleProgress({
 
 function ProjectRow({
   project,
-  theme,
   basePath,
   personParam,
 }: {
   project: Project;
-  theme: ColorTheme;
   basePath?: string;
   personParam?: string;
 }) {
@@ -137,7 +100,6 @@ function ProjectRow({
     { length: project.chapterCount },
     (_, i) => i + 1,
   );
-  const colors = THEME_COLORS[theme];
 
   // 각 챕터의 단계 계산
   const chapterStages = chapters.map((ch) => ({
@@ -174,10 +136,9 @@ function ProjectRow({
   const itemsByStage: Record<DetailColumn, DotItem[]> = {
     교안: [],
     촬영: [],
-    편집: [],
-    자막: [],
+    "편집.자막": [],
     검수: [],
-    승인: [],
+    완료: [],
   };
   for (const item of dotItems) {
     itemsByStage[item.stage].push(item);
@@ -210,7 +171,7 @@ function ProjectRow({
     >
       <td className="px-4 py-3">
         <div className="flex items-center gap-2">
-          <CircleProgress percent={progressPct} color={colors.progress} />
+          <CircleProgress percent={progressPct} color={PROGRESS_COLOR} />
           <span className="text-[13px] font-medium text-foreground leading-snug">
             {project.title}
           </span>
@@ -224,11 +185,11 @@ function ProjectRow({
       <td colSpan={DETAIL_COLUMNS.length} className="px-2 py-3">
         <div className="relative h-[28px] flex items-center">
           <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-[2px] bg-[#E5E7EB] rounded-full" />
-          {Array.from({ length: 7 }, (_, i) => (
+          {Array.from({ length: DETAIL_COLUMNS.length + 1 }, (_, i) => (
             <div
               key={i}
               className="absolute top-1/2 -translate-y-1/2 w-[3px] h-[3px] rounded-full bg-[#D1D5DB]"
-              style={{ left: `${(i / 6) * 100}%` }}
+              style={{ left: `${(i / DETAIL_COLUMNS.length) * 100}%` }}
             />
           ))}
           {DETAIL_COLUMNS.map((col) => {
@@ -258,7 +219,7 @@ function ProjectRow({
                           height: groupSize,
                           backgroundColor: hasOverdue
                             ? OVERDUE_COLOR
-                            : colors.stages[col],
+                            : DOT_COLOR,
                         }}
                       >
                         {item.from}-{item.to}
@@ -273,9 +234,7 @@ function ProjectRow({
                       style={{
                         width: 20,
                         height: 20,
-                        backgroundColor: overdue
-                          ? OVERDUE_COLOR
-                          : colors.stages[col],
+                        backgroundColor: overdue ? OVERDUE_COLOR : DOT_COLOR,
                       }}
                     >
                       {item.ch}
@@ -307,8 +266,6 @@ export function DotMatrixTable({
   basePath,
   personParam,
 }: DotMatrixTableProps) {
-  const theme: ColorTheme = "green";
-
   return (
     <div>
       <div className="rounded-2xl border border-border/50 bg-white shadow-[0_1px_8px_rgba(0,0,0,0.04)] overflow-hidden">
@@ -346,7 +303,6 @@ export function DotMatrixTable({
               <ProjectRow
                 key={project.id}
                 project={project}
-                theme={theme}
                 basePath={basePath}
                 personParam={personParam}
               />

@@ -35,7 +35,7 @@ export function ProjectGrid({ projects }: ProjectGridProps) {
 
   // 공통 필터 (검색/사업부/트랙/상태)
   function applyFilters(list: Project[]): Project[] {
-    let result = list.filter((p) => !p.hidden);
+    let result = [...list];
 
     if (search) {
       const q = search.toLowerCase();
@@ -67,9 +67,9 @@ export function ProjectGrid({ projects }: ProjectGridProps) {
     [projects, search, statusFilter, businessFilter, trackFilter],
   );
 
-  // 전체 탭: 중단만 제외 (완료 포함)
+  // 전체 탭: 중단 포함 모두 표시
   const allProjects = useMemo(
-    () => applyFilters(projects.filter((p) => p.status !== "중단")),
+    () => applyFilters(projects),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [projects, search, statusFilter, businessFilter, trackFilter],
   );

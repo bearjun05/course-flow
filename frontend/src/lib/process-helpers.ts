@@ -45,6 +45,9 @@ const CHAPTER_TASK_TYPES: TaskType[] = [
  * 장의 현재 세부 공정명을 반환한다.
  * 편집·검수 퍼널에서는 편집/자막/검수 중 실제 진행 단계를 구분한다.
  */
+/**
+ * 진척표 컬럼 매핑용 (5단계): 교안 → 촬영 → 편집.자막 → 검수 → 완료
+ */
 export function getChapterDetailedStage(
   project: Project,
   chapter: number,
@@ -61,12 +64,12 @@ export function getChapterDetailedStage(
         task.status === "진행" ||
         task.status === "리뷰")
     ) {
-      if (taskType === "승인") return "승인";
-      if (taskType === "편집") return "편집";
-      if (taskType === "자막") return "자막";
+      if (taskType === "승인") return "완료";
       if (taskType === "검수") return "검수";
+      if (taskType === "편집" || taskType === "자막") return "편집.자막";
+      if (taskType === "촬영") return "촬영";
       if (taskType === "교안제작") return "교안";
-      return taskType;
+      return "교안";
     }
   }
 
