@@ -256,7 +256,7 @@ function ProjectRow({
                               : DOT_COLOR,
                           }}
                         >
-                          {item.from}-{item.to}
+                          {item.from}~{item.to}
                         </span>
                       );
                     }
