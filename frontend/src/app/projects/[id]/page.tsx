@@ -56,7 +56,7 @@ export default function ProjectDetailPage() {
   const [projectLectures, setProjectLectures] = useState(
     baseProject?.lectures ?? [],
   );
-  const [scheduleTab, setScheduleTab] = useState<ScheduleTab>("schedule");
+  const [scheduleTab, setScheduleTab] = useState<ScheduleTab>("work-status");
   const [weekStart, setWeekStart] = useState(() => {
     const d = new Date();
     const day = d.getDay();
@@ -198,6 +198,17 @@ export default function ProjectDetailPage() {
           <div className="flex items-center gap-3 mb-3">
             <div className="flex items-center gap-1 rounded-lg border border-border p-0.5 bg-muted/30">
               <button
+                onClick={() => setScheduleTab("work-status")}
+                className={`flex items-center gap-1.5 h-7 px-3 rounded-md text-xs font-medium transition-colors ${
+                  scheduleTab === "work-status"
+                    ? "bg-white text-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <ClipboardList className="h-3.5 w-3.5" />
+                작업 현황
+              </button>
+              <button
                 onClick={() => setScheduleTab("schedule")}
                 className={`flex items-center gap-1.5 h-7 px-3 rounded-md text-xs font-medium transition-colors ${
                   scheduleTab === "schedule"
@@ -219,34 +230,47 @@ export default function ProjectDetailPage() {
                 <Calendar className="h-3.5 w-3.5" />
                 이번 주
               </button>
-              <button
-                onClick={() => setScheduleTab("work-status")}
-                className={`flex items-center gap-1.5 h-7 px-3 rounded-md text-xs font-medium transition-colors ${
-                  scheduleTab === "work-status"
-                    ? "bg-white text-foreground shadow-sm"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                <ClipboardList className="h-3.5 w-3.5" />
-                작업 현황
-              </button>
             </div>
           </div>
 
-          {scheduleTab === "schedule" && (
+          {scheduleTab === "work-status" && (
             <div className="space-y-6">
-              <MondayBoard
+              <WorkStatusTab
                 tasks={tasks}
-                onTasksChange={handleTasksChange}
-                onAddChapter={handleAddChapter}
-                onDeleteChapter={handleDeleteChapter}
-                projectStartDate={project.createdAt}
-                paymentDate={project.paymentDate}
-                tutor={project.tutor}
-                pm="박진영"
+                lectures={projectLectures}
+                chapterCount={project.chapterCount}
+                chapterTitles={project.chapterTitles}
+                chapterDriveLinks={project.chapterDriveLinks}
+                onReviewToggle={(lectureId, reviewed) =>
+                  setProjectLectures((prev) =>
+                    prev.map((l) =>
+                      l.id === lectureId ? { ...l, reviewed } : l,
+                    ),
+                  )
+                }
+                onApprovalToggle={(lectureId, approved) =>
+                  setProjectLectures((prev) =>
+                    prev.map((l) =>
+                      l.id === lectureId ? { ...l, approved } : l,
+                    ),
+                  )
+                }
+                onLectureUrlChange={handleLectureUrlChange}
               />
               <TaskCalendar projects={[project]} basePath="/projects" />
             </div>
+          )}
+          {scheduleTab === "schedule" && (
+            <MondayBoard
+              tasks={tasks}
+              onTasksChange={handleTasksChange}
+              onAddChapter={handleAddChapter}
+              onDeleteChapter={handleDeleteChapter}
+              projectStartDate={project.createdAt}
+              paymentDate={project.paymentDate}
+              tutor={project.tutor}
+              pm="박진영"
+            />
           )}
           {scheduleTab === "calendar" && (
             <WeeklyCalendar
@@ -267,30 +291,6 @@ export default function ProjectDetailPage() {
                   ),
                 );
               }}
-            />
-          )}
-          {scheduleTab === "work-status" && (
-            <WorkStatusTab
-              tasks={tasks}
-              lectures={projectLectures}
-              chapterCount={project.chapterCount}
-              chapterTitles={project.chapterTitles}
-              chapterDriveLinks={project.chapterDriveLinks}
-              onReviewToggle={(lectureId, reviewed) =>
-                setProjectLectures((prev) =>
-                  prev.map((l) =>
-                    l.id === lectureId ? { ...l, reviewed } : l,
-                  ),
-                )
-              }
-              onApprovalToggle={(lectureId, approved) =>
-                setProjectLectures((prev) =>
-                  prev.map((l) =>
-                    l.id === lectureId ? { ...l, approved } : l,
-                  ),
-                )
-              }
-              onLectureUrlChange={handleLectureUrlChange}
             />
           )}
         </section>
