@@ -10,7 +10,7 @@ import {
   isToday,
 } from "date-fns";
 import { ko } from "date-fns/locale";
-import { ChevronDown, Check, Plus, Rocket } from "lucide-react";
+import { ChevronDown, Check, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { ChapterTask, TaskType } from "@/lib/types";
 
@@ -50,8 +50,6 @@ const STAGE_SHORT: Record<string, string> = {
   검수: "검수",
   승인: "승인",
   "커리큘럼 기획": "목차",
-  롤아웃: "롤아웃",
-  업로드: "업로드",
 };
 
 /* ------------------------------------------------------------------ */
@@ -696,22 +694,16 @@ export default function MondayBoard({
 }: MondayBoardProps) {
   const [expandedGroups, setExpandedGroups] = useState<Set<number>>(new Set());
 
-  // 사전 준비에서 롤아웃 분리
-  const { groups, rolloutTask } = useMemo(() => {
+  const groups = useMemo(() => {
     const map = new Map<number, ChapterTask[]>();
-    let rollout: ChapterTask | null = null;
 
     for (const t of tasks) {
-      // 롤아웃은 따로 빼기
-      if (t.taskType === "롤아웃") {
-        rollout = t;
-        continue;
-      }
+      if (t.taskType === "롤아웃" || t.taskType === "업로드") continue;
       if (!map.has(t.chapter)) map.set(t.chapter, []);
       map.get(t.chapter)!.push(t);
     }
 
-    const grps: ChapterGroup[] = Array.from(map.entries())
+    return Array.from(map.entries())
       .sort(([a], [b]) => a - b)
       .map(([ch, chTasks]) => ({
         chapter: ch,
@@ -720,21 +712,6 @@ export default function MondayBoard({
         tasks: chTasks,
         completedCount: chTasks.filter((t) => t.status === "완료").length,
       }));
-
-    // 전체 장의 승인이 모두 완료되면 롤아웃 자동 "진행" 전환
-    if (rollout && rollout.status === "대기") {
-      const chapterGroups = grps.filter((g) => g.chapter > 0);
-      const allApproved =
-        chapterGroups.length > 0 &&
-        chapterGroups.every((g) =>
-          g.tasks.some((t) => t.taskType === "승인" && t.status === "완료"),
-        );
-      if (allApproved) {
-        rollout = { ...rollout, status: "진행" };
-      }
-    }
-
-    return { groups: grps, rolloutTask: rollout };
   }, [tasks]);
 
   const toggleExpand = useCallback((ch: number) => {
@@ -947,50 +924,6 @@ export default function MondayBoard({
         >
           <Plus className="h-3.5 w-3.5" />장 추가
         </button>
-      )}
-
-      {/* 강의 롤아웃 (맨 하단 고정) */}
-      {rolloutTask && (
-        <div
-          className="flex items-center gap-3 px-4 py-3 border-t border-neutral-100 bg-neutral-50/30"
-          style={{ borderLeft: "4px solid #7C8DBC" }}
-        >
-          <div className="flex items-center gap-2">
-            <Rocket className="h-4 w-4 text-[#7C8DBC]" />
-            <span className="text-sm font-semibold text-[#7C8DBC]">
-              강의 롤아웃
-            </span>
-          </div>
-          <div className="flex-1" />
-          <span
-            className={cn(
-              "text-[11px] font-medium px-2.5 py-1 rounded-full",
-              rolloutTask.status === "완료"
-                ? "bg-emerald-50 text-emerald-600"
-                : rolloutTask.status === "진행"
-                  ? "bg-blue-50 text-blue-600"
-                  : "bg-neutral-100 text-neutral-400",
-            )}
-          >
-            {rolloutTask.status}
-          </span>
-          {rolloutTask.startDate && (
-            <span className="text-[11px] text-muted-foreground">
-              {formatDateRange(rolloutTask)}
-            </span>
-          )}
-          <button
-            onClick={() => toggleTask(rolloutTask.id)}
-            className={cn(
-              "h-6 w-6 rounded-md border flex items-center justify-center shrink-0 transition-colors",
-              rolloutTask.status === "완료"
-                ? "bg-[#7C8DBC] border-[#7C8DBC] text-white"
-                : "border-neutral-300 hover:border-[#7C8DBC]",
-            )}
-          >
-            {rolloutTask.status === "완료" && <Check className="h-4 w-4" />}
-          </button>
-        </div>
       )}
 
       {tasks.length === 0 && (

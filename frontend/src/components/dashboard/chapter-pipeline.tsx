@@ -3,14 +3,7 @@
 import type { Project, TaskType } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
-const PIPELINE_STAGE_NAMES = [
-  "교안",
-  "촬영",
-  "편집",
-  "자막",
-  "검수",
-  "승인",
-] as const;
+const PIPELINE_STAGE_NAMES = ["교안", "촬영", "편집·자막", "검수"] as const;
 type PipelineStageName = (typeof PIPELINE_STAGE_NAMES)[number];
 
 const PIPELINE_TASK_TYPES: TaskType[] = [
@@ -23,9 +16,7 @@ const PIPELINE_TASK_TYPES: TaskType[] = [
 ];
 
 const SLOT_FILLED_COLORS = [
-  "bg-[#EDF2DC]",
   "bg-[#DDE8C0]",
-  "bg-[#CCDC9F]",
   "bg-[#BACE80]",
   "bg-[#A8BE60]",
   "bg-[#8AAE50]",
@@ -38,8 +29,9 @@ function getChapterProgress(
   const tasks = project.tasks.filter((t) => t.chapter === chapter);
   if (tasks.length === 0) return { filledCount: 0, stageName: "교안" };
 
-  // 가장 진행된 단계 찾기 (역순 탐색)
-  for (let i = 5; i >= 0; i--) {
+  // 4단계 매핑: 교안(0) → 촬영(1) → 편집·자막(2) → 검수(3)
+  // 승인/검수 완료 → 검수 4칸 채움
+  for (let i = PIPELINE_TASK_TYPES.length - 1; i >= 0; i--) {
     const taskType = PIPELINE_TASK_TYPES[i];
     const task = tasks.find((t) => t.taskType === taskType);
     if (
@@ -48,7 +40,12 @@ function getChapterProgress(
         task.status === "진행" ||
         task.status === "리뷰")
     ) {
-      return { filledCount: i + 1, stageName: PIPELINE_STAGE_NAMES[i] };
+      if (taskType === "승인" || taskType === "검수")
+        return { filledCount: 4, stageName: "검수" };
+      if (taskType === "자막" || taskType === "편집")
+        return { filledCount: 3, stageName: "편집·자막" };
+      if (taskType === "촬영") return { filledCount: 2, stageName: "촬영" };
+      return { filledCount: 1, stageName: "교안" };
     }
   }
 
@@ -115,7 +112,7 @@ export function ChapterPipeline({ project }: ChapterPipelineProps) {
           {row.map(({ ch, filledCount, stageName }) => (
             <div key={ch} className="flex-1 flex flex-col gap-1">
               <div className="flex gap-[2px]">
-                {Array.from({ length: 6 }, (_, i) => (
+                {Array.from({ length: 4 }, (_, i) => (
                   <div
                     key={i}
                     className={cn(

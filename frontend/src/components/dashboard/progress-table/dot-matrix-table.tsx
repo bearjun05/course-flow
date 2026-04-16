@@ -14,6 +14,7 @@ interface DotMatrixTableProps {
 }
 
 const DETAIL_COLUMNS = [
+  "기획",
   "교안",
   "촬영",
   "편집·자막",
@@ -24,12 +25,13 @@ const DETAIL_COLUMNS = [
 type DetailColumn = (typeof DETAIL_COLUMNS)[number];
 
 const STAGE_ORDER: Record<DetailColumn, number> = {
-  교안: 0,
-  촬영: 1,
-  "편집·자막": 2,
-  검수: 3,
-  승인: 4,
-  완료: 5,
+  기획: 0,
+  교안: 1,
+  촬영: 2,
+  "편집·자막": 3,
+  검수: 4,
+  승인: 5,
+  완료: 6,
 };
 
 const DOT_COLOR = "#8AAE50";
@@ -142,6 +144,7 @@ function ProjectRow({
 
   // 단계별로 도트 아이템 그룹화
   const itemsByStage: Record<DetailColumn, DotItem[]> = {
+    기획: [],
     교안: [],
     촬영: [],
     "편집·자막": [],
