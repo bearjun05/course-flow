@@ -135,7 +135,7 @@ export function ProjectGrid({ projects }: ProjectGridProps) {
             }}
           >
             <SelectTrigger className="h-8 w-auto gap-1 border-border text-xs">
-              <SelectValue placeholder="상태" />
+              <SelectValue placeholder="전체 상태" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all" className="text-xs">
@@ -159,7 +159,7 @@ export function ProjectGrid({ projects }: ProjectGridProps) {
             }}
           >
             <SelectTrigger className="h-8 w-auto gap-1 border-border text-xs">
-              <SelectValue placeholder="사업부" />
+              <SelectValue placeholder="전체 사업부" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all" className="text-xs">

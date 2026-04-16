@@ -23,7 +23,7 @@ export default function DashboardPage() {
 
           <Separator />
 
-          <ProgressTable projects={projects} />
+          <ProgressTable projects={projects} basePath="/projects" />
 
           <Separator />
 
