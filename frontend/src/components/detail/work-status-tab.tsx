@@ -676,7 +676,10 @@ export default function WorkStatusTab({
             const completedCount = FILE_COLUMNS.filter(
               (col) => chapter.taskStatuses[col.key] === "완료",
             ).length;
-            const driveLink = chapterDriveLinks?.[chapter.chapter - 1];
+            // 드라이브 링크: 명시된 링크 우선, 없으면 장번호 기반 placeholder
+            const driveLink =
+              chapterDriveLinks?.[chapter.chapter - 1] ||
+              `https://drive.google.com/drive/folders/ch${chapter.chapter}-${encodeURIComponent(chapter.title ?? `${chapter.chapter}장`)}`;
 
             return (
               <div key={chapter.chapter}>
