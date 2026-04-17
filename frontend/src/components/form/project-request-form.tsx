@@ -2,7 +2,14 @@
 
 import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { Send, CheckCircle2, ArrowRight, Link as LinkIcon } from "lucide-react";
+import {
+  Send,
+  CheckCircle2,
+  ArrowRight,
+  Link as LinkIcon,
+  Search,
+  X,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,9 +22,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Checkbox } from "@/components/ui/checkbox";
 import type { BusinessUnit, ProductionType } from "@/lib/types";
 import { KDT_TRACKS } from "@/lib/constants";
+import { mockProjects } from "@/lib/mock-data";
 
 interface FormData {
   title: string;
@@ -28,8 +35,12 @@ interface FormData {
   businessUnitOther: string;
   productionType: ProductionType | "";
   renewalType: "부분" | "전체" | "";
-  previousTitleSame: boolean;
-  previousTitle: string;
+  /** 리뉴얼 시 선택된 기존 강의 ID (외부 API 검색 결과) */
+  previousCourseId: string;
+  /** 리뉴얼 시 선택된 기존 강의명 (표시용) */
+  previousCourseTitle: string;
+  /** 리뉴얼 시 다음 버전 번호 (자동 계산) */
+  nextVersion: string;
   renewalScope: string;
   rolloutDate: string;
   paymentDate: string;
@@ -53,8 +64,9 @@ const DEFAULT_FORM: FormData = {
   businessUnitOther: "",
   productionType: "",
   renewalType: "",
-  previousTitleSame: false,
-  previousTitle: "",
+  previousCourseId: "",
+  previousCourseTitle: "",
+  nextVersion: "",
   renewalScope: "",
   rolloutDate: "",
   paymentDate: "",
@@ -68,6 +80,113 @@ const DEFAULT_FORM: FormData = {
   curriculumLink: "",
   conceptDescription: "",
 };
+
+/* ── 강의 검색 필드 (외부 API mock) ── */
+function CourseSearchField({
+  selectedId,
+  selectedTitle,
+  nextVersion,
+  onSelect,
+  onClear,
+}: {
+  selectedId: string;
+  selectedTitle: string;
+  nextVersion: string;
+  onSelect: (id: string, title: string, nextVersion: string) => void;
+  onClear: () => void;
+}) {
+  const [query, setQuery] = useState("");
+  const [open, setOpen] = useState(false);
+
+  // Mock: 고유한 강의명들과 최신 버전 목록 계산
+  const courses = (() => {
+    const map = new Map<
+      string,
+      { id: string; title: string; latestVersion: number }
+    >();
+    for (const p of mockProjects) {
+      const v = parseFloat(p.version.replace("v", "")) || 1;
+      const prev = map.get(p.title);
+      if (!prev || v > prev.latestVersion) {
+        map.set(p.title, { id: p.id, title: p.title, latestVersion: v });
+      }
+    }
+    return Array.from(map.values());
+  })();
+
+  const filtered = query
+    ? courses.filter((c) => c.title.toLowerCase().includes(query.toLowerCase()))
+    : courses.slice(0, 8);
+
+  if (selectedId) {
+    return (
+      <div className="flex items-center justify-between gap-2 rounded-lg border border-border bg-white px-3 py-2.5">
+        <div className="min-w-0">
+          <p className="text-sm font-medium text-foreground truncate">
+            {selectedTitle}
+          </p>
+          <p className="text-[11px] text-muted-foreground">
+            다음 버전: v{nextVersion}
+          </p>
+        </div>
+        <button
+          onClick={onClear}
+          className="h-6 w-6 flex items-center justify-center rounded text-neutral-400 hover:text-neutral-600 hover:bg-neutral-100 shrink-0"
+          title="선택 취소"
+        >
+          <X className="h-3.5 w-3.5" />
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="relative">
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+        <Input
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          onFocus={() => setOpen(true)}
+          onBlur={() => setTimeout(() => setOpen(false), 150)}
+          placeholder="강의명으로 검색"
+          className="pl-9"
+        />
+      </div>
+      {open && filtered.length > 0 && (
+        <div className="absolute z-10 left-0 right-0 mt-1 max-h-56 overflow-y-auto rounded-lg border border-border bg-white shadow-md">
+          {filtered.map((c) => {
+            const next = (c.latestVersion + 1).toFixed(1);
+            return (
+              <button
+                key={c.id}
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => {
+                  onSelect(c.id, c.title, next);
+                  setQuery("");
+                  setOpen(false);
+                }}
+                className="w-full flex items-center justify-between gap-2 px-3 py-2 text-left hover:bg-neutral-50"
+              >
+                <span className="text-sm text-foreground truncate">
+                  {c.title}
+                </span>
+                <span className="text-[11px] text-muted-foreground shrink-0">
+                  최신 v{c.latestVersion.toFixed(1)} → v{next}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      )}
+      {open && filtered.length === 0 && (
+        <div className="absolute z-10 left-0 right-0 mt-1 rounded-lg border border-border bg-white shadow-md px-3 py-2 text-xs text-muted-foreground">
+          검색 결과가 없습니다
+        </div>
+      )}
+    </div>
+  );
+}
 
 /* ── 카드형 질문 래퍼 (구글 폼 스타일) ── */
 function QuestionCard({
@@ -144,7 +263,8 @@ export function ProjectRequestForm() {
     (form.businessUnit !== "KDT" || form.trackName) &&
     (form.businessUnit !== "기타" || form.businessUnitOther) &&
     form.productionType &&
-    (form.productionType !== "리뉴얼" || form.renewalType) &&
+    (form.productionType !== "리뉴얼" ||
+      (form.renewalType && form.previousCourseId)) &&
     form.rolloutDate &&
     form.paymentDate &&
     form.estimatedDuration &&
@@ -315,8 +435,9 @@ export function ProjectRequestForm() {
               update("productionType", v as ProductionType);
               if (v === "신규") {
                 update("renewalType", "");
-                update("previousTitle", "");
-                update("previousTitleSame", true);
+                update("previousCourseId", "");
+                update("previousCourseTitle", "");
+                update("nextVersion", "");
                 update("renewalScope", "");
               }
             }}
@@ -338,6 +459,32 @@ export function ProjectRequestForm() {
 
           {form.productionType === "리뉴얼" && (
             <div className="space-y-4 rounded-lg border border-border bg-muted/30 p-4">
+              {/* 강의 검색 (외부 API mock) */}
+              <div className="space-y-2">
+                <Label className="text-xs font-medium">
+                  기존 강의 검색 <span className="text-red-500">*</span>
+                </Label>
+                <p className="text-[11px] text-muted-foreground">
+                  리뉴얼할 기존 강의를 선택하세요. 버전은 자동 지정됩니다.
+                </p>
+                <CourseSearchField
+                  selectedId={form.previousCourseId}
+                  selectedTitle={form.previousCourseTitle}
+                  nextVersion={form.nextVersion}
+                  onSelect={(id, title, nextVersion) => {
+                    update("previousCourseId", id);
+                    update("previousCourseTitle", title);
+                    update("nextVersion", nextVersion);
+                    update("title", title); // 강의명 자동 세팅
+                  }}
+                  onClear={() => {
+                    update("previousCourseId", "");
+                    update("previousCourseTitle", "");
+                    update("nextVersion", "");
+                  }}
+                />
+              </div>
+
               <div className="space-y-2">
                 <Label className="text-xs font-medium">리뉴얼 범위</Label>
                 <RadioGroup
@@ -360,32 +507,6 @@ export function ProjectRequestForm() {
                     </Label>
                   </div>
                 </RadioGroup>
-              </div>
-
-              <div className="space-y-2">
-                <Label className="text-xs font-medium">이전 강의명</Label>
-                <div className="flex items-center gap-2">
-                  <Checkbox
-                    id="same-title"
-                    checked={form.previousTitleSame}
-                    onCheckedChange={(checked) =>
-                      update("previousTitleSame", !!checked)
-                    }
-                  />
-                  <Label
-                    htmlFor="same-title"
-                    className="text-xs font-normal text-muted-foreground"
-                  >
-                    위에 입력한 강의명과 동일합니다
-                  </Label>
-                </div>
-                {!form.previousTitleSame && (
-                  <Input
-                    value={form.previousTitle}
-                    onChange={(e) => update("previousTitle", e.target.value)}
-                    placeholder="이전 강의명을 입력해 주세요"
-                  />
-                )}
               </div>
 
               {form.renewalType === "부분" && (
