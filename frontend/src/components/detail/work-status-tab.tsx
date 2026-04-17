@@ -12,26 +12,20 @@ import {
   Circle,
   HardDrive,
   Link as LinkIcon,
-  Upload,
   Check,
   Plus,
   ClipboardCheck,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { ChapterTask, Lecture, TaskStatus } from "@/lib/types";
+import PlanningModal, { type PlanningSubmitData } from "./planning-modal";
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
 /* ------------------------------------------------------------------ */
 
-interface PlanningSubmitData {
-  chapters: {
-    title: string;
-    duration: number;
-    lectures: { title: string }[];
-  }[];
-  curriculumLink: string;
-}
+// PlanningSubmitData는 planning-modal.tsx에서 re-export
+export type { PlanningSubmitData };
 
 interface WorkStatusTabProps {
   tasks: ChapterTask[];
@@ -318,10 +312,7 @@ export default function WorkStatusTab({
   onLectureUrlChange,
 }: WorkStatusTabProps) {
   const [showPlanningModal, setShowPlanningModal] = useState(false);
-  const [planningChapters, setPlanningChapters] = useState<
-    { title: string; duration: string; lectures: { title: string }[] }[]
-  >([{ title: "", duration: "", lectures: [{ title: "" }] }]);
-  const [planningCurriculum, setPlanningCurriculum] = useState("");
+
   const chapters: ChapterRow[] = useMemo(() => {
     const rows: ChapterRow[] = [];
 
@@ -357,17 +348,6 @@ export default function WorkStatusTab({
     return rows;
   }, [tasks, lectures, chapterCount, chapterTitles]);
 
-  const canSubmitPlanning =
-    planningChapters.length > 0 &&
-    planningChapters.every(
-      (c) =>
-        c.title.trim() &&
-        parseFloat(c.duration) > 0 &&
-        c.lectures.length > 0 &&
-        c.lectures.every((l) => l.title.trim()),
-    ) &&
-    planningCurriculum.trim().length > 0;
-
   return (
     <div className="rounded-2xl border border-neutral-100 bg-white shadow-sm overflow-hidden">
       {/* 기획 행 */}
@@ -393,230 +373,11 @@ export default function WorkStatusTab({
       </div>
 
       {/* 기획 완료 모달 */}
-      {showPlanningModal && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
-          onClick={() => setShowPlanningModal(false)}
-        >
-          <div
-            className="bg-white rounded-2xl shadow-xl w-[480px] max-h-[90vh] overflow-hidden flex flex-col"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="px-6 pt-6 pb-4 border-b border-neutral-100">
-              <h3 className="text-base font-semibold">기획 완료</h3>
-              <p className="text-xs text-muted-foreground mt-1">
-                커리큘럼 링크와 장 정보를 입력하면 기획이 완료됩니다.
-              </p>
-            </div>
-
-            <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5">
-              {/* 커리큘럼 링크 */}
-              <div className="space-y-2">
-                <label className="text-xs font-semibold text-neutral-700">
-                  커리큘럼 링크 <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="url"
-                  value={planningCurriculum}
-                  onChange={(e) => setPlanningCurriculum(e.target.value)}
-                  placeholder="https://notion.so/..."
-                  className="w-full h-9 px-3 text-sm border border-neutral-200 rounded-lg focus:border-[#7C8DBC] focus:outline-none"
-                />
-                <p className="text-[11px] text-neutral-400">
-                  노션 또는 구글 독스 링크. 바로가기 &gt; 커리큘럼에 자동
-                  등록됩니다.
-                </p>
-              </div>
-
-              {/* 장 추가 */}
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <label className="text-xs font-semibold text-neutral-700">
-                    장 목록 <span className="text-red-500">*</span>
-                  </label>
-                  <span className="text-[11px] text-neutral-400">
-                    총{" "}
-                    {planningChapters.reduce(
-                      (s, c) => s + (parseFloat(c.duration) || 0),
-                      0,
-                    )}
-                    시간
-                  </span>
-                </div>
-                <div className="space-y-3">
-                  {planningChapters.map((ch, i) => (
-                    <div
-                      key={i}
-                      className="rounded-xl border border-neutral-200 bg-neutral-50/50 p-3 space-y-2"
-                    >
-                      {/* 장 제목 + 분량 */}
-                      <div className="flex items-center gap-2">
-                        <span className="text-[11px] font-semibold text-neutral-600 w-7 shrink-0">
-                          {i + 1}장
-                        </span>
-                        <input
-                          type="text"
-                          value={ch.title}
-                          onChange={(e) => {
-                            const next = [...planningChapters];
-                            next[i] = { ...next[i], title: e.target.value };
-                            setPlanningChapters(next);
-                          }}
-                          placeholder="장 제목"
-                          className="flex-1 h-8 px-2.5 text-sm bg-white border border-neutral-200 rounded-lg focus:border-[#7C8DBC] focus:outline-none"
-                        />
-                        <div className="relative">
-                          <input
-                            type="number"
-                            step={0.5}
-                            min={0}
-                            value={ch.duration}
-                            onChange={(e) => {
-                              const next = [...planningChapters];
-                              next[i] = {
-                                ...next[i],
-                                duration: e.target.value,
-                              };
-                              setPlanningChapters(next);
-                            }}
-                            placeholder="분량"
-                            className="w-20 h-8 pl-2.5 pr-6 text-sm bg-white border border-neutral-200 rounded-lg focus:border-[#7C8DBC] focus:outline-none"
-                          />
-                          <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-neutral-400">
-                            h
-                          </span>
-                        </div>
-                        {planningChapters.length > 1 && (
-                          <button
-                            onClick={() =>
-                              setPlanningChapters(
-                                planningChapters.filter((_, idx) => idx !== i),
-                              )
-                            }
-                            className="h-8 w-8 flex items-center justify-center rounded-lg text-neutral-400 hover:text-red-500 hover:bg-red-50"
-                            title="장 삭제"
-                          >
-                            ×
-                          </button>
-                        )}
-                      </div>
-
-                      {/* 강 목록 */}
-                      <div className="pl-9 space-y-1.5">
-                        {ch.lectures.map((lec, li) => (
-                          <div key={li} className="flex items-center gap-2">
-                            <span className="text-[10px] text-neutral-400 w-8 shrink-0">
-                              {i + 1}-{li + 1}
-                            </span>
-                            <input
-                              type="text"
-                              value={lec.title}
-                              onChange={(e) => {
-                                const next = [...planningChapters];
-                                const nextLectures = [...next[i].lectures];
-                                nextLectures[li] = {
-                                  ...nextLectures[li],
-                                  title: e.target.value,
-                                };
-                                next[i] = {
-                                  ...next[i],
-                                  lectures: nextLectures,
-                                };
-                                setPlanningChapters(next);
-                              }}
-                              placeholder="강 제목"
-                              className="flex-1 h-7 px-2.5 text-[13px] bg-white border border-neutral-200 rounded-md focus:border-[#7C8DBC] focus:outline-none"
-                            />
-                            {ch.lectures.length > 1 && (
-                              <button
-                                onClick={() => {
-                                  const next = [...planningChapters];
-                                  next[i] = {
-                                    ...next[i],
-                                    lectures: ch.lectures.filter(
-                                      (_, idx) => idx !== li,
-                                    ),
-                                  };
-                                  setPlanningChapters(next);
-                                }}
-                                className="h-7 w-7 flex items-center justify-center rounded-md text-neutral-400 hover:text-red-500 hover:bg-red-50 text-xs"
-                                title="강 삭제"
-                              >
-                                ×
-                              </button>
-                            )}
-                          </div>
-                        ))}
-                        <button
-                          onClick={() => {
-                            const next = [...planningChapters];
-                            next[i] = {
-                              ...next[i],
-                              lectures: [...ch.lectures, { title: "" }],
-                            };
-                            setPlanningChapters(next);
-                          }}
-                          className="w-full h-7 flex items-center justify-center gap-1 text-[11px] text-neutral-400 border border-dashed border-neutral-200 rounded-md hover:border-[#7C8DBC] hover:text-[#7C8DBC]"
-                        >
-                          <Plus className="h-2.5 w-2.5" />강 추가
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                <button
-                  onClick={() =>
-                    setPlanningChapters([
-                      ...planningChapters,
-                      {
-                        title: "",
-                        duration: "",
-                        lectures: [{ title: "" }],
-                      },
-                    ])
-                  }
-                  className="w-full h-9 flex items-center justify-center gap-1.5 text-xs text-neutral-500 border border-dashed border-neutral-200 rounded-lg hover:border-[#7C8DBC] hover:text-[#7C8DBC]"
-                >
-                  <Plus className="h-3 w-3" />장 추가
-                </button>
-              </div>
-            </div>
-
-            <div className="flex gap-2 px-6 py-4 border-t border-neutral-100">
-              <button
-                onClick={() => setShowPlanningModal(false)}
-                className="flex-1 h-9 rounded-lg border border-neutral-200 text-sm text-muted-foreground hover:bg-neutral-50"
-              >
-                취소
-              </button>
-              <button
-                onClick={() => {
-                  onPlanningComplete?.({
-                    chapters: planningChapters.map((c) => ({
-                      title: c.title.trim(),
-                      duration: parseFloat(c.duration) || 0,
-                      lectures: c.lectures.map((l) => ({
-                        title: l.title.trim(),
-                      })),
-                    })),
-                    curriculumLink: planningCurriculum.trim(),
-                  });
-                  setShowPlanningModal(false);
-                }}
-                disabled={!canSubmitPlanning}
-                className={cn(
-                  "flex-1 h-9 rounded-lg text-sm font-medium transition-colors",
-                  canSubmitPlanning
-                    ? "bg-emerald-500 text-white hover:bg-emerald-600"
-                    : "bg-neutral-100 text-neutral-400 cursor-not-allowed",
-                )}
-              >
-                완료
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <PlanningModal
+        open={showPlanningModal}
+        onOpenChange={setShowPlanningModal}
+        onSubmit={(data) => onPlanningComplete?.(data)}
+      />
 
       {/* Header */}
       <div
