@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   FileText,
   HardDrive,
@@ -45,6 +45,14 @@ import {
 /*  Props                                                              */
 /* ------------------------------------------------------------------ */
 
+export type AssigneeRole =
+  | "pm"
+  | "tutor"
+  | "editor"
+  | "subtitleEditor"
+  | "curriculumManager"
+  | "reviewer";
+
 interface InfoGuideTabProps {
   project: Project;
   readOnly?: boolean;
@@ -54,6 +62,7 @@ interface InfoGuideTabProps {
   onChapterDurationsChange?: (durations: number[]) => void;
   onNoteChange?: (note: string) => void;
   onSlackChange?: (channel: string, channelId: string) => void;
+  onAssigneeChange?: (role: AssigneeRole, value: string) => void;
 }
 
 /* ------------------------------------------------------------------ */
@@ -121,30 +130,171 @@ function PersonRow({
   label,
   value,
   readOnly,
+  onClick,
 }: {
   label: string;
   value?: string;
   readOnly?: boolean;
+  onClick?: () => void;
 }) {
+  const clickable = !readOnly && onClick;
+  const pill = value ? (
+    <span className="inline-flex items-center gap-1.5 h-6 max-w-full min-w-0 px-2 rounded-full bg-neutral-50 text-[12px] font-medium text-neutral-700">
+      <User className="h-3 w-3 text-neutral-400 shrink-0" />
+      <span className="truncate whitespace-nowrap">{value}</span>
+    </span>
+  ) : readOnly ? (
+    <span className="inline-flex items-center gap-1 h-6 px-2 rounded-full bg-neutral-50 text-[11px] text-neutral-300 whitespace-nowrap">
+      담당자 없음
+    </span>
+  ) : (
+    <span className="inline-flex items-center gap-1 h-6 px-2 rounded-full border border-dashed border-neutral-200 text-[11px] text-neutral-400 hover:border-neutral-300 hover:text-neutral-500 transition-colors whitespace-nowrap">
+      <UserPlus className="h-3 w-3" />
+      배정
+    </span>
+  );
+
   return (
     <div className="flex items-center justify-between gap-2 py-1.5">
       <span className="text-xs text-neutral-500 shrink-0">{label}</span>
-      {value ? (
-        <span className="inline-flex items-center gap-1.5 h-6 max-w-full min-w-0 px-2 rounded-full bg-neutral-50 text-[12px] font-medium text-neutral-700">
-          <User className="h-3 w-3 text-neutral-400 shrink-0" />
-          <span className="truncate whitespace-nowrap">{value}</span>
-        </span>
-      ) : readOnly ? (
-        <span className="inline-flex items-center gap-1 h-6 px-2 rounded-full bg-neutral-50 text-[11px] text-neutral-300 whitespace-nowrap">
-          담당자 없음
-        </span>
-      ) : (
-        <button className="inline-flex items-center gap-1 h-6 px-2 rounded-full border border-dashed border-neutral-200 text-[11px] text-neutral-400 hover:border-neutral-300 hover:text-neutral-500 transition-colors whitespace-nowrap">
-          <UserPlus className="h-3 w-3" />
-          배정
+      {clickable ? (
+        <button
+          onClick={onClick}
+          className="min-w-0 max-w-full hover:brightness-95 transition"
+          title={`${label} 배정 관리`}
+        >
+          {pill}
         </button>
+      ) : (
+        pill
       )}
     </div>
+  );
+}
+
+/* ── 담당자 배정 모달 (슬랙 채널 멤버에서 복수 선택) ── */
+function AssigneeModal({
+  open,
+  onOpenChange,
+  label,
+  currentValue,
+  candidates,
+  onSave,
+}: {
+  open: boolean;
+  onOpenChange: (o: boolean) => void;
+  label: string;
+  currentValue?: string;
+  candidates: string[];
+  onSave: (value: string) => void;
+}) {
+  const [query, setQuery] = useState("");
+  const [selected, setSelected] = useState<string[]>([]);
+
+  // 모달 열릴 때 현재 값 파싱
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (open) {
+      const parts = (currentValue ?? "")
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean);
+      setSelected(parts);
+      setQuery("");
+    }
+  }, [open]);
+
+  const filtered = query
+    ? candidates.filter((n) => n.includes(query))
+    : candidates;
+
+  const toggle = (name: string) => {
+    setSelected((prev) =>
+      prev.includes(name) ? prev.filter((n) => n !== name) : [...prev, name],
+    );
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-sm">
+        <DialogHeader>
+          <DialogTitle className="text-sm">{label} 배정</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-3 pt-1">
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="이름 검색"
+            className="w-full h-9 px-3 text-sm rounded-lg border border-neutral-200 focus:outline-none focus:ring-1 focus:ring-primary"
+          />
+
+          {selected.length > 0 && (
+            <div className="flex flex-wrap gap-1.5">
+              {selected.map((name) => (
+                <span
+                  key={name}
+                  className="inline-flex items-center gap-1 h-6 px-2 rounded-full bg-[#EDF2DC] text-[11px] font-medium text-[#6E8A3A]"
+                >
+                  {name}
+                  <button
+                    onClick={() => toggle(name)}
+                    className="hover:text-destructive"
+                  >
+                    <X className="h-2.5 w-2.5" />
+                  </button>
+                </span>
+              ))}
+            </div>
+          )}
+
+          <div className="max-h-52 overflow-y-auto rounded-lg border border-neutral-200">
+            {filtered.length === 0 ? (
+              <p className="text-xs text-muted-foreground text-center py-5">
+                검색 결과가 없습니다
+              </p>
+            ) : (
+              filtered.map((name) => {
+                const checked = selected.includes(name);
+                return (
+                  <button
+                    key={name}
+                    onClick={() => toggle(name)}
+                    className="w-full flex items-center justify-between gap-2 px-3 py-2 text-left hover:bg-neutral-50 border-b border-neutral-100 last:border-b-0"
+                  >
+                    <span className="text-sm text-foreground">{name}</span>
+                    {checked && (
+                      <Check className="h-3.5 w-3.5 text-[#6E8A3A]" />
+                    )}
+                  </button>
+                );
+              })
+            )}
+          </div>
+
+          <p className="text-[11px] text-muted-foreground">
+            슬랙 채널 멤버 목록 (추후 실제 채널 연동 시 대체됩니다).
+          </p>
+
+          <div className="flex gap-2 pt-1">
+            <button
+              onClick={() => onOpenChange(false)}
+              className="flex-1 h-9 rounded-lg border border-neutral-200 text-sm text-muted-foreground hover:bg-neutral-50"
+            >
+              취소
+            </button>
+            <button
+              onClick={() => {
+                onSave(selected.join(", "));
+                onOpenChange(false);
+              }}
+              className="flex-1 h-9 rounded-lg bg-primary text-primary-foreground text-sm font-medium"
+            >
+              저장
+            </button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -446,11 +596,74 @@ export default function InfoGuideTab({
   onChapterDurationsChange,
   onNoteChange,
   onSlackChange,
+  onAssigneeChange,
 }: InfoGuideTabProps) {
   const [editingDurations, setEditingDurations] = useState(false);
   const [draftDurations, setDraftDurations] = useState<number[]>([]);
   const [editingNote, setEditingNote] = useState(false);
   const [draftNote, setDraftNote] = useState("");
+
+  // 담당자 배정 모달
+  const [assigneeModal, setAssigneeModal] = useState<{
+    role: AssigneeRole;
+    label: string;
+  } | null>(null);
+
+  const getAssigneeValue = (role: AssigneeRole): string | undefined => {
+    switch (role) {
+      case "pm":
+        return project.pm;
+      case "tutor":
+        return project.tutor;
+      case "editor":
+        return project.editor;
+      case "subtitleEditor":
+        return project.subtitleEditor;
+      case "curriculumManager":
+        return project.curriculumManager;
+      case "reviewer":
+        return project.reviewer;
+    }
+  };
+
+  // 슬랙 채널 멤버 mock (실제로는 slackChannelId로 API 호출해 조회)
+  const candidates = [
+    "박진영",
+    "강태경",
+    "김다은",
+    "김하늘",
+    "정민호",
+    "김태준",
+    "조현우",
+    "송민아",
+    "유재성",
+    "박지훈",
+    "박민서",
+    "정예린",
+    "김선용",
+    "이준혁",
+    "오승환",
+    "최유진",
+    "강동훈",
+    "이현우",
+    "박서연",
+    "구민정",
+    "김선우",
+    "한지민",
+    "최민수",
+    "정수진",
+    "김민지",
+    "이소영",
+    "박현아",
+    "이수빈",
+    "송미래",
+    "윤서현",
+  ];
+
+  const openAssignee = (role: AssigneeRole, label: string) => {
+    if (readOnly || !onAssigneeChange) return;
+    setAssigneeModal({ role, label });
+  };
   const prodTypeLabel =
     PRODUCTION_TYPES.find((p) => p.value === project.productionType)?.label ??
     project.productionType;
@@ -679,30 +892,62 @@ export default function InfoGuideTab({
             담당자
           </span>
           <div className="mt-2 grid grid-cols-2 gap-x-4">
-            <PersonRow label="튜터" value={project.tutor} readOnly={readOnly} />
+            <PersonRow
+              label="튜터"
+              value={project.tutor}
+              readOnly={readOnly}
+              onClick={() => openAssignee("tutor", "튜터")}
+            />
             <PersonRow
               label="편집 담당자"
               value={project.editor}
               readOnly={readOnly}
+              onClick={() => openAssignee("editor", "편집 담당자")}
             />
             <PersonRow
               label="커리큘럼 기획 매니저"
               value={project.curriculumManager}
               readOnly={readOnly}
+              onClick={() =>
+                openAssignee("curriculumManager", "커리큘럼 기획 매니저")
+              }
             />
             <PersonRow
               label="자막 담당자"
               value={project.subtitleEditor}
               readOnly={readOnly}
+              onClick={() => openAssignee("subtitleEditor", "자막 담당자")}
             />
-            <PersonRow label="PM" value={project.pm} readOnly={readOnly} />
+            <PersonRow
+              label="PM"
+              value={project.pm}
+              readOnly={readOnly}
+              onClick={() => openAssignee("pm", "PM")}
+            />
             <PersonRow
               label="검수 담당자"
               value={project.reviewer}
               readOnly={readOnly}
+              onClick={() => openAssignee("reviewer", "검수 담당자")}
             />
           </div>
         </div>
+
+        {/* 담당자 배정 모달 */}
+        {assigneeModal && onAssigneeChange && (
+          <AssigneeModal
+            open={true}
+            onOpenChange={(o) => {
+              if (!o) setAssigneeModal(null);
+            }}
+            label={assigneeModal.label}
+            currentValue={getAssigneeValue(assigneeModal.role)}
+            candidates={candidates}
+            onSave={(value) => {
+              onAssigneeChange(assigneeModal.role, value);
+            }}
+          />
+        )}
 
         {/* 바로가기 + 메모 */}
         <div className="rounded-2xl border border-neutral-100 bg-white p-4 shadow-sm space-y-3">

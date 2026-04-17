@@ -32,6 +32,16 @@ export default function ProjectDetailPage() {
   );
 
   const [title, setTitle] = useState(baseProject?.title ?? "");
+  const [pm, setPm] = useState(baseProject?.pm ?? "");
+  const [tutor, setTutor] = useState(baseProject?.tutor ?? "");
+  const [editor, setEditor] = useState(baseProject?.editor ?? "");
+  const [subtitleEditor, setSubtitleEditor] = useState(
+    baseProject?.subtitleEditor ?? "",
+  );
+  const [reviewer, setReviewer] = useState(baseProject?.reviewer ?? "");
+  const [curriculumManager, setCurriculumManager] = useState(
+    baseProject?.curriculumManager ?? "",
+  );
   const [tasks, setTasks] = useState<ChapterTask[]>(baseProject?.tasks ?? []);
   const [status, setStatus] = useState<ProjectStatus>(
     baseProject?.status ?? "기획",
@@ -83,6 +93,12 @@ export default function ProjectDetailPage() {
     return {
       ...baseProject,
       title,
+      pm: pm || undefined,
+      tutor: tutor || undefined,
+      editor: editor || undefined,
+      subtitleEditor: subtitleEditor || undefined,
+      reviewer: reviewer || undefined,
+      curriculumManager: curriculumManager || undefined,
       tasks,
       status,
       trafficLight,
@@ -101,6 +117,12 @@ export default function ProjectDetailPage() {
   }, [
     baseProject,
     title,
+    pm,
+    tutor,
+    editor,
+    subtitleEditor,
+    reviewer,
+    curriculumManager,
     tasks,
     status,
     trafficLight,
@@ -215,6 +237,14 @@ export default function ProjectDetailPage() {
           onSlackChange={(ch, id) => {
             setSlackChannel(ch);
             setSlackChannelId(id);
+          }}
+          onAssigneeChange={(role, value) => {
+            if (role === "pm") setPm(value);
+            else if (role === "tutor") setTutor(value);
+            else if (role === "editor") setEditor(value);
+            else if (role === "subtitleEditor") setSubtitleEditor(value);
+            else if (role === "reviewer") setReviewer(value);
+            else if (role === "curriculumManager") setCurriculumManager(value);
           }}
         />
 
