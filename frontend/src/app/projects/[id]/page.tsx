@@ -66,6 +66,9 @@ export default function ProjectDetailPage() {
   const [chapterTitles, setChapterTitles] = useState<string[]>(
     baseProject?.chapterTitles ?? [],
   );
+  const [chapterDriveLinks, setChapterDriveLinks] = useState<string[]>(
+    baseProject?.chapterDriveLinks ?? [],
+  );
   const [scheduleTab, setScheduleTab] = useState<ScheduleTab>("work-status");
   const [weekStart, setWeekStart] = useState(() => {
     const d = new Date();
@@ -86,6 +89,7 @@ export default function ProjectDetailPage() {
       chapterDurations,
       chapterCount: chapterDurations.length,
       chapterTitles,
+      chapterDriveLinks,
       note,
       slackChannel: slackChannel || undefined,
       slackChannelId: slackChannelId || undefined,
@@ -101,6 +105,7 @@ export default function ProjectDetailPage() {
     paymentDate,
     chapterDurations,
     chapterTitles,
+    chapterDriveLinks,
     note,
     slackChannel,
     slackChannelId,
@@ -299,6 +304,14 @@ export default function ProjectDetailPage() {
                   setProjectLectures(newLectures);
                   setChapterDurations(data.chapters.map((c) => c.duration));
                   setChapterTitles(data.chapters.map((c) => c.title));
+                  // 장별 드라이브 폴더 링크 생성 (포맷: "n장_제목")
+                  // TODO(백엔드 연결): 실제 Google Drive API로 폴더 생성 후 링크 반환
+                  setChapterDriveLinks(
+                    data.chapters.map(
+                      (c, idx) =>
+                        `https://drive.google.com/drive/folders/${projectId}-ch${idx + 1}-${encodeURIComponent(c.title)}`,
+                    ),
+                  );
                   setPlanningComplete(true);
                 }}
                 onAddChapter={handleAddChapter}
