@@ -90,6 +90,9 @@ function isTaskForPerson(
     return true;
   // 편집자 → 편집
   if (project.editor === person && task.taskType === "편집") return true;
+  // 자막자 → 자막
+  if (project.subtitleEditor === person && task.taskType === "자막")
+    return true;
   // 검수자 → 검수
   if (project.reviewer === person && task.taskType === "검수") return true;
   // 커기매 → 커리큘럼 기획, 승인

@@ -690,7 +690,11 @@ export default function InfoGuideTab({
               value={project.curriculumManager}
               readOnly={readOnly}
             />
-            <PersonRow label="자막 담당자" readOnly={readOnly} />
+            <PersonRow
+              label="자막 담당자"
+              value={project.subtitleEditor}
+              readOnly={readOnly}
+            />
             <PersonRow label="PM" value="박진영" readOnly={readOnly} />
             <PersonRow
               label="검수 담당자"

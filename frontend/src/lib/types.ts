@@ -54,6 +54,7 @@ export interface Project {
   tutor?: string;
   curriculumManager?: string;
   editor?: string;
+  subtitleEditor?: string;
   reviewer?: string;
   slackChannel?: string;
   slackChannelId?: string;

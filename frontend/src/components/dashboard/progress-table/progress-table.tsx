@@ -11,6 +11,8 @@ interface ProgressTableProps {
   title?: string;
   basePath?: string;
   personParam?: string;
+  /** 강조할 담당 단계 컬럼명 (에듀웍스에서 역할별 강조용) */
+  highlightedStage?: string;
 }
 
 export function ProgressTable({
@@ -18,6 +20,7 @@ export function ProgressTable({
   title = "진행 중인 강의",
   basePath,
   personParam,
+  highlightedStage,
 }: ProgressTableProps) {
   const activeProjects = projects
     .filter(
@@ -40,6 +43,7 @@ export function ProgressTable({
         projects={activeProjects}
         basePath={basePath}
         personParam={personParam}
+        highlightedStage={highlightedStage}
       />
     </div>
   );

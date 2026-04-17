@@ -11,6 +11,8 @@ interface DotMatrixTableProps {
   projects: Project[];
   basePath?: string;
   personParam?: string;
+  /** 강조할 담당 단계 컬럼 (예: "촬영", "편집·자막", "검수") */
+  highlightedStage?: string;
 }
 
 const DETAIL_COLUMNS = [
@@ -100,10 +102,12 @@ function ProjectRow({
   project,
   basePath,
   personParam,
+  highlightedStage,
 }: {
   project: Project;
   basePath?: string;
   personParam?: string;
+  highlightedStage?: string;
 }) {
   const dday = getDday(project.rolloutDate);
   const chapters = Array.from(
@@ -202,6 +206,22 @@ function ProjectRow({
 
       <td colSpan={DETAIL_COLUMNS.length} className="px-2 py-3">
         <div className="relative h-[28px] flex items-center">
+          {/* 담당 단계 강조 배경 */}
+          {highlightedStage &&
+            (() => {
+              const idx = DETAIL_COLUMNS.indexOf(
+                highlightedStage as DetailColumn,
+              );
+              if (idx < 0) return null;
+              const leftPct = (idx / DETAIL_COLUMNS.length) * 100;
+              const widthPct = 100 / DETAIL_COLUMNS.length;
+              return (
+                <div
+                  className="absolute top-0 bottom-0 rounded-md bg-[#EDF2DC]/60"
+                  style={{ left: `${leftPct}%`, width: `${widthPct}%` }}
+                />
+              );
+            })()}
           <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-[2px] bg-[#E5E7EB] rounded-full" />
           {Array.from({ length: DETAIL_COLUMNS.length + 1 }, (_, i) => (
             <div
@@ -299,6 +319,7 @@ export function DotMatrixTable({
   projects,
   basePath,
   personParam,
+  highlightedStage,
 }: DotMatrixTableProps) {
   return (
     <div>
@@ -319,14 +340,22 @@ export function DotMatrixTable({
               <th className="px-4 py-2.5 text-left text-[11px] font-semibold text-[#9CA3AF]">
                 강의명
               </th>
-              {DETAIL_COLUMNS.map((col) => (
-                <th
-                  key={col}
-                  className="px-1 py-2.5 text-center text-[11px] font-semibold text-[#9CA3AF]"
-                >
-                  {col}
-                </th>
-              ))}
+              {DETAIL_COLUMNS.map((col) => {
+                const isHighlighted = col === highlightedStage;
+                return (
+                  <th
+                    key={col}
+                    className={cn(
+                      "px-1 py-2.5 text-center text-[11px] font-semibold",
+                      isHighlighted
+                        ? "text-[#6E8A3A] bg-[#EDF2DC]"
+                        : "text-[#9CA3AF]",
+                    )}
+                  >
+                    {col}
+                  </th>
+                );
+              })}
               <th className="px-3 py-2.5 text-right text-[11px] font-semibold text-[#9CA3AF]">
                 D-Day
               </th>
@@ -339,6 +368,7 @@ export function DotMatrixTable({
                 project={project}
                 basePath={basePath}
                 personParam={personParam}
+                highlightedStage={highlightedStage}
               />
             ))}
           </tbody>
