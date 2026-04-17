@@ -11,6 +11,7 @@ import type {
   TrafficLight,
   TaskType,
   Lecture,
+  Project,
 } from "@/lib/types";
 import DetailHeader from "@/components/detail/detail-header";
 import InfoGuideTab from "@/components/detail/info-guide-tab";
@@ -22,6 +23,70 @@ import { Separator } from "@/components/ui/separator";
 
 type ScheduleTab = "schedule" | "calendar" | "work-status";
 
+/**
+ * 프로젝트 상세 페이지에서 편집 가능한 필드들을 하나의 객체로 묶음.
+ * 원래 19개의 개별 useState였으나, 단일 state + patch 헬퍼로 통합.
+ * UI 전용 state(scheduleTab, weekStart)는 별도 useState 유지.
+ */
+interface ProjectDraft {
+  title: string;
+  pm: string;
+  tutor: string;
+  editor: string;
+  subtitleEditor: string;
+  reviewer: string;
+  curriculumManager: string;
+  tasks: ChapterTask[];
+  status: ProjectStatus;
+  trafficLight: TrafficLight;
+  rolloutDate: string;
+  paymentDate: string;
+  chapterDurations: number[];
+  note: string;
+  slackChannel: string;
+  slackChannelId: string;
+  projectLectures: Lecture[];
+  planningComplete: boolean;
+  lessonPlanLink: string;
+  chapterTitles: string[];
+  chapterDriveLinks: string[];
+}
+
+function initFromBase(base?: Project): ProjectDraft {
+  return {
+    title: base?.title ?? "",
+    pm: base?.pm ?? "",
+    tutor: base?.tutor ?? "",
+    editor: base?.editor ?? "",
+    subtitleEditor: base?.subtitleEditor ?? "",
+    reviewer: base?.reviewer ?? "",
+    curriculumManager: base?.curriculumManager ?? "",
+    tasks: base?.tasks ?? [],
+    status: base?.status ?? "기획",
+    trafficLight: base?.trafficLight ?? "green",
+    rolloutDate: base?.rolloutDate ?? "",
+    paymentDate: base?.paymentDate ?? "",
+    chapterDurations: base?.chapterDurations ?? [],
+    note: base?.note ?? "",
+    slackChannel: base?.slackChannel ?? "",
+    slackChannelId: base?.slackChannelId ?? "",
+    projectLectures: base?.lectures ?? [],
+    planningComplete: base?.status !== "기획",
+    lessonPlanLink: base?.lessonPlanLink ?? "",
+    chapterTitles: base?.chapterTitles ?? [],
+    chapterDriveLinks: base?.chapterDriveLinks ?? [],
+  };
+}
+
+const TASK_TYPES_ON_PLANNING: TaskType[] = [
+  "교안제작",
+  "촬영",
+  "편집",
+  "자막",
+  "검수",
+  "승인",
+];
+
 export default function ProjectDetailPage() {
   const params = useParams<{ id: string }>();
   const projectId = params.id;
@@ -31,55 +96,13 @@ export default function ProjectDetailPage() {
     [projectId],
   );
 
-  const [title, setTitle] = useState(baseProject?.title ?? "");
-  const [pm, setPm] = useState(baseProject?.pm ?? "");
-  const [tutor, setTutor] = useState(baseProject?.tutor ?? "");
-  const [editor, setEditor] = useState(baseProject?.editor ?? "");
-  const [subtitleEditor, setSubtitleEditor] = useState(
-    baseProject?.subtitleEditor ?? "",
+  const [draft, setDraft] = useState<ProjectDraft>(() =>
+    initFromBase(baseProject),
   );
-  const [reviewer, setReviewer] = useState(baseProject?.reviewer ?? "");
-  const [curriculumManager, setCurriculumManager] = useState(
-    baseProject?.curriculumManager ?? "",
-  );
-  const [tasks, setTasks] = useState<ChapterTask[]>(baseProject?.tasks ?? []);
-  const [status, setStatus] = useState<ProjectStatus>(
-    baseProject?.status ?? "기획",
-  );
-  const [trafficLight, setTrafficLight] = useState<TrafficLight>(
-    baseProject?.trafficLight ?? "green",
-  );
-  const [rolloutDate, setRolloutDate] = useState(
-    baseProject?.rolloutDate ?? "",
-  );
-  const [paymentDate, setPaymentDate] = useState(
-    baseProject?.paymentDate ?? "",
-  );
-  const [chapterDurations, setChapterDurations] = useState<number[]>(
-    baseProject?.chapterDurations ?? [],
-  );
-  const [note, setNote] = useState(baseProject?.note ?? "");
-  const [slackChannel, setSlackChannel] = useState(
-    baseProject?.slackChannel ?? "",
-  );
-  const [slackChannelId, setSlackChannelId] = useState(
-    baseProject?.slackChannelId ?? "",
-  );
-  const [projectLectures, setProjectLectures] = useState(
-    baseProject?.lectures ?? [],
-  );
-  const [planningComplete, setPlanningComplete] = useState(
-    baseProject?.status !== "기획",
-  );
-  const [lessonPlanLink, setLessonPlanLink] = useState(
-    baseProject?.lessonPlanLink ?? "",
-  );
-  const [chapterTitles, setChapterTitles] = useState<string[]>(
-    baseProject?.chapterTitles ?? [],
-  );
-  const [chapterDriveLinks, setChapterDriveLinks] = useState<string[]>(
-    baseProject?.chapterDriveLinks ?? [],
-  );
+  const patch = useCallback((p: Partial<ProjectDraft>) => {
+    setDraft((d) => ({ ...d, ...p }));
+  }, []);
+
   const [scheduleTab, setScheduleTab] = useState<ScheduleTab>("work-status");
   const [weekStart, setWeekStart] = useState(() => {
     const d = new Date();
@@ -92,119 +115,137 @@ export default function ProjectDetailPage() {
     if (!baseProject) return null;
     return {
       ...baseProject,
-      title,
-      pm: pm || undefined,
-      tutor: tutor || undefined,
-      editor: editor || undefined,
-      subtitleEditor: subtitleEditor || undefined,
-      reviewer: reviewer || undefined,
-      curriculumManager: curriculumManager || undefined,
-      tasks,
-      status,
-      trafficLight,
-      rolloutDate,
-      paymentDate,
-      chapterDurations,
-      chapterCount: chapterDurations.length,
-      chapterTitles,
-      chapterDriveLinks,
-      note,
-      slackChannel: slackChannel || undefined,
-      slackChannelId: slackChannelId || undefined,
-      lessonPlanLink: lessonPlanLink || undefined,
-      lectures: projectLectures,
+      title: draft.title,
+      pm: draft.pm || undefined,
+      tutor: draft.tutor || undefined,
+      editor: draft.editor || undefined,
+      subtitleEditor: draft.subtitleEditor || undefined,
+      reviewer: draft.reviewer || undefined,
+      curriculumManager: draft.curriculumManager || undefined,
+      tasks: draft.tasks,
+      status: draft.status,
+      trafficLight: draft.trafficLight,
+      rolloutDate: draft.rolloutDate,
+      paymentDate: draft.paymentDate,
+      chapterDurations: draft.chapterDurations,
+      chapterCount: draft.chapterDurations.length,
+      chapterTitles: draft.chapterTitles,
+      chapterDriveLinks: draft.chapterDriveLinks,
+      note: draft.note,
+      slackChannel: draft.slackChannel || undefined,
+      slackChannelId: draft.slackChannelId || undefined,
+      lessonPlanLink: draft.lessonPlanLink || undefined,
+      lectures: draft.projectLectures,
     };
-  }, [
-    baseProject,
-    title,
-    pm,
-    tutor,
-    editor,
-    subtitleEditor,
-    reviewer,
-    curriculumManager,
-    tasks,
-    status,
-    trafficLight,
-    rolloutDate,
-    paymentDate,
-    chapterDurations,
-    chapterTitles,
-    chapterDriveLinks,
-    note,
-    slackChannel,
-    slackChannelId,
-    lessonPlanLink,
-    projectLectures,
-  ]);
+  }, [baseProject, draft]);
 
-  const handleTasksChange = useCallback((newTasks: ChapterTask[]) => {
-    setTasks(newTasks);
-  }, []);
-
-  const handleTaskStatusChange = useCallback(
-    (
-      chapter: number,
-      taskType: string,
-      newStatus: "대기" | "진행" | "리뷰" | "완료",
-    ) => {
-      setTasks((prev) =>
-        prev.map((t) =>
-          t.chapter === chapter && t.taskType === taskType
-            ? { ...t, status: newStatus }
-            : t,
-        ),
-      );
+  const handleTasksChange = useCallback(
+    (newTasks: ChapterTask[]) => {
+      patch({ tasks: newTasks });
     },
-    [],
+    [patch],
   );
 
   const handleLectureUrlChange = useCallback(
     (lectureId: string, field: string, url: string) => {
-      setProjectLectures((prev) =>
-        prev.map((l) => (l.id === lectureId ? { ...l, [field]: url } : l)),
-      );
+      setDraft((d) => ({
+        ...d,
+        projectLectures: d.projectLectures.map((l) =>
+          l.id === lectureId ? { ...l, [field]: url } : l,
+        ),
+      }));
     },
     [],
   );
 
   const handleAddChapter = useCallback(() => {
-    const maxChapter = tasks.reduce((max, t) => Math.max(max, t.chapter), 0);
-    const newCh = maxChapter + 1;
-    const taskTypes: TaskType[] = [
-      "교안제작",
-      "촬영",
-      "편집",
-      "자막",
-      "검수",
-      "승인",
-    ];
-    const newTasks: ChapterTask[] = taskTypes.map((taskType) => ({
-      id: `${projectId}-c${newCh}-${taskType}`,
-      projectId: projectId!,
-      chapter: newCh,
-      taskType,
-      status: "대기" as const,
-    }));
-    setTasks((prev) => [...prev, ...newTasks]);
-    setChapterDurations((prev) => [...prev, 0]);
-  }, [tasks, projectId]);
+    setDraft((d) => {
+      const maxChapter = d.tasks.reduce(
+        (max, t) => Math.max(max, t.chapter),
+        0,
+      );
+      const newCh = maxChapter + 1;
+      const newTasks: ChapterTask[] = TASK_TYPES_ON_PLANNING.map(
+        (taskType) => ({
+          id: `${projectId}-c${newCh}-${taskType}`,
+          projectId: projectId!,
+          chapter: newCh,
+          taskType,
+          status: "대기" as const,
+        }),
+      );
+      return {
+        ...d,
+        tasks: [...d.tasks, ...newTasks],
+        chapterDurations: [...d.chapterDurations, 0],
+      };
+    });
+  }, [projectId]);
 
   const handleDeleteChapter = useCallback((chapter: number) => {
-    setTasks((prev) => {
-      // 해당 장의 태스크 제거
-      const filtered = prev.filter((t) => t.chapter !== chapter);
-      // 삭제된 장보다 큰 번호를 가진 장들의 번호를 1씩 당기기
-      return filtered.map((t) =>
+    setDraft((d) => {
+      const filtered = d.tasks.filter((t) => t.chapter !== chapter);
+      const shifted = filtered.map((t) =>
         t.chapter > chapter ? { ...t, chapter: t.chapter - 1 } : t,
       );
-    });
-    setChapterDurations((prev) => {
-      const next = [...prev];
-      next.splice(chapter - 1, 1); // 1장 = index 0
-      return next;
+      const nextDurations = [...d.chapterDurations];
+      nextDurations.splice(chapter - 1, 1);
+      return { ...d, tasks: shifted, chapterDurations: nextDurations };
     });
   }, []);
+
+  const handlePlanningComplete = useCallback(
+    (data: {
+      chapters: {
+        title: string;
+        duration: number;
+        lectures: { title: string }[];
+      }[];
+      curriculumLink: string;
+    }) => {
+      const newTasks: ChapterTask[] = [];
+      const newLectures: Lecture[] = [];
+      data.chapters.forEach((chData, idx) => {
+        const ch = idx + 1;
+        TASK_TYPES_ON_PLANNING.forEach((taskType) => {
+          newTasks.push({
+            id: `${projectId}-c${ch}-${taskType}`,
+            projectId: projectId!,
+            chapter: ch,
+            taskType,
+            status: "대기" as const,
+          });
+        });
+        chData.lectures.forEach((lec, li) => {
+          const lectureNumber = li + 1;
+          newLectures.push({
+            id: `${projectId}-lec-${ch}-${lectureNumber}`,
+            projectId: projectId!,
+            chapter: ch,
+            lectureNumber,
+            label: `${ch}-${lectureNumber}`,
+            title: lec.title,
+            videoUrls: [],
+          });
+        });
+      });
+      // TODO(백엔드 연결): 실제 Google Drive API로 폴더 생성 후 링크 반환
+      const driveLinks = data.chapters.map(
+        (c, idx) =>
+          `https://drive.google.com/drive/folders/${projectId}-ch${idx + 1}-${encodeURIComponent(c.title)}`,
+      );
+      patch({
+        lessonPlanLink: data.curriculumLink,
+        tasks: newTasks,
+        projectLectures: newLectures,
+        chapterDurations: data.chapters.map((c) => c.duration),
+        chapterTitles: data.chapters.map((c) => c.title),
+        chapterDriveLinks: driveLinks,
+        planningComplete: true,
+      });
+    },
+    [projectId, patch],
+  );
 
   if (!project) {
     return (
@@ -221,8 +262,8 @@ export default function ProjectDetailPage() {
     <div className="min-h-screen">
       <DetailHeader
         project={project}
-        onTrafficLightChange={setTrafficLight}
-        onTitleChange={setTitle}
+        onTrafficLightChange={(v) => patch({ trafficLight: v })}
+        onTitleChange={(v) => patch({ title: v })}
         otherVersions={mockProjects
           .filter((p) => p.title === project.title && p.id !== project.id)
           .map((p) => ({ id: p.id, version: p.version, status: p.status }))}
@@ -232,22 +273,17 @@ export default function ProjectDetailPage() {
         {/* 강의 핵심 지표 + 상세 */}
         <InfoGuideTab
           project={project}
-          onStatusChange={setStatus}
-          onRolloutDateChange={setRolloutDate}
-          onPaymentDateChange={setPaymentDate}
-          onChapterDurationsChange={setChapterDurations}
-          onNoteChange={setNote}
-          onSlackChange={(ch, id) => {
-            setSlackChannel(ch);
-            setSlackChannelId(id);
-          }}
+          onStatusChange={(v) => patch({ status: v })}
+          onRolloutDateChange={(v) => patch({ rolloutDate: v })}
+          onPaymentDateChange={(v) => patch({ paymentDate: v })}
+          onChapterDurationsChange={(v) => patch({ chapterDurations: v })}
+          onNoteChange={(v) => patch({ note: v })}
+          onSlackChange={(ch, id) =>
+            patch({ slackChannel: ch, slackChannelId: id })
+          }
           onAssigneeChange={(role, value) => {
-            if (role === "pm") setPm(value);
-            else if (role === "tutor") setTutor(value);
-            else if (role === "editor") setEditor(value);
-            else if (role === "subtitleEditor") setSubtitleEditor(value);
-            else if (role === "reviewer") setReviewer(value);
-            else if (role === "curriculumManager") setCurriculumManager(value);
+            // role 이름과 draft 키가 동일하므로 dynamic key로 바로 patch
+            patch({ [role]: value } as Partial<ProjectDraft>);
           }}
         />
 
@@ -296,78 +332,29 @@ export default function ProjectDetailPage() {
           {scheduleTab === "work-status" && (
             <div className="space-y-6">
               <WorkStatusTab
-                tasks={tasks}
-                lectures={projectLectures}
+                tasks={draft.tasks}
+                lectures={draft.projectLectures}
                 chapterCount={project.chapterCount}
                 chapterTitles={project.chapterTitles}
                 chapterDriveLinks={project.chapterDriveLinks}
-                planningComplete={planningComplete}
-                onPlanningComplete={(data) => {
-                  // 커리큘럼 링크 등록
-                  setLessonPlanLink(data.curriculumLink);
-                  // 장 태스크 + 강 생성
-                  const taskTypes: TaskType[] = [
-                    "교안제작",
-                    "촬영",
-                    "편집",
-                    "자막",
-                    "검수",
-                    "승인",
-                  ];
-                  const newTasks: ChapterTask[] = [];
-                  const newLectures: Lecture[] = [];
-                  data.chapters.forEach((chData, idx) => {
-                    const ch = idx + 1;
-                    taskTypes.forEach((taskType) => {
-                      newTasks.push({
-                        id: `${projectId}-c${ch}-${taskType}`,
-                        projectId: projectId!,
-                        chapter: ch,
-                        taskType,
-                        status: "대기" as const,
-                      });
-                    });
-                    chData.lectures.forEach((lec, li) => {
-                      const lectureNumber = li + 1;
-                      newLectures.push({
-                        id: `${projectId}-lec-${ch}-${lectureNumber}`,
-                        projectId: projectId!,
-                        chapter: ch,
-                        lectureNumber,
-                        label: `${ch}-${lectureNumber}`,
-                        title: lec.title,
-                        videoUrls: [],
-                      });
-                    });
-                  });
-                  setTasks(newTasks);
-                  setProjectLectures(newLectures);
-                  setChapterDurations(data.chapters.map((c) => c.duration));
-                  setChapterTitles(data.chapters.map((c) => c.title));
-                  // 장별 드라이브 폴더 링크 생성 (포맷: "n장_제목")
-                  // TODO(백엔드 연결): 실제 Google Drive API로 폴더 생성 후 링크 반환
-                  setChapterDriveLinks(
-                    data.chapters.map(
-                      (c, idx) =>
-                        `https://drive.google.com/drive/folders/${projectId}-ch${idx + 1}-${encodeURIComponent(c.title)}`,
-                    ),
-                  );
-                  setPlanningComplete(true);
-                }}
+                planningComplete={draft.planningComplete}
+                onPlanningComplete={handlePlanningComplete}
                 onAddChapter={handleAddChapter}
                 onReviewToggle={(lectureId, reviewed) =>
-                  setProjectLectures((prev) =>
-                    prev.map((l) =>
+                  setDraft((d) => ({
+                    ...d,
+                    projectLectures: d.projectLectures.map((l) =>
                       l.id === lectureId ? { ...l, reviewed } : l,
                     ),
-                  )
+                  }))
                 }
                 onApprovalToggle={(lectureId, approved) =>
-                  setProjectLectures((prev) =>
-                    prev.map((l) =>
+                  setDraft((d) => ({
+                    ...d,
+                    projectLectures: d.projectLectures.map((l) =>
                       l.id === lectureId ? { ...l, approved } : l,
                     ),
-                  )
+                  }))
                 }
                 onLectureUrlChange={handleLectureUrlChange}
               />
@@ -376,7 +363,7 @@ export default function ProjectDetailPage() {
           )}
           {scheduleTab === "schedule" && (
             <MondayBoard
-              tasks={tasks}
+              tasks={draft.tasks}
               onTasksChange={handleTasksChange}
               onAddChapter={handleAddChapter}
               onDeleteChapter={handleDeleteChapter}
@@ -388,7 +375,7 @@ export default function ProjectDetailPage() {
           )}
           {scheduleTab === "calendar" && (
             <WeeklyCalendar
-              tasks={tasks}
+              tasks={draft.tasks}
               lectures={project.lectures}
               weekStart={weekStart}
               onWeekChange={setWeekStart}
@@ -397,13 +384,14 @@ export default function ProjectDetailPage() {
               tutor={project.tutor}
               pm={project.pm}
               onTaskToggle={(taskId) => {
-                handleTasksChange(
-                  tasks.map((t) =>
+                setDraft((d) => ({
+                  ...d,
+                  tasks: d.tasks.map((t) =>
                     t.id === taskId
                       ? { ...t, status: t.status === "완료" ? "진행" : "완료" }
                       : t,
                   ),
-                );
+                }));
               }}
             />
           )}
