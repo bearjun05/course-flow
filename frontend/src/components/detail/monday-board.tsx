@@ -69,6 +69,8 @@ interface MondayBoardProps {
   tutor?: string;
   /** PM명 (승인 바에 표시) */
   pm?: string;
+  /** 읽기 전용 (에듀웍스 등) — 드래그/클릭/장추가 모두 차단 */
+  readOnly?: boolean;
 }
 
 interface ChapterGroup {
@@ -100,10 +102,12 @@ function StageChip({
   task,
   chapterColor,
   onToggle,
+  readOnly,
 }: {
   task: ChapterTask;
   chapterColor: string;
   onToggle: () => void;
+  readOnly?: boolean;
 }) {
   const isComplete = task.status === "완료";
   const isActive = task.status === "진행";
@@ -114,8 +118,10 @@ function StageChip({
 
   return (
     <button
+      disabled={readOnly}
       onClick={(e) => {
         e.stopPropagation();
+        if (readOnly) return;
         onToggle();
       }}
       className={cn(
@@ -125,6 +131,7 @@ function StageChip({
         isReview &&
           "bg-amber-100 text-amber-700 ring-2 ring-amber-300 ring-offset-1",
         isWaiting && "bg-neutral-100 text-neutral-400",
+        readOnly && "cursor-default",
       )}
       style={{
         ...(isComplete ? { backgroundColor: chapterColor } : {}),
@@ -193,6 +200,7 @@ function MiniGantt({
   paymentDate,
   tutor,
   pm,
+  readOnly,
 }: {
   tasks: ChapterTask[];
   chapterColor: string;
@@ -207,6 +215,7 @@ function MiniGantt({
   paymentDate?: string;
   tutor?: string;
   pm?: string;
+  readOnly?: boolean;
 }) {
   const today = startOfDay(new Date());
   const containerRef = useRef<HTMLDivElement>(null);
@@ -333,6 +342,7 @@ function MiniGantt({
       task: ChapterTask,
       mode: "left" | "right" | "move",
     ) => {
+      if (readOnly) return;
       e.stopPropagation();
       e.preventDefault();
 
@@ -371,7 +381,7 @@ function MiniGantt({
       window.addEventListener("mousemove", onMove);
       window.addEventListener("mouseup", onUp);
     },
-    [onTaskDateChange],
+    [onTaskDateChange, readOnly],
   );
 
   const contentWidth = totalDays * COL_W;
@@ -604,7 +614,7 @@ function MiniGantt({
                             handleDragStart(ev, task, "right")
                           }
                         />
-                        {onTaskDateClear && (
+                        {onTaskDateClear && !readOnly && (
                           <button
                             className="absolute -top-1.5 -right-1.5 h-4 w-4 rounded-full bg-white border border-neutral-300 text-neutral-400 text-[10px] leading-none flex items-center justify-center opacity-0 group-hover/bar:opacity-100 transition-opacity hover:bg-red-50 hover:border-red-300 hover:text-red-500 z-20"
                             onClick={(e) => {
@@ -628,8 +638,14 @@ function MiniGantt({
                 return (
                   <div
                     key={task.id}
-                    className="relative h-10 border-b border-neutral-50 cursor-pointer group/unsch hover:bg-neutral-50/50"
+                    className={cn(
+                      "relative h-10 border-b border-neutral-50 group/unsch",
+                      readOnly
+                        ? "cursor-default"
+                        : "cursor-pointer hover:bg-neutral-50/50",
+                    )}
                     onClick={(e) => {
+                      if (readOnly) return;
                       const rect = e.currentTarget.getBoundingClientRect();
                       const x = e.clientX - rect.left;
                       const dayIdx = Math.floor(x / COL_W);
@@ -650,10 +666,16 @@ function MiniGantt({
                       }}
                     />
                     <div
-                      className="absolute top-1.5 h-7 rounded-md border-2 border-dashed border-neutral-300 flex items-center justify-center group-hover/unsch:border-neutral-400 transition-colors z-[2] cursor-pointer"
+                      className={cn(
+                        "absolute top-1.5 h-7 rounded-md border-2 border-dashed border-neutral-300 flex items-center justify-center group-hover/unsch:border-neutral-400 transition-colors z-[2]",
+                        readOnly
+                          ? "cursor-default opacity-50"
+                          : "cursor-pointer",
+                      )}
                       style={{ left: barLeftPx, width: barWidthPx }}
                       onClick={(e) => {
                         e.stopPropagation();
+                        if (readOnly) return;
                         const todayDate = startOfDay(new Date());
                         const endDate = addDays(todayDate, 2);
                         onTaskDateChange(
@@ -691,6 +713,7 @@ export default function MondayBoard({
   paymentDate,
   tutor,
   pm,
+  readOnly = false,
 }: MondayBoardProps) {
   const [expandedGroups, setExpandedGroups] = useState<Set<number>>(new Set());
 
@@ -725,6 +748,7 @@ export default function MondayBoard({
 
   const toggleTask = useCallback(
     (taskId: string) => {
+      if (readOnly) return;
       onTasksChange(
         tasks.map((t) =>
           t.id === taskId
@@ -733,20 +757,22 @@ export default function MondayBoard({
         ),
       );
     },
-    [tasks, onTasksChange],
+    [tasks, onTasksChange, readOnly],
   );
 
   const handleTaskDateChange = useCallback(
     (taskId: string, startDate: string, endDate: string) => {
+      if (readOnly) return;
       onTasksChange(
         tasks.map((t) => (t.id === taskId ? { ...t, startDate, endDate } : t)),
       );
     },
-    [tasks, onTasksChange],
+    [tasks, onTasksChange, readOnly],
   );
 
   const handleTaskDateClear = useCallback(
     (taskId: string) => {
+      if (readOnly) return;
       onTasksChange(
         tasks.map((t) =>
           t.id === taskId
@@ -755,7 +781,7 @@ export default function MondayBoard({
         ),
       );
     },
-    [tasks, onTasksChange],
+    [tasks, onTasksChange, readOnly],
   );
 
   function getChapterStatus(groupTasks: ChapterTask[]): {
@@ -854,6 +880,7 @@ export default function MondayBoard({
                       task={task}
                       chapterColor={group.color}
                       onToggle={() => toggleTask(task.id)}
+                      readOnly={readOnly}
                     />
                   </div>
                 ))}
@@ -896,8 +923,9 @@ export default function MondayBoard({
                   paymentDate={paymentDate}
                   tutor={tutor}
                   pm={pm}
+                  readOnly={readOnly}
                 />
-                {onDeleteChapter && group.chapter > 0 && (
+                {onDeleteChapter && group.chapter > 0 && !readOnly && (
                   <div className="px-4 pl-10 pb-2 flex justify-end">
                     <button
                       onClick={(e) => {
@@ -917,7 +945,7 @@ export default function MondayBoard({
       })}
 
       {/* 장 추가 버튼 */}
-      {onAddChapter && (
+      {onAddChapter && !readOnly && (
         <button
           onClick={onAddChapter}
           className="w-full flex items-center justify-center gap-1.5 py-2.5 text-xs text-muted-foreground hover:text-foreground hover:bg-accent/30 transition-colors border-b border-dashed border-neutral-200"

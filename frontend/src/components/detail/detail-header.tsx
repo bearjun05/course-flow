@@ -26,6 +26,8 @@ interface DetailHeaderProps {
   onSuspend?: () => void;
   onTrafficLightChange?: (light: TrafficLight) => void;
   backHref?: string;
+  /** 읽기 전용 (에듀웍스 등) */
+  readOnly?: boolean;
 }
 
 const TRAFFIC_LIGHTS: {
@@ -64,6 +66,7 @@ export default function DetailHeader({
   onSuspend,
   onTrafficLightChange,
   backHref = "/",
+  readOnly = false,
 }: DetailHeaderProps) {
   const versionNum = parseFloat(project.version.replace("v", ""));
   const hasVersionHistory = versionNum >= 2.0;
@@ -135,46 +138,60 @@ export default function DetailHeader({
 
         {/* Traffic Light */}
         <div className="inline-flex items-center gap-1.5 rounded-full bg-neutral-200/50 px-2 py-1.5 shrink-0">
-          {TRAFFIC_LIGHTS.map((tl) => (
-            <button
-              key={tl.value}
-              onClick={() => onTrafficLightChange?.(tl.value)}
-              title={tl.label}
-              className={cn(
-                "h-2.5 w-2.5 rounded-full transition-all",
-                project.trafficLight === tl.value
-                  ? cn(tl.active, "scale-125")
-                  : tl.inactive,
-              )}
-              style={
-                project.trafficLight === tl.value
-                  ? { boxShadow: `0 0 6px 1px ${tl.glow}` }
-                  : undefined
-              }
-            />
-          ))}
+          {TRAFFIC_LIGHTS.map((tl) => {
+            const isActive = project.trafficLight === tl.value;
+            const className = cn(
+              "h-2.5 w-2.5 rounded-full transition-all",
+              isActive ? cn(tl.active, "scale-125") : tl.inactive,
+              readOnly ? "cursor-default" : "",
+            );
+            const style = isActive
+              ? { boxShadow: `0 0 6px 1px ${tl.glow}` }
+              : undefined;
+            if (readOnly) {
+              return (
+                <span
+                  key={tl.value}
+                  title={tl.label}
+                  className={className}
+                  style={style}
+                />
+              );
+            }
+            return (
+              <button
+                key={tl.value}
+                onClick={() => onTrafficLightChange?.(tl.value)}
+                title={tl.label}
+                className={className}
+                style={style}
+              />
+            );
+          })}
         </div>
       </div>
 
-      {/* Right: Actions */}
-      <DropdownMenu>
-        <DropdownMenuTrigger className="inline-flex items-center justify-center h-8 w-8 rounded-lg text-neutral-400 hover:bg-neutral-100 hover:text-neutral-600 transition-colors shrink-0">
-          <MoreHorizontal className="h-4 w-4" />
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuItem onClick={onSuspend} className="gap-2 text-xs">
-            <Pause className="h-3.5 w-3.5" />
-            중단 처리
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            onClick={onDelete}
-            className="gap-2 text-xs text-destructive focus:text-destructive"
-          >
-            <Trash2 className="h-3.5 w-3.5" />
-            삭제
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+      {/* Right: Actions (읽기 전용일 때 숨김) */}
+      {!readOnly && (
+        <DropdownMenu>
+          <DropdownMenuTrigger className="inline-flex items-center justify-center h-8 w-8 rounded-lg text-neutral-400 hover:bg-neutral-100 hover:text-neutral-600 transition-colors shrink-0">
+            <MoreHorizontal className="h-4 w-4" />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={onSuspend} className="gap-2 text-xs">
+              <Pause className="h-3.5 w-3.5" />
+              중단 처리
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={onDelete}
+              className="gap-2 text-xs text-destructive focus:text-destructive"
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+              삭제
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      )}
     </header>
   );
 }

@@ -25,7 +25,7 @@ export default function EduworksDetailPage() {
     [projectId],
   );
 
-  const [tasks] = useState(baseProject?.tasks ?? []);
+  const [tasks, setTasks] = useState(baseProject?.tasks ?? []);
   const [lectures, setLectures] = useState(baseProject?.lectures ?? []);
 
   const project = useMemo(() => {
@@ -41,6 +41,22 @@ export default function EduworksDetailPage() {
       prev.map((l) => (l.id === lectureId ? { ...l, reviewed } : l)),
     );
   };
+
+  // 이번 주 탭: 검수자만 "검수" 태스크 토글 가능
+  const handleCalendarTaskToggle = isReviewer
+    ? (taskId: string) => {
+        setTasks((prev) =>
+          prev.map((t) => {
+            if (t.id !== taskId) return t;
+            if (t.taskType !== "검수") return t;
+            return {
+              ...t,
+              status: t.status === "완료" ? "진행" : "완료",
+            };
+          }),
+        );
+      }
+    : undefined;
 
   const [scheduleTab, setScheduleTab] = useState<ScheduleTab>("work-status");
   const [weekStart, setWeekStart] = useState(() => {
@@ -66,7 +82,7 @@ export default function EduworksDetailPage() {
 
   return (
     <div className="min-h-screen">
-      <DetailHeader project={project} backHref="/eduworks" />
+      <DetailHeader project={project} backHref="/eduworks" readOnly />
 
       <div className="space-y-6 px-6 py-6">
         <InfoGuideTab project={project} readOnly />
@@ -131,6 +147,7 @@ export default function EduworksDetailPage() {
               paymentDate={project.paymentDate}
               tutor={project.tutor}
               pm="박진영"
+              readOnly
             />
           )}
           {scheduleTab === "calendar" && (
@@ -143,6 +160,7 @@ export default function EduworksDetailPage() {
               paymentDate={project.paymentDate}
               tutor={project.tutor}
               pm="박진영"
+              onTaskToggle={handleCalendarTaskToggle}
             />
           )}
         </section>
