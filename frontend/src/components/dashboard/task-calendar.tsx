@@ -73,6 +73,27 @@ function getChapterColor(chapter: number): string {
   return CHAPTER_COLORS[chapter % CHAPTER_COLORS.length];
 }
 
+/** 태스크의 담당자 이름. task.assignee 우선, 없으면 역할 기반 추론. */
+function getTaskOwner(task: ChapterTask, project: Project): string | undefined {
+  if (task.assignee) return task.assignee;
+  switch (task.taskType) {
+    case "커리큘럼 기획":
+    case "승인":
+      return project.curriculumManager;
+    case "교안제작":
+    case "촬영":
+      return project.tutor;
+    case "편집":
+      return project.editor;
+    case "자막":
+      return project.subtitleEditor;
+    case "검수":
+      return project.reviewer;
+    default:
+      return undefined;
+  }
+}
+
 /** 태스크가 해당 사람에게 배정된 것인지 확인 */
 function isTaskForPerson(
   task: ChapterTask,
@@ -118,6 +139,7 @@ export function TaskCalendar({
   const router = useRouter();
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [expandedDates, setExpandedDates] = useState<Set<string>>(new Set());
 
   const activeProjects = useMemo(
     () => projects.filter((p) => isProjectActive(p.status)),
@@ -131,22 +153,25 @@ export function TaskCalendar({
     today.setHours(0, 0, 0, 0);
 
     for (const project of activeProjects) {
-      // 롤아웃 마감
-      const rollout = parseISO(project.rolloutDate);
-      bars.push({
-        task: {
-          id: `${project.id}-rollout`,
-          projectId: project.id,
-          chapter: 0,
-          taskType: "롤아웃",
-          status: project.status === "롤아웃" ? "진행" : "대기",
-        },
-        project,
-        startDate: rollout,
-        endDate: rollout,
-        isDone: false,
-        isOverdue: isBefore(rollout, today) && project.status !== "완료",
-      });
+      // 롤아웃 마감: 에듀옵스(selectedPerson 없을 때)에서만 표시.
+      // 에듀웍스(외부 관계자)에는 롤아웃 바 숨김.
+      if (!selectedPerson) {
+        const rollout = parseISO(project.rolloutDate);
+        bars.push({
+          task: {
+            id: `${project.id}-rollout`,
+            projectId: project.id,
+            chapter: 0,
+            taskType: "롤아웃",
+            status: project.status === "롤아웃" ? "진행" : "대기",
+          },
+          project,
+          startDate: rollout,
+          endDate: rollout,
+          isDone: false,
+          isOverdue: isBefore(rollout, today) && project.status !== "완료",
+        });
+      }
 
       for (const task of project.tasks) {
         if (!task.startDate && !task.endDate) continue;
@@ -297,6 +322,8 @@ export function TaskCalendar({
               const inMonth = isSameMonth(day, currentMonth);
               const today = isToday(day);
               const selected = isSameDay(day, selectedDate);
+              const isExpanded = expandedDates.has(key);
+              const visibleEvents = isExpanded ? events : events.slice(0, 4);
 
               return (
                 <div
@@ -325,7 +352,7 @@ export function TaskCalendar({
 
                   {/* 이벤트 바 — 셀 전체 너비 사용, 중간 바는 경계 없이 이어짐 */}
                   <div className="mt-0.5 space-y-[1px] pb-1">
-                    {events.slice(0, 4).map((e, idx) => {
+                    {visibleEvents.map((e, idx) => {
                       const color = e.bar.isDone
                         ? "#A0A0A0"
                         : e.bar.isOverdue
@@ -379,11 +406,36 @@ export function TaskCalendar({
                         </div>
                       );
                     })}
-                    {events.length > 4 && (
-                      <span className="text-[8px] text-muted-foreground px-1.5">
-                        +{events.length - 4}
-                      </span>
-                    )}
+                    {events.length > 4 &&
+                      (isExpanded ? (
+                        <button
+                          onClick={(ev) => {
+                            ev.stopPropagation();
+                            setExpandedDates((prev) => {
+                              const next = new Set(prev);
+                              next.delete(key);
+                              return next;
+                            });
+                          }}
+                          className="text-[8px] text-muted-foreground px-1.5 hover:text-foreground"
+                        >
+                          접기
+                        </button>
+                      ) : (
+                        <button
+                          onClick={(ev) => {
+                            ev.stopPropagation();
+                            setExpandedDates((prev) => {
+                              const next = new Set(prev);
+                              next.add(key);
+                              return next;
+                            });
+                          }}
+                          className="text-[8px] text-muted-foreground px-1.5 hover:text-foreground"
+                        >
+                          +{events.length - 4} 더보기
+                        </button>
+                      ))}
                   </div>
                 </div>
               );
@@ -535,18 +587,25 @@ export function TaskCalendar({
                       </div>
 
                       {/* 담당자 */}
-                      {event.bar.task.assignee && (
-                        <div
-                          className={cn(
-                            "text-[10px] mt-1",
-                            event.bar.isDone
-                              ? "text-neutral-400"
-                              : "text-muted-foreground",
-                          )}
-                        >
-                          담당: {event.bar.task.assignee}
-                        </div>
-                      )}
+                      {(() => {
+                        const owner = getTaskOwner(
+                          event.bar.task,
+                          event.bar.project,
+                        );
+                        if (!owner) return null;
+                        return (
+                          <div
+                            className={cn(
+                              "text-[10px] mt-1",
+                              event.bar.isDone
+                                ? "text-neutral-400"
+                                : "text-muted-foreground",
+                            )}
+                          >
+                            담당: {owner}
+                          </div>
+                        );
+                      })()}
                     </button>
                   );
                 })}
