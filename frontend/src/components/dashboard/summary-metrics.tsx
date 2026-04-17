@@ -100,21 +100,21 @@ function MetricCard({
 export function SummaryMetrics({ projects }: SummaryMetricsProps) {
   const activeProjects = projects.filter((p) => isProjectActive(p.status));
 
-  const todayTasks = activeProjects.flatMap((p) =>
+  const activeTasks = activeProjects.flatMap((p) =>
     p.tasks.filter((t) => t.status === "진행"),
   );
 
-  const projectsWithTasks = activeProjects
+  const projectsWithActiveTasks = activeProjects
     .filter((p) => p.tasks.some((t) => t.status === "진행"))
     .sort((a, b) => getDday(a.rolloutDate) - getDday(b.rolloutDate));
 
-  const allNames = projectsWithTasks.map((p) => p.title).join(", ");
-  const todayDetail =
-    projectsWithTasks.length === 0
+  const allNames = projectsWithActiveTasks.map((p) => p.title).join(", ");
+  const activeDetail =
+    projectsWithActiveTasks.length === 0
       ? "진행 중인 태스크 없음"
       : allNames.length <= 45
         ? allNames
-        : `${projectsWithTasks[0].title} 외 ${projectsWithTasks.length - 1}개`;
+        : `${projectsWithActiveTasks[0].title} 외 ${projectsWithActiveTasks.length - 1}개`;
 
   const overdueProjects = projects.filter(
     (p) => isProjectActive(p.status) && getDday(p.rolloutDate) < 0,
@@ -128,9 +128,9 @@ export function SummaryMetrics({ projects }: SummaryMetricsProps) {
     <div className="grid grid-cols-2 gap-4">
       <MetricCard
         icon={CalendarCheck}
-        label="오늘 태스크"
-        value={todayTasks.length}
-        detail={todayDetail}
+        label="진행 중 태스크"
+        value={activeTasks.length}
+        detail={activeDetail}
       />
       <MetricCard
         icon={AlertTriangle}
