@@ -59,6 +59,12 @@ export default function ProjectDetailPage() {
   const [planningComplete, setPlanningComplete] = useState(
     baseProject?.status !== "기획",
   );
+  const [lessonPlanLink, setLessonPlanLink] = useState(
+    baseProject?.lessonPlanLink ?? "",
+  );
+  const [chapterTitles, setChapterTitles] = useState<string[]>(
+    baseProject?.chapterTitles ?? [],
+  );
   const [scheduleTab, setScheduleTab] = useState<ScheduleTab>("work-status");
   const [weekStart, setWeekStart] = useState(() => {
     const d = new Date();
@@ -77,9 +83,12 @@ export default function ProjectDetailPage() {
       rolloutDate,
       paymentDate,
       chapterDurations,
+      chapterCount: chapterDurations.length,
+      chapterTitles,
       note,
       slackChannel: slackChannel || undefined,
       slackChannelId: slackChannelId || undefined,
+      lessonPlanLink: lessonPlanLink || undefined,
       lectures: projectLectures,
     };
   }, [
@@ -90,9 +99,11 @@ export default function ProjectDetailPage() {
     rolloutDate,
     paymentDate,
     chapterDurations,
+    chapterTitles,
     note,
     slackChannel,
     slackChannelId,
+    lessonPlanLink,
     projectLectures,
   ]);
 
@@ -245,11 +256,37 @@ export default function ProjectDetailPage() {
                 chapterTitles={project.chapterTitles}
                 chapterDriveLinks={project.chapterDriveLinks}
                 planningComplete={planningComplete}
-                onPlanningComplete={() => setPlanningComplete(true)}
+                onPlanningComplete={(data) => {
+                  // 커리큘럼 링크 등록
+                  setLessonPlanLink(data.curriculumLink);
+                  // 장 추가: 태스크 + 제목 + 분량 생성
+                  const taskTypes: TaskType[] = [
+                    "교안제작",
+                    "촬영",
+                    "편집",
+                    "자막",
+                    "검수",
+                    "승인",
+                  ];
+                  const newTasks: ChapterTask[] = [];
+                  data.chapters.forEach((_, idx) => {
+                    const ch = idx + 1;
+                    taskTypes.forEach((taskType) => {
+                      newTasks.push({
+                        id: `${projectId}-c${ch}-${taskType}`,
+                        projectId: projectId!,
+                        chapter: ch,
+                        taskType,
+                        status: "대기" as const,
+                      });
+                    });
+                  });
+                  setTasks(newTasks);
+                  setChapterDurations(data.chapters.map((c) => c.duration));
+                  setChapterTitles(data.chapters.map((c) => c.title));
+                  setPlanningComplete(true);
+                }}
                 onAddChapter={handleAddChapter}
-                hasCurriculumLink={!!project.lessonPlanLink}
-                hasRolloutDate={!!rolloutDate}
-                hasChapterDurations={chapterDurations.length > 0}
                 onReviewToggle={(lectureId, reviewed) =>
                   setProjectLectures((prev) =>
                     prev.map((l) =>
