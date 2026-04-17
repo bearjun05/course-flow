@@ -61,12 +61,6 @@ export function isProjectOverdue(project: Project): boolean {
   return getDday(project.rolloutDate) < 0 && project.status !== "완료";
 }
 
-export function getAutoTrafficLight(project: Project): Project["trafficLight"] {
-  const dday = getDday(project.rolloutDate);
-  if (dday < 0) return "red";
-  return project.trafficLight;
-}
-
 /* ------------------------------------------------------------------ */
 /* 담당자 관련 공용 헬퍼 (에듀웍스/태스크 캘린더 등에서 공통 사용)      */
 /* ------------------------------------------------------------------ */

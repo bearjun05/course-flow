@@ -6,6 +6,7 @@ import Link from "next/link";
 import { CalendarDays, ClipboardList, Calendar } from "lucide-react";
 import { mockProjects } from "@/lib/mock-data";
 import { MOCK_CURRENT_USER } from "@/lib/mock-auth";
+import { parseAssigneeNames } from "@/lib/utils";
 import DetailHeader from "@/components/detail/detail-header";
 import InfoGuideTab from "@/components/detail/info-guide-tab";
 import MondayBoard from "@/components/detail/monday-board";
@@ -37,10 +38,7 @@ export default function EduworksDetailPage() {
   }, [baseProject, tasks, lectures]);
 
   // 검수자만 검수 토글 가능 (복수 검수자 지원: 쉼표 구분 문자열 파싱)
-  const reviewerNames = (project?.reviewer ?? "")
-    .split(",")
-    .map((s) => s.trim())
-    .filter(Boolean);
+  const reviewerNames = parseAssigneeNames(project?.reviewer);
   const isReviewer = person !== "" && reviewerNames.includes(person);
 
   const handleReviewToggle = (lectureId: string, reviewed: boolean) => {
@@ -175,6 +173,7 @@ export default function EduworksDetailPage() {
               tutor={project.tutor}
               pm={project.pm}
               onTaskToggle={handleCalendarTaskToggle}
+              readOnly={!isReviewer}
             />
           )}
         </section>

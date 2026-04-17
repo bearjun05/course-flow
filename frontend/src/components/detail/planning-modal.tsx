@@ -14,17 +14,29 @@ export interface PlanningSubmitData {
   curriculumLink: string;
 }
 
-interface DraftChapter {
+interface DraftLecture {
+  id: string;
   title: string;
-  duration: string;
-  lectures: { title: string }[];
 }
 
-const EMPTY_CHAPTER: DraftChapter = {
-  title: "",
-  duration: "",
-  lectures: [{ title: "" }],
-};
+interface DraftChapter {
+  id: string;
+  title: string;
+  duration: string;
+  lectures: DraftLecture[];
+}
+
+function uid(): string {
+  return `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
+function newLecture(): DraftLecture {
+  return { id: uid(), title: "" };
+}
+
+function newChapter(): DraftChapter {
+  return { id: uid(), title: "", duration: "", lectures: [newLecture()] };
+}
 
 interface PlanningModalProps {
   open: boolean;
@@ -44,15 +56,13 @@ export default function PlanningModal({
   onSubmit,
 }: PlanningModalProps) {
   const [curriculum, setCurriculum] = useState("");
-  const [chapters, setChapters] = useState<DraftChapter[]>([
-    { ...EMPTY_CHAPTER },
-  ]);
+  const [chapters, setChapters] = useState<DraftChapter[]>([newChapter()]);
 
   // 모달 열릴 때 초기화
   useEffect(() => {
     if (open) {
       setCurriculum("");
-      setChapters([{ ...EMPTY_CHAPTER, lectures: [{ title: "" }] }]);
+      setChapters([newChapter()]);
     }
   }, [open]);
 
@@ -77,11 +87,7 @@ export default function PlanningModal({
     });
   };
 
-  const addChapter = () =>
-    setChapters((prev) => [
-      ...prev,
-      { title: "", duration: "", lectures: [{ title: "" }] },
-    ]);
+  const addChapter = () => setChapters((prev) => [...prev, newChapter()]);
 
   const removeChapter = (idx: number) =>
     setChapters((prev) => prev.filter((_, i) => i !== idx));
@@ -90,7 +96,7 @@ export default function PlanningModal({
     setChapters((prev) => {
       const next = [...prev];
       const lectures = [...next[chIdx].lectures];
-      lectures[lecIdx] = { title };
+      lectures[lecIdx] = { ...lectures[lecIdx], title };
       next[chIdx] = { ...next[chIdx], lectures };
       return next;
     });
@@ -101,7 +107,7 @@ export default function PlanningModal({
       const next = [...prev];
       next[chIdx] = {
         ...next[chIdx],
-        lectures: [...next[chIdx].lectures, { title: "" }],
+        lectures: [...next[chIdx].lectures, newLecture()],
       };
       return next;
     });
@@ -183,7 +189,7 @@ export default function PlanningModal({
             <div className="space-y-3">
               {chapters.map((ch, i) => (
                 <div
-                  key={i}
+                  key={ch.id}
                   className="rounded-xl border border-neutral-200 bg-neutral-50/50 p-3 space-y-2"
                 >
                   {/* 장 제목 + 분량 */}
@@ -230,7 +236,7 @@ export default function PlanningModal({
                   {/* 강 목록 */}
                   <div className="pl-9 space-y-1.5">
                     {ch.lectures.map((lec, li) => (
-                      <div key={li} className="flex items-center gap-2">
+                      <div key={lec.id} className="flex items-center gap-2">
                         <span className="text-[10px] text-neutral-400 w-8 shrink-0">
                           {i + 1}-{li + 1}
                         </span>

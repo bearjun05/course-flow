@@ -38,6 +38,7 @@ import {
   getDdayColor,
   getProgressPercent,
   getProgressText,
+  parseAssigneeNames,
   cn,
 } from "@/lib/utils";
 
@@ -126,15 +127,6 @@ function TrafficLightPicker({
   );
 }
 
-/** 담당자 문자열을 배열로 파싱 (쉼표 구분) */
-function parseAssignees(value?: string): string[] {
-  if (!value) return [];
-  return value
-    .split(",")
-    .map((s) => s.trim())
-    .filter(Boolean);
-}
-
 function PersonRow({
   label,
   value,
@@ -147,7 +139,7 @@ function PersonRow({
   onClick?: () => void;
 }) {
   const clickable = !readOnly && onClick;
-  const names = parseAssignees(value);
+  const names = parseAssigneeNames(value);
 
   const pill =
     names.length > 0 ? (

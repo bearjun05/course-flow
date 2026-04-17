@@ -4,13 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Video } from "lucide-react";
 import type { Project } from "@/lib/types";
-import {
-  getDday,
-  formatDday,
-  getDdayColor,
-  getAutoTrafficLight,
-  cn,
-} from "@/lib/utils";
+import { getDday, formatDday, getDdayColor, cn } from "@/lib/utils";
 import { DDAY_GROUPS } from "@/lib/constants";
 import { ProjectCard } from "./project-card";
 import { useBadgeTheme } from "@/lib/badge-theme";
@@ -33,7 +27,7 @@ function ProjectRow({ project }: { project: Project }) {
   const dday = getDday(project.rolloutDate);
   const isOverdue = dday < 0 && project.status !== "완료";
   const isCompleted = project.status === "완료";
-  const light = getAutoTrafficLight(project);
+  const light = project.trafficLight;
 
   return (
     <Link

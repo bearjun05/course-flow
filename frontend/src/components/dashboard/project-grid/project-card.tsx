@@ -3,13 +3,7 @@
 import Link from "next/link";
 import { User, BookOpen } from "lucide-react";
 import type { Project } from "@/lib/types";
-import {
-  getDday,
-  formatDday,
-  getDdayColor,
-  getAutoTrafficLight,
-  cn,
-} from "@/lib/utils";
+import { getDday, formatDday, getDdayColor, cn } from "@/lib/utils";
 import { ChapterPipeline } from "@/components/dashboard/chapter-pipeline";
 import { useBadgeTheme } from "@/lib/badge-theme";
 
@@ -29,7 +23,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
   const dday = getDday(project.rolloutDate);
   const isOverdue = dday < 0 && project.status !== "완료";
   const completion = getCompletionRate(project);
-  const trafficLight = getAutoTrafficLight(project);
+  const trafficLight = project.trafficLight;
 
   return (
     <Link

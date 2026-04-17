@@ -40,6 +40,8 @@ interface WeeklyCalendarProps {
   paymentDate?: string;
   tutor?: string;
   pm?: string;
+  /** 읽기 전용 (에듀웍스에서 검수자가 아닌 경우 등) */
+  readOnly?: boolean;
 }
 
 interface TaskBar {
@@ -100,6 +102,7 @@ export default function WeeklyCalendar({
   onTaskToggle,
   tutor,
   pm,
+  readOnly = false,
 }: WeeklyCalendarProps) {
   const week = useMemo(() => {
     const monday = startOfWeek(weekStart, { weekStartsOn: 1 });
@@ -293,8 +296,12 @@ export default function WeeklyCalendar({
               <button
                 key={bar.task.id}
                 onClick={() => onTaskToggle?.(bar.task.id)}
+                disabled={readOnly}
                 className={cn(
-                  "absolute truncate flex items-center transition-all hover:bg-neutral-50 overflow-hidden border rounded-md",
+                  "absolute truncate flex items-center transition-all overflow-hidden border rounded-md",
+                  readOnly
+                    ? "cursor-default"
+                    : "hover:bg-neutral-50 cursor-pointer",
                   done && "opacity-35 line-through",
                 )}
                 style={{
