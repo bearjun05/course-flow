@@ -65,8 +65,6 @@ const TASK_TYPE_SHORT: Record<string, string> = {
   자막: "자막",
   검수: "검수",
   승인: "승인",
-  업로드: "업로드",
-  롤아웃: "롤아웃",
 };
 
 function getChapterColor(chapter: number): string {
@@ -153,26 +151,6 @@ export function TaskCalendar({
     today.setHours(0, 0, 0, 0);
 
     for (const project of activeProjects) {
-      // 롤아웃 마감: 에듀옵스(selectedPerson 없을 때)에서만 표시.
-      // 에듀웍스(외부 관계자)에는 롤아웃 바 숨김.
-      if (!selectedPerson) {
-        const rollout = parseISO(project.rolloutDate);
-        bars.push({
-          task: {
-            id: `${project.id}-rollout`,
-            projectId: project.id,
-            chapter: 0,
-            taskType: "롤아웃",
-            status: "대기",
-          },
-          project,
-          startDate: rollout,
-          endDate: rollout,
-          isDone: false,
-          isOverdue: isBefore(rollout, today) && project.status !== "완료",
-        });
-      }
-
       for (const task of project.tasks) {
         if (!task.startDate && !task.endDate) continue;
         if (!isTaskForPerson(task, project, selectedPerson)) continue;

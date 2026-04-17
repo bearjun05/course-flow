@@ -721,7 +721,6 @@ export default function MondayBoard({
     const map = new Map<number, ChapterTask[]>();
 
     for (const t of tasks) {
-      if (t.taskType === "롤아웃" || t.taskType === "업로드") continue;
       if (!map.has(t.chapter)) map.set(t.chapter, []);
       map.get(t.chapter)!.push(t);
     }

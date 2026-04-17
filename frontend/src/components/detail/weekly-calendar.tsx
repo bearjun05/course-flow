@@ -42,8 +42,6 @@ const STAGE_SHORT: Record<string, string> = {
   검수: "검수",
   승인: "승인",
   "커리큘럼 기획": "기획",
-  롤아웃: "롤아웃",
-  업로드: "업로드",
 };
 
 interface WeeklyCalendarProps {

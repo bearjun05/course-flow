@@ -27,25 +27,19 @@ function createChapterTasks(
 ): ChapterTask[] {
   const tasks: ChapterTask[] = [];
 
-  // Common tasks (chapter 0)
-  const commonTasks: { type: TaskType }[] = [
-    { type: "커리큘럼 기획" },
-    { type: "롤아웃" },
-  ];
-  for (const { type } of commonTasks) {
-    const status = statusFn(0, type);
-    const dates = dateFn?.(0, type);
-    tasks.push({
-      id: `${projectId}-c0-${type}`,
-      projectId,
-      chapter: 0,
-      taskType: type,
-      status,
-      assignee: assigneeFn?.(0, type),
-      startDate: dates?.start,
-      endDate: dates?.end,
-    });
-  }
+  // Common tasks (chapter 0) — 커리큘럼 기획만 남김 ("롤아웃" 태스크 제거)
+  const ctStatus = statusFn(0, "커리큘럼 기획");
+  const ctDates = dateFn?.(0, "커리큘럼 기획");
+  tasks.push({
+    id: `${projectId}-c0-커리큘럼 기획`,
+    projectId,
+    chapter: 0,
+    taskType: "커리큘럼 기획",
+    status: ctStatus,
+    assignee: assigneeFn?.(0, "커리큘럼 기획"),
+    startDate: ctDates?.start,
+    endDate: ctDates?.end,
+  });
 
   // Per-chapter tasks
   for (let ch = 1; ch <= chapterCount; ch++) {
@@ -158,16 +152,10 @@ const project3Tasks = createChapterTasks(
 const project6Tasks = createChapterTasks(
   "proj-6",
   3,
-  (ch, type) => {
-    if (ch === 0) return type === "커리큘럼 기획" ? "완료" : "진행";
-    return "완료";
-  },
+  () => "완료",
   () => "김선우",
-  (ch, type) => {
-    if (ch === 0)
-      return type === "커리큘럼 기획"
-        ? { start: "2026-01-20", end: "2026-01-22" }
-        : { start: "2026-03-27", end: undefined };
+  (ch) => {
+    if (ch === 0) return { start: "2026-01-20", end: "2026-01-22" };
     return { start: "2026-02-01", end: "2026-03-20" };
   },
 );

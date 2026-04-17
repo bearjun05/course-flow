@@ -19,9 +19,7 @@ export type TaskType =
   | "편집"
   | "자막"
   | "검수"
-  | "승인"
-  | "업로드"
-  | "롤아웃";
+  | "승인";
 
 export type TaskStatus = "대기" | "진행" | "리뷰" | "완료";
 
@@ -73,7 +71,7 @@ export interface Project {
   createdAt: string;
 }
 
-export type KanbanColumn = "교안" | "촬영" | "편집·검수" | "롤아웃";
+export type KanbanColumn = "교안" | "촬영" | "편집·검수";
 
 export interface DdayGroup {
   label: string;

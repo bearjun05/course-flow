@@ -27,9 +27,7 @@ const TASK_TYPE_TO_KANBAN: Record<TaskType, KanbanColumn> = {
   편집: "편집·검수",
   자막: "편집·검수",
   검수: "편집·검수",
-  승인: "롤아웃",
-  업로드: "롤아웃",
-  롤아웃: "롤아웃",
+  승인: "편집·검수",
 };
 
 const CHAPTER_TASK_TYPES: TaskType[] = [
