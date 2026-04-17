@@ -31,6 +31,7 @@ export default function ProjectDetailPage() {
     [projectId],
   );
 
+  const [title, setTitle] = useState(baseProject?.title ?? "");
   const [tasks, setTasks] = useState<ChapterTask[]>(baseProject?.tasks ?? []);
   const [status, setStatus] = useState<ProjectStatus>(
     baseProject?.status ?? "기획",
@@ -81,6 +82,7 @@ export default function ProjectDetailPage() {
     if (!baseProject) return null;
     return {
       ...baseProject,
+      title,
       tasks,
       status,
       trafficLight,
@@ -98,6 +100,7 @@ export default function ProjectDetailPage() {
     };
   }, [
     baseProject,
+    title,
     tasks,
     status,
     trafficLight,
@@ -194,7 +197,11 @@ export default function ProjectDetailPage() {
 
   return (
     <div className="min-h-screen">
-      <DetailHeader project={project} onTrafficLightChange={setTrafficLight} />
+      <DetailHeader
+        project={project}
+        onTrafficLightChange={setTrafficLight}
+        onTitleChange={setTitle}
+      />
 
       <div className="space-y-6 px-6 py-6">
         {/* 강의 핵심 지표 + 상세 */}

@@ -1,12 +1,15 @@
 "use client";
 
 import Link from "next/link";
+import { useState, useEffect } from "react";
 import {
   ChevronLeft,
   MoreHorizontal,
   Trash2,
   Pause,
   History,
+  Pencil,
+  Check,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -25,6 +28,7 @@ interface DetailHeaderProps {
   onDelete?: () => void;
   onSuspend?: () => void;
   onTrafficLightChange?: (light: TrafficLight) => void;
+  onTitleChange?: (title: string) => void;
   backHref?: string;
   /** 읽기 전용 (에듀웍스 등) */
   readOnly?: boolean;
@@ -65,6 +69,7 @@ export default function DetailHeader({
   onDelete,
   onSuspend,
   onTrafficLightChange,
+  onTitleChange,
   backHref = "/",
   readOnly = false,
 }: DetailHeaderProps) {
@@ -75,6 +80,20 @@ export default function DetailHeader({
         (p) => p.title === project.title && p.id !== project.id,
       )
     : [];
+
+  const [editingTitle, setEditingTitle] = useState(false);
+  const [titleDraft, setTitleDraft] = useState(project.title);
+  useEffect(() => {
+    setTitleDraft(project.title);
+  }, [project.title]);
+
+  const saveTitle = () => {
+    const next = titleDraft.trim();
+    if (next && next !== project.title) {
+      onTitleChange?.(next);
+    }
+    setEditingTitle(false);
+  };
 
   return (
     <header className="sticky top-0 z-10 flex items-center justify-between border-b border-border bg-card/80 px-6 py-4 backdrop-blur-sm">
@@ -87,9 +106,49 @@ export default function DetailHeader({
           <ChevronLeft className="h-4 w-4" />
         </Link>
 
-        <h1 className="text-lg font-semibold tracking-tight text-foreground truncate">
-          {project.title}
-        </h1>
+        {!readOnly && editingTitle ? (
+          <div className="flex items-center gap-1.5">
+            <input
+              autoFocus
+              value={titleDraft}
+              onChange={(e) => setTitleDraft(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  saveTitle();
+                }
+                if (e.key === "Escape") {
+                  setTitleDraft(project.title);
+                  setEditingTitle(false);
+                }
+              }}
+              onBlur={saveTitle}
+              className="text-lg font-semibold tracking-tight text-foreground bg-transparent border-b border-neutral-300 focus:border-neutral-500 focus:outline-none min-w-[240px]"
+            />
+            <button
+              onClick={saveTitle}
+              className="inline-flex items-center justify-center h-6 w-6 rounded-md text-neutral-400 hover:bg-neutral-100 hover:text-neutral-600"
+              title="저장"
+            >
+              <Check className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        ) : (
+          <h1
+            className={cn(
+              "text-lg font-semibold tracking-tight text-foreground truncate group/title relative flex items-center gap-1.5",
+              !readOnly && onTitleChange && "cursor-text",
+            )}
+            onClick={() => {
+              if (!readOnly && onTitleChange) setEditingTitle(true);
+            }}
+          >
+            {project.title}
+            {!readOnly && onTitleChange && (
+              <Pencil className="h-3 w-3 text-neutral-300 opacity-0 group-hover/title:opacity-100 transition-opacity" />
+            )}
+          </h1>
+        )}
 
         {hasVersionHistory ? (
           <DropdownMenu>
