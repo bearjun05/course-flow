@@ -10,6 +10,7 @@ import type {
   ProjectStatus,
   TrafficLight,
   TaskType,
+  Lecture,
 } from "@/lib/types";
 import DetailHeader from "@/components/detail/detail-header";
 import InfoGuideTab from "@/components/detail/info-guide-tab";
@@ -259,7 +260,7 @@ export default function ProjectDetailPage() {
                 onPlanningComplete={(data) => {
                   // 커리큘럼 링크 등록
                   setLessonPlanLink(data.curriculumLink);
-                  // 장 추가: 태스크 + 제목 + 분량 생성
+                  // 장 태스크 + 강 생성
                   const taskTypes: TaskType[] = [
                     "교안제작",
                     "촬영",
@@ -269,7 +270,8 @@ export default function ProjectDetailPage() {
                     "승인",
                   ];
                   const newTasks: ChapterTask[] = [];
-                  data.chapters.forEach((_, idx) => {
+                  const newLectures: Lecture[] = [];
+                  data.chapters.forEach((chData, idx) => {
                     const ch = idx + 1;
                     taskTypes.forEach((taskType) => {
                       newTasks.push({
@@ -280,8 +282,21 @@ export default function ProjectDetailPage() {
                         status: "대기" as const,
                       });
                     });
+                    chData.lectures.forEach((lec, li) => {
+                      const lectureNumber = li + 1;
+                      newLectures.push({
+                        id: `${projectId}-lec-${ch}-${lectureNumber}`,
+                        projectId: projectId!,
+                        chapter: ch,
+                        lectureNumber,
+                        label: `${ch}-${lectureNumber}`,
+                        title: lec.title,
+                        videoUrls: [],
+                      });
+                    });
                   });
                   setTasks(newTasks);
+                  setProjectLectures(newLectures);
                   setChapterDurations(data.chapters.map((c) => c.duration));
                   setChapterTitles(data.chapters.map((c) => c.title));
                   setPlanningComplete(true);

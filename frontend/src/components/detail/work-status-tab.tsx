@@ -25,7 +25,11 @@ import type { ChapterTask, Lecture, TaskStatus } from "@/lib/types";
 /* ------------------------------------------------------------------ */
 
 interface PlanningSubmitData {
-  chapters: { title: string; duration: number }[];
+  chapters: {
+    title: string;
+    duration: number;
+    lectures: { title: string }[];
+  }[];
   curriculumLink: string;
 }
 
@@ -328,8 +332,8 @@ export default function WorkStatusTab({
 }: WorkStatusTabProps) {
   const [showPlanningModal, setShowPlanningModal] = useState(false);
   const [planningChapters, setPlanningChapters] = useState<
-    { title: string; duration: string }[]
-  >([{ title: "", duration: "" }]);
+    { title: string; duration: string; lectures: { title: string }[] }[]
+  >([{ title: "", duration: "", lectures: [{ title: "" }] }]);
   const [planningCurriculum, setPlanningCurriculum] = useState("");
   const chapters: ChapterRow[] = useMemo(() => {
     const rows: ChapterRow[] = [];
@@ -369,7 +373,11 @@ export default function WorkStatusTab({
   const canSubmitPlanning =
     planningChapters.length > 0 &&
     planningChapters.every(
-      (c) => c.title.trim() && parseFloat(c.duration) > 0,
+      (c) =>
+        c.title.trim() &&
+        parseFloat(c.duration) > 0 &&
+        c.lectures.length > 0 &&
+        c.lectures.every((l) => l.title.trim()),
     ) &&
     planningCurriculum.trim().length > 0;
 
@@ -448,54 +456,124 @@ export default function WorkStatusTab({
                     시간
                   </span>
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-3">
                   {planningChapters.map((ch, i) => (
-                    <div key={i} className="flex items-center gap-2">
-                      <span className="text-[11px] text-neutral-400 w-7 shrink-0">
-                        {i + 1}장
-                      </span>
-                      <input
-                        type="text"
-                        value={ch.title}
-                        onChange={(e) => {
-                          const next = [...planningChapters];
-                          next[i] = { ...next[i], title: e.target.value };
-                          setPlanningChapters(next);
-                        }}
-                        placeholder="장 제목"
-                        className="flex-1 h-8 px-2.5 text-sm border border-neutral-200 rounded-lg focus:border-[#7C8DBC] focus:outline-none"
-                      />
-                      <div className="relative">
+                    <div
+                      key={i}
+                      className="rounded-xl border border-neutral-200 bg-neutral-50/50 p-3 space-y-2"
+                    >
+                      {/* 장 제목 + 분량 */}
+                      <div className="flex items-center gap-2">
+                        <span className="text-[11px] font-semibold text-neutral-600 w-7 shrink-0">
+                          {i + 1}장
+                        </span>
                         <input
-                          type="number"
-                          step={0.5}
-                          min={0}
-                          value={ch.duration}
+                          type="text"
+                          value={ch.title}
                           onChange={(e) => {
                             const next = [...planningChapters];
-                            next[i] = { ...next[i], duration: e.target.value };
+                            next[i] = { ...next[i], title: e.target.value };
                             setPlanningChapters(next);
                           }}
-                          placeholder="분량"
-                          className="w-20 h-8 pl-2.5 pr-6 text-sm border border-neutral-200 rounded-lg focus:border-[#7C8DBC] focus:outline-none"
+                          placeholder="장 제목"
+                          className="flex-1 h-8 px-2.5 text-sm bg-white border border-neutral-200 rounded-lg focus:border-[#7C8DBC] focus:outline-none"
                         />
-                        <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-neutral-400">
-                          h
-                        </span>
+                        <div className="relative">
+                          <input
+                            type="number"
+                            step={0.5}
+                            min={0}
+                            value={ch.duration}
+                            onChange={(e) => {
+                              const next = [...planningChapters];
+                              next[i] = {
+                                ...next[i],
+                                duration: e.target.value,
+                              };
+                              setPlanningChapters(next);
+                            }}
+                            placeholder="분량"
+                            className="w-20 h-8 pl-2.5 pr-6 text-sm bg-white border border-neutral-200 rounded-lg focus:border-[#7C8DBC] focus:outline-none"
+                          />
+                          <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-neutral-400">
+                            h
+                          </span>
+                        </div>
+                        {planningChapters.length > 1 && (
+                          <button
+                            onClick={() =>
+                              setPlanningChapters(
+                                planningChapters.filter((_, idx) => idx !== i),
+                              )
+                            }
+                            className="h-8 w-8 flex items-center justify-center rounded-lg text-neutral-400 hover:text-red-500 hover:bg-red-50"
+                            title="장 삭제"
+                          >
+                            ×
+                          </button>
+                        )}
                       </div>
-                      {planningChapters.length > 1 && (
+
+                      {/* 강 목록 */}
+                      <div className="pl-9 space-y-1.5">
+                        {ch.lectures.map((lec, li) => (
+                          <div key={li} className="flex items-center gap-2">
+                            <span className="text-[10px] text-neutral-400 w-8 shrink-0">
+                              {i + 1}-{li + 1}
+                            </span>
+                            <input
+                              type="text"
+                              value={lec.title}
+                              onChange={(e) => {
+                                const next = [...planningChapters];
+                                const nextLectures = [...next[i].lectures];
+                                nextLectures[li] = {
+                                  ...nextLectures[li],
+                                  title: e.target.value,
+                                };
+                                next[i] = {
+                                  ...next[i],
+                                  lectures: nextLectures,
+                                };
+                                setPlanningChapters(next);
+                              }}
+                              placeholder="강 제목"
+                              className="flex-1 h-7 px-2.5 text-[13px] bg-white border border-neutral-200 rounded-md focus:border-[#7C8DBC] focus:outline-none"
+                            />
+                            {ch.lectures.length > 1 && (
+                              <button
+                                onClick={() => {
+                                  const next = [...planningChapters];
+                                  next[i] = {
+                                    ...next[i],
+                                    lectures: ch.lectures.filter(
+                                      (_, idx) => idx !== li,
+                                    ),
+                                  };
+                                  setPlanningChapters(next);
+                                }}
+                                className="h-7 w-7 flex items-center justify-center rounded-md text-neutral-400 hover:text-red-500 hover:bg-red-50 text-xs"
+                                title="강 삭제"
+                              >
+                                ×
+                              </button>
+                            )}
+                          </div>
+                        ))}
                         <button
-                          onClick={() =>
-                            setPlanningChapters(
-                              planningChapters.filter((_, idx) => idx !== i),
-                            )
-                          }
-                          className="h-8 w-8 flex items-center justify-center rounded-lg text-neutral-400 hover:text-red-500 hover:bg-red-50"
-                          title="삭제"
+                          onClick={() => {
+                            const next = [...planningChapters];
+                            next[i] = {
+                              ...next[i],
+                              lectures: [...ch.lectures, { title: "" }],
+                            };
+                            setPlanningChapters(next);
+                          }}
+                          className="w-full h-7 flex items-center justify-center gap-1 text-[11px] text-neutral-400 border border-dashed border-neutral-200 rounded-md hover:border-[#7C8DBC] hover:text-[#7C8DBC]"
                         >
-                          ×
+                          <Plus className="h-2.5 w-2.5" />강 추가
                         </button>
-                      )}
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -503,10 +581,14 @@ export default function WorkStatusTab({
                   onClick={() =>
                     setPlanningChapters([
                       ...planningChapters,
-                      { title: "", duration: "" },
+                      {
+                        title: "",
+                        duration: "",
+                        lectures: [{ title: "" }],
+                      },
                     ])
                   }
-                  className="w-full h-8 flex items-center justify-center gap-1.5 text-xs text-neutral-500 border border-dashed border-neutral-200 rounded-lg hover:border-[#7C8DBC] hover:text-[#7C8DBC]"
+                  className="w-full h-9 flex items-center justify-center gap-1.5 text-xs text-neutral-500 border border-dashed border-neutral-200 rounded-lg hover:border-[#7C8DBC] hover:text-[#7C8DBC]"
                 >
                   <Plus className="h-3 w-3" />장 추가
                 </button>
@@ -526,6 +608,9 @@ export default function WorkStatusTab({
                     chapters: planningChapters.map((c) => ({
                       title: c.title.trim(),
                       duration: parseFloat(c.duration) || 0,
+                      lectures: c.lectures.map((l) => ({
+                        title: l.title.trim(),
+                      })),
                     })),
                     curriculumLink: planningCurriculum.trim(),
                   });
