@@ -23,7 +23,7 @@ import { ChevronLeft, ChevronRight, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { Project, ChapterTask } from "@/lib/types";
-import { isProjectActive } from "@/lib/utils";
+import { isProjectActive, isTaskForPerson, getTaskOwner } from "@/lib/utils";
 
 /** 시작~마감 구간을 포함하는 태스크 바 */
 interface TaskBar {
@@ -69,58 +69,6 @@ const TASK_TYPE_SHORT: Record<string, string> = {
 
 function getChapterColor(chapter: number): string {
   return CHAPTER_COLORS[chapter % CHAPTER_COLORS.length];
-}
-
-/** 태스크의 담당자 이름. task.assignee 우선, 없으면 역할 기반 추론. */
-function getTaskOwner(task: ChapterTask, project: Project): string | undefined {
-  if (task.assignee) return task.assignee;
-  switch (task.taskType) {
-    case "커리큘럼 기획":
-    case "승인":
-      return project.curriculumManager;
-    case "교안제작":
-    case "촬영":
-      return project.tutor;
-    case "편집":
-      return project.editor;
-    case "자막":
-      return project.subtitleEditor;
-    case "검수":
-      return project.reviewer;
-    default:
-      return undefined;
-  }
-}
-
-/** 태스크가 해당 사람에게 배정된 것인지 확인 */
-function isTaskForPerson(
-  task: ChapterTask,
-  project: Project,
-  person?: string,
-): boolean {
-  if (!person) return true; // 필터 없으면 모두 표시
-  // 직접 assignee
-  if (task.assignee === person) return true;
-  // 튜터 → 교안제작, 촬영
-  if (
-    project.tutor === person &&
-    (task.taskType === "교안제작" || task.taskType === "촬영")
-  )
-    return true;
-  // 편집자 → 편집
-  if (project.editor === person && task.taskType === "편집") return true;
-  // 자막자 → 자막
-  if (project.subtitleEditor === person && task.taskType === "자막")
-    return true;
-  // 검수자 → 검수
-  if (project.reviewer === person && task.taskType === "검수") return true;
-  // 커기매 → 커리큘럼 기획, 승인
-  if (
-    project.curriculumManager === person &&
-    (task.taskType === "커리큘럼 기획" || task.taskType === "승인")
-  )
-    return true;
-  return false;
 }
 
 interface TaskCalendarProps {

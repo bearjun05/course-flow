@@ -5,6 +5,7 @@ import { useState, useMemo } from "react";
 import Link from "next/link";
 import { CalendarDays, ClipboardList, Calendar } from "lucide-react";
 import { mockProjects } from "@/lib/mock-data";
+import { MOCK_CURRENT_USER } from "@/lib/mock-auth";
 import DetailHeader from "@/components/detail/detail-header";
 import InfoGuideTab from "@/components/detail/info-guide-tab";
 import MondayBoard from "@/components/detail/monday-board";
@@ -18,7 +19,9 @@ export default function EduworksDetailPage() {
   const params = useParams<{ id: string }>();
   const searchParams = useSearchParams();
   const projectId = params.id;
-  const person = searchParams.get("person") ?? "";
+  // URL ?person= 파라미터 없으면 로그인 사용자(MOCK_CURRENT_USER)로 fallback
+  // 프로덕션에서는 로그인 세션으로 항상 결정됨
+  const person = searchParams.get("person") ?? MOCK_CURRENT_USER.name;
 
   const baseProject = useMemo(
     () => mockProjects.find((p) => p.id === projectId) ?? null,
@@ -33,8 +36,12 @@ export default function EduworksDetailPage() {
     return { ...baseProject, tasks, lectures };
   }, [baseProject, tasks, lectures]);
 
-  // 검수자만 검수 토글 가능
-  const isReviewer = person !== "" && person === project?.reviewer;
+  // 검수자만 검수 토글 가능 (복수 검수자 지원: 쉼표 구분 문자열 파싱)
+  const reviewerNames = (project?.reviewer ?? "")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+  const isReviewer = person !== "" && reviewerNames.includes(person);
 
   const handleReviewToggle = (lectureId: string, reviewed: boolean) => {
     setLectures((prev) =>

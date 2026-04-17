@@ -126,6 +126,15 @@ function TrafficLightPicker({
   );
 }
 
+/** 담당자 문자열을 배열로 파싱 (쉼표 구분) */
+function parseAssignees(value?: string): string[] {
+  if (!value) return [];
+  return value
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
+
 function PersonRow({
   label,
   value,
@@ -138,21 +147,31 @@ function PersonRow({
   onClick?: () => void;
 }) {
   const clickable = !readOnly && onClick;
-  const pill = value ? (
-    <span className="inline-flex items-center gap-1.5 h-6 max-w-full min-w-0 px-2 rounded-full bg-neutral-50 text-[12px] font-medium text-neutral-700">
-      <User className="h-3 w-3 text-neutral-400 shrink-0" />
-      <span className="truncate whitespace-nowrap">{value}</span>
-    </span>
-  ) : readOnly ? (
-    <span className="inline-flex items-center gap-1 h-6 px-2 rounded-full bg-neutral-50 text-[11px] text-neutral-300 whitespace-nowrap">
-      담당자 없음
-    </span>
-  ) : (
-    <span className="inline-flex items-center gap-1 h-6 px-2 rounded-full border border-dashed border-neutral-200 text-[11px] text-neutral-400 hover:border-neutral-300 hover:text-neutral-500 transition-colors whitespace-nowrap">
-      <UserPlus className="h-3 w-3" />
-      배정
-    </span>
-  );
+  const names = parseAssignees(value);
+
+  const pill =
+    names.length > 0 ? (
+      <span className="inline-flex flex-wrap items-center gap-1 max-w-full">
+        {names.map((name) => (
+          <span
+            key={name}
+            className="inline-flex items-center gap-1 h-6 px-2 rounded-full bg-neutral-50 text-[12px] font-medium text-neutral-700 whitespace-nowrap"
+          >
+            <User className="h-3 w-3 text-neutral-400 shrink-0" />
+            {name}
+          </span>
+        ))}
+      </span>
+    ) : readOnly ? (
+      <span className="inline-flex items-center gap-1 h-6 px-2 rounded-full bg-neutral-50 text-[11px] text-neutral-300 whitespace-nowrap">
+        담당자 없음
+      </span>
+    ) : (
+      <span className="inline-flex items-center gap-1 h-6 px-2 rounded-full border border-dashed border-neutral-200 text-[11px] text-neutral-400 hover:border-neutral-300 hover:text-neutral-500 transition-colors whitespace-nowrap">
+        <UserPlus className="h-3 w-3" />
+        배정
+      </span>
+    );
 
   return (
     <div className="flex items-center justify-between gap-2 py-1.5">

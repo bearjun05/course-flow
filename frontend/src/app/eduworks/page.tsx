@@ -10,6 +10,7 @@ import { mockProjects } from "@/lib/mock-data";
 import type { Project } from "@/lib/types";
 import { BadgeThemeProvider } from "@/lib/badge-theme";
 import { MOCK_CURRENT_USER, MOCK_USERS, type MockUser } from "@/lib/mock-auth";
+import { isAssignedAs } from "@/lib/utils";
 
 /**
  * 에듀웍스: 외부 관계자(튜터/편집자/자막자/검수자) 전용 페이지.
@@ -20,15 +21,9 @@ import { MOCK_CURRENT_USER, MOCK_USERS, type MockUser } from "@/lib/mock-auth";
  * 상단에 디버그용 "다른 사용자로 보기" 드롭다운을 제공한다.
  */
 
-/** 해당 사용자가 담당인 프로젝트 필터 */
+/** 해당 사용자가 담당인 프로젝트 필터 (복수 담당자 지원) */
 function filterProjectsForUser(projects: Project[], user: MockUser): Project[] {
-  return projects.filter((p) => {
-    if (user.role === "tutor") return p.tutor === user.name;
-    if (user.role === "editor") return p.editor === user.name;
-    if (user.role === "subtitleEditor") return p.subtitleEditor === user.name;
-    if (user.role === "reviewer") return p.reviewer === user.name;
-    return false;
-  });
+  return projects.filter((p) => isAssignedAs(p, user.role, user.name));
 }
 
 const ROLE_LABEL: Record<MockUser["role"], string> = {

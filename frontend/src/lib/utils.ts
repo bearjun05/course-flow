@@ -2,7 +2,7 @@ import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { differenceInDays, parseISO, format } from "date-fns";
 import { ko } from "date-fns/locale";
-import type { Project, ChapterTask, ProjectStatus } from "./types";
+import type { Project, ChapterTask, ProjectStatus, TaskType } from "./types";
 import { DDAY_GROUPS } from "./constants";
 
 export function cn(...inputs: ClassValue[]) {
@@ -65,4 +65,105 @@ export function getAutoTrafficLight(project: Project): Project["trafficLight"] {
   const dday = getDday(project.rolloutDate);
   if (dday < 0) return "red";
   return project.trafficLight;
+}
+
+/* ------------------------------------------------------------------ */
+/* 담당자 관련 공용 헬퍼 (에듀웍스/태스크 캘린더 등에서 공통 사용)      */
+/* ------------------------------------------------------------------ */
+
+/**
+ * 역할별 담당 TaskType 목록.
+ * 외부 관계자가 어떤 공정 태스크를 담당하는지 결정한다.
+ */
+export const ROLE_TASK_TYPES: Record<
+  "tutor" | "editor" | "subtitleEditor" | "reviewer" | "curriculumManager",
+  TaskType[]
+> = {
+  tutor: ["교안제작", "촬영"],
+  editor: ["편집"],
+  subtitleEditor: ["자막"],
+  reviewer: ["검수"],
+  curriculumManager: ["커리큘럼 기획", "승인"],
+};
+
+/** 쉼표 구분 담당자 문자열을 배열로 파싱 (복수 담당자 지원) */
+export function parseAssigneeNames(value?: string): string[] {
+  if (!value) return [];
+  return value
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
+
+/**
+ * 해당 이름이 프로젝트의 특정 역할에 배정되어 있는지 확인.
+ * 쉼표 구분 복수 담당자 지원.
+ */
+export function isAssignedAs(
+  project: Project,
+  role: keyof typeof ROLE_TASK_TYPES | "pm",
+  name: string,
+): boolean {
+  const field =
+    role === "pm"
+      ? project.pm
+      : role === "tutor"
+        ? project.tutor
+        : role === "editor"
+          ? project.editor
+          : role === "subtitleEditor"
+            ? project.subtitleEditor
+            : role === "reviewer"
+              ? project.reviewer
+              : project.curriculumManager;
+  return parseAssigneeNames(field).includes(name);
+}
+
+/**
+ * 태스크가 해당 사람에게 배정된 것인지 확인.
+ * 직접 assignee 매칭 또는 역할 기반 매칭.
+ */
+export function isTaskForPerson(
+  task: ChapterTask,
+  project: Project,
+  person?: string,
+): boolean {
+  if (!person) return true;
+  if (task.assignee === person) return true;
+  for (const [role, taskTypes] of Object.entries(ROLE_TASK_TYPES) as [
+    keyof typeof ROLE_TASK_TYPES,
+    TaskType[],
+  ][]) {
+    if (
+      isAssignedAs(project, role, person) &&
+      taskTypes.includes(task.taskType)
+    ) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/** 태스크의 담당자 이름. task.assignee 우선, 없으면 역할 기반 추론. */
+export function getTaskOwner(
+  task: ChapterTask,
+  project: Project,
+): string | undefined {
+  if (task.assignee) return task.assignee;
+  switch (task.taskType) {
+    case "커리큘럼 기획":
+    case "승인":
+      return project.curriculumManager;
+    case "교안제작":
+    case "촬영":
+      return project.tutor;
+    case "편집":
+      return project.editor;
+    case "자막":
+      return project.subtitleEditor;
+    case "검수":
+      return project.reviewer;
+    default:
+      return undefined;
+  }
 }
