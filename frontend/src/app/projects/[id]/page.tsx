@@ -343,7 +343,7 @@ export default function ProjectDetailPage() {
               projectStartDate={project.createdAt}
               paymentDate={project.paymentDate}
               tutor={project.tutor}
-              pm="박진영"
+              pm={project.pm}
             />
           )}
           {scheduleTab === "calendar" && (
@@ -355,7 +355,7 @@ export default function ProjectDetailPage() {
               projectStartDate={project.createdAt}
               paymentDate={project.paymentDate}
               tutor={project.tutor}
-              pm="박진영"
+              pm={project.pm}
               onTaskToggle={(taskId) => {
                 handleTasksChange(
                   tasks.map((t) =>

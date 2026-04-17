@@ -5,7 +5,6 @@ export const PROJECT_STATUSES: { value: ProjectStatus; label: string }[] = [
   { value: "교안", label: "교안" },
   { value: "촬영", label: "촬영" },
   { value: "편집·검수", label: "편집·검수" },
-  { value: "롤아웃", label: "롤아웃" },
   { value: "완료", label: "완료" },
   { value: "중단", label: "중단" },
 ];
@@ -14,7 +13,6 @@ export const STATUS_TO_KANBAN: Partial<Record<ProjectStatus, KanbanColumn>> = {
   교안: "교안",
   촬영: "촬영",
   "편집·검수": "편집·검수",
-  롤아웃: "롤아웃",
 };
 
 export const BUSINESS_UNITS = ["KDT", "KDC", "기타"] as const;
@@ -61,7 +59,6 @@ export const STATUS_BADGE_VARIANT: Record<ProjectStatus, string> = {
   교안: "bg-[#EDF2DC] text-[#7A9445]",
   촬영: "bg-[#E5EDCF] text-[#728A3E]",
   "편집·검수": "bg-[#DDE9C2] text-[#6A8438]",
-  롤아웃: "bg-[#E5F0D0] text-[#7A9445]",
   완료: "bg-neutral-100 text-neutral-400",
   중단: "bg-neutral-100 text-neutral-400",
 };

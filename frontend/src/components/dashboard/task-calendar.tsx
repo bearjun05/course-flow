@@ -163,7 +163,7 @@ export function TaskCalendar({
             projectId: project.id,
             chapter: 0,
             taskType: "롤아웃",
-            status: project.status === "롤아웃" ? "진행" : "대기",
+            status: "대기",
           },
           project,
           startDate: rollout,

@@ -146,7 +146,7 @@ export default function EduworksDetailPage() {
               projectStartDate={project.createdAt}
               paymentDate={project.paymentDate}
               tutor={project.tutor}
-              pm="박진영"
+              pm={project.pm}
               readOnly
             />
           )}
@@ -159,7 +159,7 @@ export default function EduworksDetailPage() {
               projectStartDate={project.createdAt}
               paymentDate={project.paymentDate}
               tutor={project.tutor}
-              pm="박진영"
+              pm={project.pm}
               onTaskToggle={handleCalendarTaskToggle}
             />
           )}

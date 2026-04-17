@@ -3,7 +3,6 @@ export type ProjectStatus =
   | "교안"
   | "촬영"
   | "편집·검수"
-  | "롤아웃"
   | "완료"
   | "중단";
 
@@ -51,11 +50,14 @@ export interface Project {
   chapterCount: number;
   chapterDurations: number[];
   chapterTitles?: string[];
+  pm?: string;
   tutor?: string;
   curriculumManager?: string;
   editor?: string;
   subtitleEditor?: string;
   reviewer?: string;
+  /** 중단 직전 상태 (재개 시 복구용) */
+  suspendedFromStatus?: ProjectStatus;
   slackChannel?: string;
   slackChannelId?: string;
   driveLink?: string;

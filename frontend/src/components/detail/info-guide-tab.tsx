@@ -695,7 +695,7 @@ export default function InfoGuideTab({
               value={project.subtitleEditor}
               readOnly={readOnly}
             />
-            <PersonRow label="PM" value="박진영" readOnly={readOnly} />
+            <PersonRow label="PM" value={project.pm} readOnly={readOnly} />
             <PersonRow
               label="검수 담당자"
               value={project.reviewer}
