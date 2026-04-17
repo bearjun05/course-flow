@@ -20,8 +20,14 @@ import {
   DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
 import type { Project, TrafficLight } from "@/lib/types";
-import { mockProjects } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
+
+/** 같은 강의의 다른 버전 (버전 히스토리 드롭다운용) */
+export interface ProjectVersionRef {
+  id: string;
+  version: string;
+  status: string;
+}
 
 interface DetailHeaderProps {
   project: Project;
@@ -29,6 +35,8 @@ interface DetailHeaderProps {
   onSuspend?: () => void;
   onTrafficLightChange?: (light: TrafficLight) => void;
   onTitleChange?: (title: string) => void;
+  /** 같은 제목의 다른 버전 목록. 전달하지 않으면 '이전 버전 아카이브' 안내만 노출 */
+  otherVersions?: ProjectVersionRef[];
   backHref?: string;
   /** 읽기 전용 (에듀웍스 등) */
   readOnly?: boolean;
@@ -70,16 +78,12 @@ export default function DetailHeader({
   onSuspend,
   onTrafficLightChange,
   onTitleChange,
+  otherVersions = [],
   backHref = "/",
   readOnly = false,
 }: DetailHeaderProps) {
   const versionNum = parseFloat(project.version.replace("v", ""));
   const hasVersionHistory = versionNum >= 2.0;
-  const otherVersions = hasVersionHistory
-    ? mockProjects.filter(
-        (p) => p.title === project.title && p.id !== project.id,
-      )
-    : [];
 
   const [editingTitle, setEditingTitle] = useState(false);
   const [titleDraft, setTitleDraft] = useState(project.title);

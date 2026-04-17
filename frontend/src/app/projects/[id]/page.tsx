@@ -223,6 +223,9 @@ export default function ProjectDetailPage() {
         project={project}
         onTrafficLightChange={setTrafficLight}
         onTitleChange={setTitle}
+        otherVersions={mockProjects
+          .filter((p) => p.title === project.title && p.id !== project.id)
+          .map((p) => ({ id: p.id, version: p.version, status: p.status }))}
       />
 
       <div className="space-y-6 px-6 py-6">

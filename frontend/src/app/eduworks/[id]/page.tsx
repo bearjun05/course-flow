@@ -89,7 +89,14 @@ export default function EduworksDetailPage() {
 
   return (
     <div className="min-h-screen">
-      <DetailHeader project={project} backHref="/eduworks" readOnly />
+      <DetailHeader
+        project={project}
+        backHref="/eduworks"
+        readOnly
+        otherVersions={mockProjects
+          .filter((p) => p.title === project.title && p.id !== project.id)
+          .map((p) => ({ id: p.id, version: p.version, status: p.status }))}
+      />
 
       <div className="space-y-6 px-6 py-6">
         <InfoGuideTab project={project} readOnly />
