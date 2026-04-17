@@ -62,3 +62,29 @@ export const STATUS_BADGE_VARIANT: Record<ProjectStatus, string> = {
   완료: "bg-neutral-100 text-neutral-400",
   중단: "bg-neutral-100 text-neutral-400",
 };
+
+/**
+ * 챕터별 색상 팔레트 (12색, chapter 번호로 순환).
+ * 0번은 사전 준비(neutral), 1번부터 색상 시작.
+ * monday-board / work-status-tab / upload-tab / weekly-calendar / task-calendar
+ * 전역에서 동일한 매핑을 쓰기 위한 단일 소스.
+ */
+export const CHAPTER_COLORS = [
+  "#909090", // CH0 사전 (neutral)
+  "#D07070", // CH1 분홍
+  "#D08A6A", // CH2 살구
+  "#D0A858", // CH3 주황
+  "#C4A840", // CH4 노랑
+  "#8AAE50", // CH5 연두
+  "#50B880", // CH6 초록
+  "#50AAAA", // CH7 민트
+  "#5090C0", // CH8 하늘
+  "#8070C0", // CH9 보라
+  "#B870A0", // CH10 자주
+  "#A89070", // CH11 베이지
+] as const;
+
+/** 챕터 번호 → 색상 (12색 순환) */
+export function getChapterColor(chapter: number): string {
+  return CHAPTER_COLORS[chapter % CHAPTER_COLORS.length];
+}

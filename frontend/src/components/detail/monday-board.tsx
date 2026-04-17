@@ -18,6 +18,11 @@ import type { ChapterTask, TaskType } from "@/lib/types";
 /*  Constants                                                          */
 /* ------------------------------------------------------------------ */
 
+/**
+ * 먼데이보드 전용 파스텔톤 색상.
+ * 다른 컴포넌트(CHAPTER_COLORS)보다 옅은 톤을 쓰는 이유:
+ * 간트 바 배경 위에 흰 텍스트를 깔끔하게 얹기 위해.
+ */
 const GROUP_COLORS = [
   "#B0B0B0", // CH0 사전 (neutral)
   "#E4A0A0", // CH1 분홍

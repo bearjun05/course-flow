@@ -41,20 +41,7 @@ const FILE_COLUMNS = [
   { key: "승인", label: "승인", icon: ThumbsUp },
 ] as const;
 
-const GROUP_COLORS = [
-  "#909090",
-  "#D07070",
-  "#D08A6A",
-  "#D0A858",
-  "#C4A840",
-  "#8AAE50",
-  "#50B880",
-  "#50AAAA",
-  "#5090C0",
-  "#8070C0",
-  "#B870A0",
-  "#A89070",
-];
+import { CHAPTER_COLORS as GROUP_COLORS } from "@/lib/constants";
 
 /** 해당 공정이 이 사람에게 배정된 것인지 (교안·승인은 에듀옵스 전용) */
 function isMyTask(taskKey: string, project: Project, person: string): boolean {

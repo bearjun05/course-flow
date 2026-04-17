@@ -68,20 +68,7 @@ const FILE_COLUMNS = [
   { key: "완료", label: "완료", icon: CheckCircle2 },
 ] as const;
 
-const GROUP_COLORS = [
-  "#909090",
-  "#D07070",
-  "#D08A6A",
-  "#D0A858",
-  "#C4A840",
-  "#8AAE50",
-  "#50B880",
-  "#50AAAA",
-  "#5090C0",
-  "#8070C0",
-  "#B870A0",
-  "#A89070",
-];
+import { CHAPTER_COLORS as GROUP_COLORS } from "@/lib/constants";
 
 function getLectureDeliverableUrl(
   lecture: Lecture,

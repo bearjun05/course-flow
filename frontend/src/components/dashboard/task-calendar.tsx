@@ -24,6 +24,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { Project, ChapterTask } from "@/lib/types";
 import { isProjectActive, isTaskForPerson, getTaskOwner } from "@/lib/utils";
+import { getChapterColor } from "@/lib/constants";
 
 /** 시작~마감 구간을 포함하는 태스크 바 */
 interface TaskBar {
@@ -41,22 +42,6 @@ interface DayEvent {
   type: "start" | "middle" | "end" | "single";
 }
 
-/** 챕터 색상 — WorkStatusTab의 GROUP_COLORS와 동일 */
-const CHAPTER_COLORS = [
-  "#909090",
-  "#D07070",
-  "#D08A6A",
-  "#D0A858",
-  "#C4A840",
-  "#8AAE50",
-  "#50B880",
-  "#50AAAA",
-  "#5090C0",
-  "#8070C0",
-  "#B870A0",
-  "#A89070",
-];
-
 const TASK_TYPE_SHORT: Record<string, string> = {
   "커리큘럼 기획": "기획",
   교안제작: "교안",
@@ -66,10 +51,6 @@ const TASK_TYPE_SHORT: Record<string, string> = {
   검수: "검수",
   승인: "승인",
 };
-
-function getChapterColor(chapter: number): string {
-  return CHAPTER_COLORS[chapter % CHAPTER_COLORS.length];
-}
 
 interface TaskCalendarProps {
   projects: Project[];
