@@ -3,16 +3,16 @@
 import { useParams, useSearchParams } from "next/navigation";
 import { useState, useMemo } from "react";
 import Link from "next/link";
-import { CalendarDays, ClipboardList, Calendar, Upload } from "lucide-react";
+import { CalendarDays, ClipboardList, Calendar } from "lucide-react";
 import { mockProjects } from "@/lib/mock-data";
 import DetailHeader from "@/components/detail/detail-header";
 import InfoGuideTab from "@/components/detail/info-guide-tab";
 import MondayBoard from "@/components/detail/monday-board";
-import UploadTab from "@/components/detail/upload-tab";
+import WorkStatusTab from "@/components/detail/work-status-tab";
 import WeeklyCalendar from "@/components/detail/weekly-calendar";
 import { Separator } from "@/components/ui/separator";
 
-type ScheduleTab = "schedule" | "calendar" | "upload";
+type ScheduleTab = "work-status" | "schedule" | "calendar";
 
 export default function EduworksDetailPage() {
   const params = useParams<{ id: string }>();
@@ -25,7 +25,7 @@ export default function EduworksDetailPage() {
     [projectId],
   );
 
-  const [tasks, setTasks] = useState(baseProject?.tasks ?? []);
+  const [tasks] = useState(baseProject?.tasks ?? []);
   const [lectures, setLectures] = useState(baseProject?.lectures ?? []);
 
   const project = useMemo(() => {
@@ -33,26 +33,16 @@ export default function EduworksDetailPage() {
     return { ...baseProject, tasks, lectures };
   }, [baseProject, tasks, lectures]);
 
+  // 검수자만 검수 토글 가능
+  const isReviewer = person !== "" && person === project?.reviewer;
+
   const handleReviewToggle = (lectureId: string, reviewed: boolean) => {
     setLectures((prev) =>
       prev.map((l) => (l.id === lectureId ? { ...l, reviewed } : l)),
     );
   };
 
-  const handleLectureUrlChange = (
-    lectureId: string,
-    field: string,
-    url: string,
-  ) => {
-    setLectures((prev) =>
-      prev.map((l) => (l.id === lectureId ? { ...l, [field]: url } : l)),
-    );
-  };
-
-  const tabParam = searchParams.get("tab");
-  const defaultTab: ScheduleTab =
-    tabParam === "work-status" || tabParam === "upload" ? "upload" : "schedule";
-  const [scheduleTab, setScheduleTab] = useState<ScheduleTab>(defaultTab);
+  const [scheduleTab, setScheduleTab] = useState<ScheduleTab>("work-status");
   const [weekStart, setWeekStart] = useState(() => {
     const d = new Date();
     const day = d.getDay();
@@ -87,6 +77,17 @@ export default function EduworksDetailPage() {
           <div className="flex items-center gap-3 mb-3">
             <div className="flex items-center gap-1 rounded-lg border border-border p-0.5 bg-muted/30">
               <button
+                onClick={() => setScheduleTab("work-status")}
+                className={`flex items-center gap-1.5 h-7 px-3 rounded-md text-xs font-medium transition-colors ${
+                  scheduleTab === "work-status"
+                    ? "bg-white text-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <ClipboardList className="h-3.5 w-3.5" />
+                작업 현황
+              </button>
+              <button
                 onClick={() => setScheduleTab("schedule")}
                 className={`flex items-center gap-1.5 h-7 px-3 rounded-md text-xs font-medium transition-colors ${
                   scheduleTab === "schedule"
@@ -108,20 +109,20 @@ export default function EduworksDetailPage() {
                 <Calendar className="h-3.5 w-3.5" />
                 이번 주
               </button>
-              <button
-                onClick={() => setScheduleTab("upload")}
-                className={`flex items-center gap-1.5 h-7 px-3 rounded-md text-xs font-medium transition-colors ${
-                  scheduleTab === "upload"
-                    ? "bg-white text-foreground shadow-sm"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                <Upload className="h-3.5 w-3.5" />
-                결과물 제출
-              </button>
             </div>
           </div>
 
+          {scheduleTab === "work-status" && (
+            <WorkStatusTab
+              tasks={project.tasks}
+              lectures={project.lectures}
+              chapterCount={project.chapterCount}
+              chapterTitles={project.chapterTitles}
+              chapterDriveLinks={project.chapterDriveLinks}
+              planningComplete={true}
+              onReviewToggle={isReviewer ? handleReviewToggle : undefined}
+            />
+          )}
           {scheduleTab === "schedule" && (
             <MondayBoard
               tasks={project.tasks}
@@ -142,14 +143,6 @@ export default function EduworksDetailPage() {
               paymentDate={project.paymentDate}
               tutor={project.tutor}
               pm="박진영"
-            />
-          )}
-          {scheduleTab === "upload" && (
-            <UploadTab
-              project={project}
-              person={person}
-              onReviewToggle={handleReviewToggle}
-              onLectureUrlChange={handleLectureUrlChange}
             />
           )}
         </section>
