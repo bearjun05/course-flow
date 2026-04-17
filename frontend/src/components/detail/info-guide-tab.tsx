@@ -615,7 +615,7 @@ export default function InfoGuideTab({
             </div>
             {project.chapterDurations.length === 0 && (
               <p className="text-xs text-neutral-400 mt-2">
-                작업현황에서 장을 추가하면 여기에 표시됩니다.
+                기획 완료 후 생성됩니다.
               </p>
             )}
           </div>

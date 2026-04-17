@@ -575,7 +575,7 @@ export default function WorkStatusTab({
         <div className="flex items-center justify-center h-24 text-sm text-muted-foreground">
           {planningComplete
             ? "아래 버튼을 눌러 장 추가를 해주세요!"
-            : "기획 완료 후 장을 추가할 수 있습니다."}
+            : "기획 완료 후 생성됩니다."}
         </div>
       )}
 
