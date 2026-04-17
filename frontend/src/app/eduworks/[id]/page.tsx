@@ -69,7 +69,7 @@ export default function EduworksDetailPage() {
       <DetailHeader project={project} backHref="/eduworks" />
 
       <div className="space-y-6 px-6 py-6">
-        <InfoGuideTab project={project} />
+        <InfoGuideTab project={project} readOnly />
 
         <Separator />
 

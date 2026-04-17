@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import {
   FileText,
   HardDrive,
@@ -48,6 +47,7 @@ import {
 
 interface InfoGuideTabProps {
   project: Project;
+  readOnly?: boolean;
   onStatusChange?: (status: ProjectStatus) => void;
   onRolloutDateChange?: (date: string) => void;
   onPaymentDateChange?: (date: string) => void;
@@ -117,20 +117,29 @@ function TrafficLightPicker({
   );
 }
 
-function PersonRow({ label, value }: { label: string; value?: string }) {
+function PersonRow({
+  label,
+  value,
+  readOnly,
+}: {
+  label: string;
+  value?: string;
+  readOnly?: boolean;
+}) {
   return (
-    <div className="flex items-center justify-between py-1.5">
-      <span className="text-xs text-neutral-500">{label}</span>
+    <div className="flex items-center justify-between gap-2 py-1.5">
+      <span className="text-xs text-neutral-500 shrink-0">{label}</span>
       {value ? (
-        <Link
-          href={`/people/${encodeURIComponent(value)}`}
-          className="inline-flex items-center gap-1.5 h-6 px-2 rounded-full bg-neutral-50 text-[12px] font-medium text-neutral-700 hover:bg-neutral-100 transition-colors"
-        >
-          <User className="h-3 w-3 text-neutral-400" />
-          {value}
-        </Link>
+        <span className="inline-flex items-center gap-1.5 h-6 max-w-full min-w-0 px-2 rounded-full bg-neutral-50 text-[12px] font-medium text-neutral-700">
+          <User className="h-3 w-3 text-neutral-400 shrink-0" />
+          <span className="truncate whitespace-nowrap">{value}</span>
+        </span>
+      ) : readOnly ? (
+        <span className="inline-flex items-center gap-1 h-6 px-2 rounded-full bg-neutral-50 text-[11px] text-neutral-300 whitespace-nowrap">
+          담당자 없음
+        </span>
       ) : (
-        <button className="inline-flex items-center gap-1 h-6 px-2 rounded-full border border-dashed border-neutral-200 text-[11px] text-neutral-400 hover:border-neutral-300 hover:text-neutral-500 transition-colors">
+        <button className="inline-flex items-center gap-1 h-6 px-2 rounded-full border border-dashed border-neutral-200 text-[11px] text-neutral-400 hover:border-neutral-300 hover:text-neutral-500 transition-colors whitespace-nowrap">
           <UserPlus className="h-3 w-3" />
           배정
         </button>
@@ -210,18 +219,31 @@ function LinkChip({
   icon,
   label,
   href,
+  readOnly,
 }: {
   icon: React.ReactNode;
   label: string;
   href?: string;
+  readOnly?: boolean;
 }) {
-  if (!href)
+  if (!href) {
+    if (readOnly) {
+      return (
+        <span className="inline-flex items-center gap-2 h-9 px-3.5 text-xs rounded-xl border border-neutral-100 bg-neutral-50 text-neutral-300">
+          <span className="h-3.5 w-3.5 shrink-0 opacity-40 [&>svg]:h-full [&>svg]:w-full">
+            {icon}
+          </span>
+          {label} 없음
+        </span>
+      );
+    }
     return (
       <button className="inline-flex items-center gap-2 h-9 px-3.5 text-xs rounded-xl border border-dashed border-neutral-200 text-neutral-400 hover:border-neutral-300 hover:text-neutral-500 transition-all">
         <Plus className="h-3.5 w-3.5" />
         {label}
       </button>
     );
+  }
   return (
     <a
       href={href}
@@ -243,10 +265,12 @@ function SlackChip({
   channel,
   channelId,
   onSave,
+  readOnly,
 }: {
   channel?: string;
   channelId?: string;
   onSave?: (channel: string, channelId: string) => void;
+  readOnly?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
@@ -265,6 +289,14 @@ function SlackChip({
 
   // 링크 없으면 추가 버튼
   if (!channel) {
+    if (readOnly) {
+      return (
+        <span className="inline-flex items-center gap-2 h-9 px-3.5 text-xs rounded-xl border border-neutral-100 bg-neutral-50 text-neutral-300">
+          <Hash className="h-3.5 w-3.5 opacity-40" />
+          슬랙 없음
+        </span>
+      );
+    }
     return (
       <>
         <button
@@ -407,6 +439,7 @@ function SlackChip({
 
 export default function InfoGuideTab({
   project,
+  readOnly = false,
   onStatusChange,
   onRolloutDateChange,
   onPaymentDateChange,
@@ -430,23 +463,29 @@ export default function InfoGuideTab({
       {/* ━━━ 핵심 지표 스트립 ━━━ */}
       <div className="flex items-center gap-3 rounded-2xl border border-neutral-100 bg-white px-5 py-3.5 shadow-sm">
         {/* 상태 배지 */}
-        <Select
-          value={project.status}
-          onValueChange={(v) => {
-            if (v && onStatusChange) onStatusChange(v as ProjectStatus);
-          }}
-        >
-          <SelectTrigger className="h-6 w-auto gap-1 rounded-full border-none px-2.5 text-[11px] font-medium shadow-none bg-[#E8F0FE] text-[#5A8AC0] [&_svg]:text-[#7AB4E0]">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {PROJECT_STATUSES.map((s) => (
-              <SelectItem key={s.value} value={s.value} className="text-xs">
-                {s.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        {readOnly ? (
+          <span className="h-6 inline-flex items-center rounded-full px-2.5 text-[11px] font-medium bg-[#E8F0FE] text-[#5A8AC0]">
+            {project.status}
+          </span>
+        ) : (
+          <Select
+            value={project.status}
+            onValueChange={(v) => {
+              if (v && onStatusChange) onStatusChange(v as ProjectStatus);
+            }}
+          >
+            <SelectTrigger className="h-6 w-auto gap-1 rounded-full border-none px-2.5 text-[11px] font-medium shadow-none bg-[#E8F0FE] text-[#5A8AC0] [&_svg]:text-[#7AB4E0]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {PROJECT_STATUSES.map((s) => (
+                <SelectItem key={s.value} value={s.value} className="text-xs">
+                  {s.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
 
         <div className="w-px h-4 bg-neutral-100" />
 
@@ -529,48 +568,61 @@ export default function InfoGuideTab({
           <div className="mt-2.5 space-y-2 text-[12px]">
             <div className="flex items-center justify-between">
               <span className="text-xs text-neutral-500">롤아웃</span>
-              <input
-                type="date"
-                value={project.rolloutDate}
-                onChange={(e) => onRolloutDateChange?.(e.target.value)}
-                className="text-sm font-medium text-neutral-700 bg-transparent border-b border-transparent hover:border-neutral-300 focus:border-neutral-400 focus:outline-none cursor-pointer transition-colors tabular-nums text-right"
-              />
+              {readOnly ? (
+                <span className="text-sm font-medium text-neutral-700 tabular-nums">
+                  {project.rolloutDate || "-"}
+                </span>
+              ) : (
+                <input
+                  type="date"
+                  value={project.rolloutDate}
+                  onChange={(e) => onRolloutDateChange?.(e.target.value)}
+                  className="text-sm font-medium text-neutral-700 bg-transparent border-b border-transparent hover:border-neutral-300 focus:border-neutral-400 focus:outline-none cursor-pointer transition-colors tabular-nums text-right"
+                />
+              )}
             </div>
             <div className="flex items-center justify-between">
               <span className="text-xs text-neutral-500">강의 지급일</span>
-              <input
-                type="date"
-                value={project.paymentDate}
-                onChange={(e) => onPaymentDateChange?.(e.target.value)}
-                className="text-sm font-medium text-neutral-700 bg-transparent border-b border-transparent hover:border-neutral-300 focus:border-neutral-400 focus:outline-none cursor-pointer transition-colors tabular-nums text-right"
-              />
+              {readOnly ? (
+                <span className="text-sm font-medium text-neutral-700 tabular-nums">
+                  {project.paymentDate || "-"}
+                </span>
+              ) : (
+                <input
+                  type="date"
+                  value={project.paymentDate}
+                  onChange={(e) => onPaymentDateChange?.(e.target.value)}
+                  className="text-sm font-medium text-neutral-700 bg-transparent border-b border-transparent hover:border-neutral-300 focus:border-neutral-400 focus:outline-none cursor-pointer transition-colors tabular-nums text-right"
+                />
+              )}
             </div>
           </div>
           <div className="mt-3 pt-3 border-t border-neutral-100">
             <div className="flex items-center justify-between mb-2">
               <p className="text-xs text-neutral-500">장별 분량</p>
-              {editingDurations ? (
-                <button
-                  onClick={() => {
-                    onChapterDurationsChange?.(draftDurations);
-                    setEditingDurations(false);
-                  }}
-                  className="inline-flex items-center gap-1 text-[11px] text-[#6E8A50] hover:text-[#5A7340] transition-colors"
-                >
-                  <Check className="h-3 w-3" />
-                  완료
-                </button>
-              ) : (
-                <button
-                  onClick={() => {
-                    setDraftDurations([...project.chapterDurations]);
-                    setEditingDurations(true);
-                  }}
-                  className="inline-flex items-center gap-1 text-[11px] text-neutral-400 hover:text-neutral-600 transition-colors"
-                >
-                  <Pencil className="h-3 w-3" />
-                </button>
-              )}
+              {!readOnly &&
+                (editingDurations ? (
+                  <button
+                    onClick={() => {
+                      onChapterDurationsChange?.(draftDurations);
+                      setEditingDurations(false);
+                    }}
+                    className="inline-flex items-center gap-1 text-[11px] text-[#6E8A50] hover:text-[#5A7340] transition-colors"
+                  >
+                    <Check className="h-3 w-3" />
+                    완료
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => {
+                      setDraftDurations([...project.chapterDurations]);
+                      setEditingDurations(true);
+                    }}
+                    className="inline-flex items-center gap-1 text-[11px] text-neutral-400 hover:text-neutral-600 transition-colors"
+                  >
+                    <Pencil className="h-3 w-3" />
+                  </button>
+                ))}
             </div>
             <div className="grid grid-cols-5 gap-1.5">
               {(editingDurations
@@ -627,15 +679,24 @@ export default function InfoGuideTab({
             담당자
           </span>
           <div className="mt-2 grid grid-cols-2 gap-x-4">
-            <PersonRow label="튜터" value={project.tutor} />
-            <PersonRow label="편집 담당자" value={project.editor} />
+            <PersonRow label="튜터" value={project.tutor} readOnly={readOnly} />
+            <PersonRow
+              label="편집 담당자"
+              value={project.editor}
+              readOnly={readOnly}
+            />
             <PersonRow
               label="커리큘럼 기획 매니저"
               value={project.curriculumManager}
+              readOnly={readOnly}
             />
-            <PersonRow label="자막 담당자" />
-            <PersonRow label="PM" value="박진영" />
-            <PersonRow label="검수 담당자" value={project.reviewer} />
+            <PersonRow label="자막 담당자" readOnly={readOnly} />
+            <PersonRow label="PM" value="박진영" readOnly={readOnly} />
+            <PersonRow
+              label="검수 담당자"
+              value={project.reviewer}
+              readOnly={readOnly}
+            />
           </div>
         </div>
 
@@ -650,26 +711,31 @@ export default function InfoGuideTab({
                 icon={<FileText className="h-4 w-4" />}
                 label="교안"
                 href={project.lessonPlanLink}
+                readOnly={readOnly}
               />
               <LinkChip
                 icon={<HardDrive className="h-4 w-4" />}
                 label="드라이브"
                 href={project.driveLink}
+                readOnly={readOnly}
               />
               <LinkChip
                 icon={<LayoutDashboard className="h-4 w-4" />}
                 label="백오피스"
                 href={project.backofficeLink}
+                readOnly={readOnly}
               />
               <LinkChip
                 icon={<Sheet className="h-4 w-4" />}
                 label="커리큘럼"
                 href={project.curriculumSheetLink}
+                readOnly={readOnly}
               />
               <SlackChip
                 channel={project.slackChannel}
                 channelId={project.slackChannelId}
-                onSave={onSlackChange}
+                onSave={readOnly ? undefined : onSlackChange}
+                readOnly={readOnly}
               />
             </div>
           </div>
@@ -678,7 +744,13 @@ export default function InfoGuideTab({
             <span className="text-xs font-semibold text-neutral-500 uppercase tracking-wider">
               메모
             </span>
-            {editingNote ? (
+            {readOnly ? (
+              <div className="mt-1.5 min-h-[36px] rounded-lg bg-neutral-50 px-3 py-2 text-[12px] text-neutral-600 leading-relaxed whitespace-pre-wrap">
+                {project.note || (
+                  <span className="text-neutral-300">메모가 없습니다</span>
+                )}
+              </div>
+            ) : editingNote ? (
               <textarea
                 autoFocus
                 value={draftNote}
