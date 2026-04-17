@@ -4,6 +4,7 @@ import Link from "next/link";
 import { User, BookOpen } from "lucide-react";
 import type { Project } from "@/lib/types";
 import { getDday, formatDday, getDdayColor, cn } from "@/lib/utils";
+import { TRAFFIC_LIGHT_HEX } from "@/lib/constants";
 import { ChapterPipeline } from "@/components/dashboard/chapter-pipeline";
 import { useBadgeTheme } from "@/lib/badge-theme";
 
@@ -99,14 +100,8 @@ export function ProjectCard({ project }: ProjectCardProps) {
       {/* 하단 메타 */}
       <div className="flex items-center gap-3 text-[11px] text-neutral-400">
         <span
-          className={cn(
-            "inline-block w-2.5 h-2.5 rounded-full shrink-0",
-            trafficLight === "green"
-              ? "bg-[#6ECC9A]"
-              : trafficLight === "yellow"
-                ? "bg-[#F5C842]"
-                : "bg-[#F47A8A]",
-          )}
+          className="inline-block w-2.5 h-2.5 rounded-full shrink-0"
+          style={{ backgroundColor: TRAFFIC_LIGHT_HEX[trafficLight] }}
         />
         <span className="flex items-center gap-1">
           <BookOpen className="w-3 h-3" />

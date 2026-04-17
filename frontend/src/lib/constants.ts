@@ -1,4 +1,9 @@
-import type { KanbanColumn, ProjectStatus, DdayGroup } from "./types";
+import type {
+  KanbanColumn,
+  ProjectStatus,
+  DdayGroup,
+  TrafficLight,
+} from "./types";
 
 export const PROJECT_STATUSES: { value: ProjectStatus; label: string }[] = [
   { value: "기획", label: "기획" },
@@ -48,11 +53,25 @@ export const DDAY_GROUPS: DdayGroup[] = [
   { label: "한 달 이상", min: 31, max: Infinity },
 ];
 
-export const TRAFFIC_LIGHT_COLORS = {
-  green: { bg: "bg-emerald-500", text: "text-emerald-500", label: "정상" },
-  yellow: { bg: "bg-amber-500", text: "text-amber-500", label: "주의" },
-  red: { bg: "bg-red-500", text: "text-red-500", label: "위험" },
-} as const;
+/**
+ * 신호등 단일 소스.
+ * - hex: 배경/박스섀도우 등 style inline 용
+ * - label: 한글 라벨
+ * 신호등은 PM 수동 조작만 있으며 자동 변경 로직 없음.
+ */
+export const TRAFFIC_LIGHT_HEX: Record<TrafficLight, string> = {
+  green: "#6ECC9A",
+  yellow: "#F5C842",
+  red: "#F47A8A",
+};
+
+export const TRAFFIC_LIGHT_LABEL: Record<TrafficLight, string> = {
+  green: "정상",
+  yellow: "주의",
+  red: "위험",
+};
+
+export const TRAFFIC_LIGHT_ORDER: TrafficLight[] = ["green", "yellow", "red"];
 
 export const STATUS_BADGE_VARIANT: Record<ProjectStatus, string> = {
   기획: "bg-neutral-100 text-neutral-500",

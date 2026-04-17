@@ -31,7 +31,13 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import type { Project, ProjectStatus, TrafficLight } from "@/lib/types";
-import { PROJECT_STATUSES, PRODUCTION_TYPES } from "@/lib/constants";
+import {
+  PROJECT_STATUSES,
+  PRODUCTION_TYPES,
+  TRAFFIC_LIGHT_HEX,
+  TRAFFIC_LIGHT_LABEL,
+  TRAFFIC_LIGHT_ORDER,
+} from "@/lib/constants";
 import {
   getDday,
   formatDday,
@@ -70,32 +76,6 @@ interface InfoGuideTabProps {
 /*  Tiny helpers                                                       */
 /* ------------------------------------------------------------------ */
 
-const TRAFFIC_LIGHTS: {
-  value: TrafficLight;
-  label: string;
-  active: string;
-  inactive: string;
-}[] = [
-  {
-    value: "green",
-    label: "정상",
-    active: "bg-[#6ECC9A]",
-    inactive: "bg-[#6ECC9A]/20",
-  },
-  {
-    value: "yellow",
-    label: "주의",
-    active: "bg-[#F5C842]",
-    inactive: "bg-[#F5C842]/20",
-  },
-  {
-    value: "red",
-    label: "위험",
-    active: "bg-[#F47A8A]",
-    inactive: "bg-[#F47A8A]/20",
-  },
-];
-
 function TrafficLightPicker({
   value,
   onChange,
@@ -105,24 +85,25 @@ function TrafficLightPicker({
 }) {
   return (
     <div className="inline-flex items-center gap-1.5 rounded-full bg-neutral-200/50 px-2 py-1.5">
-      {TRAFFIC_LIGHTS.map((tl) => (
-        <button
-          key={tl.value}
-          onClick={() => onChange?.(tl.value)}
-          title={tl.label}
-          className={cn(
-            "h-2.5 w-2.5 rounded-full transition-all",
-            value === tl.value ? cn(tl.active, "scale-125") : tl.inactive,
-          )}
-          style={
-            value === tl.value
-              ? {
-                  boxShadow: `0 0 6px 1px ${tl.value === "green" ? "#6ECC9A" : tl.value === "yellow" ? "#F5C842" : "#F47A8A"}`,
-                }
-              : undefined
-          }
-        />
-      ))}
+      {TRAFFIC_LIGHT_ORDER.map((tl) => {
+        const isActive = value === tl;
+        const hex = TRAFFIC_LIGHT_HEX[tl];
+        return (
+          <button
+            key={tl}
+            onClick={() => onChange?.(tl)}
+            title={TRAFFIC_LIGHT_LABEL[tl]}
+            className={cn(
+              "h-2.5 w-2.5 rounded-full transition-all",
+              isActive && "scale-125",
+            )}
+            style={{
+              backgroundColor: isActive ? hex : `${hex}33`,
+              boxShadow: isActive ? `0 0 6px 1px ${hex}` : undefined,
+            }}
+          />
+        );
+      })}
     </div>
   );
 }

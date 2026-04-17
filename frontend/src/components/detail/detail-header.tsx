@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import type React from "react";
 import { useState, useEffect } from "react";
 import {
   ChevronLeft,
@@ -21,6 +22,11 @@ import {
 } from "@/components/ui/dropdown-menu";
 import type { Project, TrafficLight } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import {
+  TRAFFIC_LIGHT_HEX,
+  TRAFFIC_LIGHT_LABEL,
+  TRAFFIC_LIGHT_ORDER,
+} from "@/lib/constants";
 
 /** 같은 강의의 다른 버전 (버전 히스토리 드롭다운용) */
 export interface ProjectVersionRef {
@@ -41,36 +47,6 @@ interface DetailHeaderProps {
   /** 읽기 전용 (에듀웍스 등) */
   readOnly?: boolean;
 }
-
-const TRAFFIC_LIGHTS: {
-  value: TrafficLight;
-  label: string;
-  active: string;
-  inactive: string;
-  glow: string;
-}[] = [
-  {
-    value: "green",
-    label: "정상",
-    active: "bg-[#6ECC9A]",
-    inactive: "bg-[#6ECC9A]/20",
-    glow: "#6ECC9A",
-  },
-  {
-    value: "yellow",
-    label: "주의",
-    active: "bg-[#F5C842]",
-    inactive: "bg-[#F5C842]/20",
-    glow: "#F5C842",
-  },
-  {
-    value: "red",
-    label: "위험",
-    active: "bg-[#F47A8A]",
-    inactive: "bg-[#F47A8A]/20",
-    glow: "#F47A8A",
-  },
-];
 
 export default function DetailHeader({
   project,
@@ -201,21 +177,23 @@ export default function DetailHeader({
 
         {/* Traffic Light */}
         <div className="inline-flex items-center gap-1.5 rounded-full bg-neutral-200/50 px-2 py-1.5 shrink-0">
-          {TRAFFIC_LIGHTS.map((tl) => {
-            const isActive = project.trafficLight === tl.value;
+          {TRAFFIC_LIGHT_ORDER.map((value) => {
+            const isActive = project.trafficLight === value;
+            const hex = TRAFFIC_LIGHT_HEX[value];
             const className = cn(
               "h-2.5 w-2.5 rounded-full transition-all",
-              isActive ? cn(tl.active, "scale-125") : tl.inactive,
-              readOnly ? "cursor-default" : "",
+              isActive && "scale-125",
+              readOnly && "cursor-default",
             );
-            const style = isActive
-              ? { boxShadow: `0 0 6px 1px ${tl.glow}` }
-              : undefined;
+            const style: React.CSSProperties = {
+              backgroundColor: isActive ? hex : `${hex}33`,
+              boxShadow: isActive ? `0 0 6px 1px ${hex}` : undefined,
+            };
             if (readOnly) {
               return (
                 <span
-                  key={tl.value}
-                  title={tl.label}
+                  key={value}
+                  title={TRAFFIC_LIGHT_LABEL[value]}
                   className={className}
                   style={style}
                 />
@@ -223,9 +201,9 @@ export default function DetailHeader({
             }
             return (
               <button
-                key={tl.value}
-                onClick={() => onTrafficLightChange?.(tl.value)}
-                title={tl.label}
+                key={value}
+                onClick={() => onTrafficLightChange?.(value)}
+                title={TRAFFIC_LIGHT_LABEL[value]}
                 className={className}
                 style={style}
               />

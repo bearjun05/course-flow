@@ -16,18 +16,11 @@ interface DeadlineListViewProps {
 
 const STATUS_NEUTRAL = "bg-[#F0F0F0] text-[#6B6B6B]";
 
-const TRAFFIC_LIGHT_COLORS: Record<string, string> = {
-  green: "bg-[#6ECC9A]",
-  yellow: "bg-[#F5C842]",
-  red: "bg-[#F47A8A]",
-};
-
 function ProjectRow({ project }: { project: Project }) {
   const { theme } = useBadgeTheme();
   const dday = getDday(project.rolloutDate);
   const isOverdue = dday < 0 && project.status !== "완료";
   const isCompleted = project.status === "완료";
-  const light = project.trafficLight;
 
   return (
     <Link
