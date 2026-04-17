@@ -4,8 +4,6 @@ import type {
   TaskType,
   TaskStatus,
   Lecture,
-  VideoFeedback,
-  VideoReview,
 } from "./types";
 
 const TASK_TYPES_PER_CHAPTER: TaskType[] = [
@@ -269,67 +267,6 @@ proj2Lectures
       l.editedVideoUrl = `https://drive.google.com/file/d/proj-2-edit-3-1.mp4`;
   });
 
-function makePmReview(scores: number[]): VideoReview {
-  const qIds = ["pm-q1", "pm-q2", "pm-q3", "pm-q4", "pm-q5", "pm-q6"];
-  return {
-    reviewer: "pm",
-    scores: qIds.map((id, i) => ({
-      questionId: id,
-      score: scores[i],
-      comment: "",
-    })),
-    averageScore: +(scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(
-      1,
-    ),
-    completedAt: "2026-03-05T14:00:00Z",
-  };
-}
-
-function makeCmReview(scores: number[]): VideoReview {
-  const qIds = ["cm-q1", "cm-q2", "cm-q3", "cm-q4", "cm-q5", "cm-q6"];
-  return {
-    reviewer: "cm",
-    scores: qIds.map((id, i) => ({
-      questionId: id,
-      score: scores[i],
-      comment: "",
-    })),
-    averageScore: +(scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(
-      1,
-    ),
-    completedAt: "2026-03-05T16:00:00Z",
-  };
-}
-
-const proj2Feedbacks: VideoFeedback[] = [
-  {
-    id: "fb-1",
-    lectureId: "proj-2-lec-1-1",
-    pmReview: makePmReview([5, 4, 5, 4, 5, 4]),
-    cmReview: makeCmReview([4, 5, 4, 4, 5, 4]),
-    verdict: "승인",
-    feedbackText:
-      "전반적으로 의도한 내용과 영상 퀄리티가 충분히 확보되어 승인 가능합니다.",
-  },
-  {
-    id: "fb-2",
-    lectureId: "proj-2-lec-1-2",
-    pmReview: makePmReview([3, 3, 4, 3, 3, 4]),
-    cmReview: makeCmReview([4, 3, 3, 3, 4, 3]),
-    verdict: "보완",
-    feedbackText:
-      "핵심 방향은 적절하나 일부 보완이 필요하여 수정 후 재검토가 필요합니다.",
-  },
-  {
-    id: "fb-3",
-    lectureId: "proj-2-lec-2-1",
-    pmReview: null,
-    cmReview: null,
-    verdict: null,
-    feedbackText: null,
-  },
-];
-
 export const mockProjects: Project[] = [
   {
     id: "proj-1",
@@ -365,7 +302,6 @@ export const mockProjects: Project[] = [
     trafficLight: "green",
     tasks: project1Tasks,
     lectures: createLectures("proj-1", [1.5, 2.0, 1.5, 2.0], 4),
-    videoFeedbacks: [],
     createdAt: "2025-10-01T09:00:00Z",
   },
   {
@@ -406,7 +342,6 @@ export const mockProjects: Project[] = [
     trafficLight: "green",
     tasks: project2Tasks,
     lectures: proj2Lectures,
-    videoFeedbacks: proj2Feedbacks,
     curriculumSheetLink: "https://docs.google.com/spreadsheets/d/proj2-sheet",
     note: "촬영 3~4챕터 진행 중",
     createdAt: "2025-11-15T10:00:00Z",
@@ -437,7 +372,6 @@ export const mockProjects: Project[] = [
     trafficLight: "yellow",
     tasks: project3Tasks,
     lectures: createLectures("proj-3", [2.5, 3.0, 2.5], 3),
-    videoFeedbacks: [],
     note: "자막 작업 진행 중, 롤아웃 D-7",
     createdAt: "2025-12-01T09:00:00Z",
   },
@@ -462,7 +396,6 @@ export const mockProjects: Project[] = [
     trafficLight: "green",
     tasks: project4Tasks,
     lectures: createLectures("proj-4", [1.5, 2.0, 1.5, 2.0, 1.5, 2.0]),
-    videoFeedbacks: [],
     note: "1~3챕터 교안 작성 중",
     createdAt: "2026-01-20T10:00:00Z",
   },
@@ -484,7 +417,6 @@ export const mockProjects: Project[] = [
     trafficLight: "green",
     tasks: project6Tasks,
     lectures: createLectures("proj-6", [2.0, 2.0, 2.0], 3),
-    videoFeedbacks: [],
     createdAt: "2025-12-01T09:00:00Z",
   },
   {
@@ -509,7 +441,6 @@ export const mockProjects: Project[] = [
     trafficLight: "green",
     tasks: createChapterTasks("proj-5", 4, () => "대기"),
     lectures: createLectures("proj-5", [2.0, 1.5, 2.0, 1.5]),
-    videoFeedbacks: [],
     note: "커리큘럼 기획 완료, 교안 작성 대기 중",
     createdAt: "2026-02-15T09:00:00Z",
   },
@@ -528,7 +459,6 @@ export const mockProjects: Project[] = [
     trafficLight: "green",
     tasks: [],
     lectures: [],
-    videoFeedbacks: [],
     note: "튜터 섭외 중, 커리큘럼 초안 작성 필요",
     createdAt: "2026-04-10T09:00:00Z",
   },
@@ -591,7 +521,6 @@ export const mockProjects: Project[] = [
       return "대기";
     }),
     lectures: createLectures("proj-7", [2.0, 2.0, 2.0, 2.0, 1.5, 2.0, 1.5]),
-    videoFeedbacks: [],
     createdAt: "2026-02-01T09:00:00Z",
   },
   {
@@ -619,7 +548,6 @@ export const mockProjects: Project[] = [
       return "대기";
     }),
     lectures: createLectures("proj-8", [1.5, 2.0, 1.5]),
-    videoFeedbacks: [],
     createdAt: "2026-01-15T09:00:00Z",
   },
   {
@@ -655,7 +583,6 @@ export const mockProjects: Project[] = [
       return "대기";
     }),
     lectures: createLectures("proj-9", [2.0, 2.5, 2.0, 2.0]),
-    videoFeedbacks: [],
     createdAt: "2026-01-01T09:00:00Z",
   },
   {
@@ -699,7 +626,6 @@ export const mockProjects: Project[] = [
       return "대기";
     }),
     lectures: createLectures("proj-10", [2.0, 2.5, 2.0, 2.5, 2.0]),
-    videoFeedbacks: [],
     createdAt: "2026-02-10T09:00:00Z",
   },
   {
@@ -775,7 +701,6 @@ export const mockProjects: Project[] = [
       [2.0, 1.5, 2.5, 2.0, 1.5, 2.0, 2.5, 2.0, 1.5, 2.0],
       3,
     ),
-    videoFeedbacks: [],
     createdAt: "2026-01-10T09:00:00Z",
   },
 ];
