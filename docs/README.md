@@ -11,10 +11,7 @@
 | 1 | [`policies/정책-초안.md`](policies/정책-초안.md) | **메인 비즈니스 정책 (SSOT).** 상태 전이, 권한, Drive 구조, 슬랙 템플릿 등 모든 룰 |
 | 2 | [`policies/API-스키마.md`](policies/API-스키마.md) | **API 계약서.** 엔티티 필드, 엔드포인트 Request/Response |
 | 3 | [`policies/백엔드-할일.md`](policies/백엔드-할일.md) | 구현 체크리스트 (DB 스키마, Drive 연동, Slack, 자동 전이 등) |
-| 4 | [`policies/미결정-정책.md`](policies/미결정-정책.md) | 답변 필요한 남은 질문 (백엔드 시점 결정 항목 포함) |
-| 5 | `../frontend/` | 프론트 코드 (참고용, `mock-data.ts`가 예시 데이터) |
-
-진행 플랜 및 정리 로드맵: [`plans/`](plans/)
+| 4 | `../frontend/` | 프론트 코드 (참고용, `mock-data.ts`가 예시 데이터) |
 
 ---
 

@@ -85,7 +85,7 @@ export const STATUS_BADGE_VARIANT: Record<ProjectStatus, string> = {
 /**
  * 챕터별 색상 팔레트 (12색, chapter 번호로 순환).
  * 0번은 사전 준비(neutral), 1번부터 색상 시작.
- * monday-board / work-status-tab / upload-tab / weekly-calendar / task-calendar
+ * monday-board / work-status-tab / weekly-calendar / task-calendar
  * 전역에서 동일한 매핑을 쓰기 위한 단일 소스.
  */
 export const CHAPTER_COLORS = [
