@@ -421,18 +421,55 @@ type TaskStatus = "대기" | "진행" | "리뷰" | "완료";
 
 ## 4. 프론트 mock과의 매핑
 
-현재 프론트(`lib/mock-data.ts`)는 담당자 필드를 `tutor: string` (쉼표 구분 문자열)로 저장. 백엔드 마이그레이션 시:
+### 4.1 담당자 필드 배열화
 
-| 현재 프론트 | 백엔드 API |
-|------------|-----------|
-| `tutor: "김태경,강태경"` | `tutors: ["김태경", "강태경"]` |
-| `editor: ""` (빈 문자열) | `editors: []` |
-| `reviewer: "박진영"` | `reviewers: ["박진영"]` |
+현재 프론트(`lib/mock-data.ts`, `types.ts`)는 담당자 필드를 단일 문자열로 저장. 복수일 때는 쉼표 구분(`"김태경,강태경"`)으로 임시 처리. 백엔드 마이그레이션 시 **전부 배열**로 통일:
+
+**Project 엔티티:**
+| 현재 프론트 (`types.ts`) | 백엔드 API 스키마 |
+|-------------------------|-----------------|
+| `pm?: string` | `pm: string[]` (필수, 기본 `[]`) |
+| `tutor?: string` | `tutors: string[]` |
+| `editor?: string` | `editors: string[]` |
+| `subtitleEditor?: string` | `subtitleEditors: string[]` |
+| `reviewer?: string` | `reviewers: string[]` |
+| `curriculumManager?: string` | `curriculumManagers: string[]` |
+
+**ChapterTask 엔티티:**
+| 현재 프론트 | 백엔드 API 스키마 |
+|------------|-----------------|
+| `assignee?: string` | `assignees: string[]` (필수, 기본 `[]`) |
 
 백엔드 작업 순서:
 1. API 스키마 이대로 구현
 2. 프론트 `types.ts` 배열 타입으로 수정
 3. 쉼표 구분 로직(`parseAssigneeNames`) 제거
+
+### 4.2 Project 필드 갭 (프론트 ↔ API)
+
+**API에 있지만 현재 `types.ts`에 없는 필드** — 백엔드 스키마에 포함하고 프론트 보강 필요:
+
+| 필드 | 타입 | 용도 |
+|------|------|------|
+| `businessUnitOther` | string? | 사업부가 "기타"일 때 직접 입력값 |
+| `renewalType` | `"부분" \| "전체"`? | 리뉴얼일 때만 |
+| `previousCourseId` | string? | 리뉴얼일 때 이전 강의 ID |
+| `previousCourseTitle` | string? | 리뉴얼일 때 이전 강의명 |
+| `driveRootUrl` | string? | 강의 루트 Drive 폴더 URL (현재 `types.ts`의 `driveLink`와 용도 동일, 통일 필요) |
+
+**프론트 `types.ts`에 있지만 API 문서에 없는 필드** — 현재 UI에서 실제 사용 중이므로 백엔드도 포함:
+
+| 필드 | 현재 용도 | API 정리 방향 |
+|------|----------|------------|
+| `driveLink` | 프로젝트 루트 Drive 링크 | `driveRootUrl`로 이름 통일 |
+| `curriculumSheetLink` | 커리큘럼 스프레드시트 (바로가기 칩) | `curriculumSheetLink`로 API에 추가 |
+
+### 4.3 Lecture 필드 갭
+
+| 필드 | 현재 `types.ts` | API 스키마 | 조치 |
+|------|----------------|-----------|------|
+| `summaryNoteUrl` | ❌ 없음 | ✅ 있음 | 프론트 `types.ts`에 추가 필요 (요약노트 링크, Drive 자동 감지) |
+| `videoUrls` | ✅ 있음 (`string[]`) | ❌ 없음 | 사용 중이므로 API에 추가 (강당 복수 영상 지원) |
 
 ---
 
@@ -443,4 +480,4 @@ type TaskStatus = "대기" | "진행" | "리뷰" | "완료";
 - 인증 토큰 만료/갱신 정책 — 백엔드 결정
 - 파일 업로드 중복/실패 처리 — 백엔드 결정
 
-→ `백엔드-할일.md` 및 `미결정-정책.md` 참고.
+→ `백엔드-할일.md` 참고.
