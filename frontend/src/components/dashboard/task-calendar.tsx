@@ -194,7 +194,7 @@ export function TaskCalendar({
                   setCurrentMonth(new Date());
                   setSelectedDate(new Date());
                 }}
-                className="text-[10px] font-medium px-2 py-0.5 rounded-md bg-neutral-100 text-neutral-500 hover:bg-neutral-200 transition-colors"
+                className="text-[11px] font-medium px-2 py-0.5 rounded-md bg-neutral-100 text-neutral-500 hover:bg-neutral-200 transition-colors"
               >
                 오늘
               </button>
@@ -214,7 +214,7 @@ export function TaskCalendar({
             {weekDays.map((d) => (
               <div
                 key={d}
-                className="text-center py-2 text-[11px] font-medium text-muted-foreground"
+                className="text-center py-2 text-[12px] font-medium text-muted-foreground"
               >
                 {d}
               </div>
@@ -247,7 +247,7 @@ export function TaskCalendar({
                   <div className="px-1.5 pt-1.5">
                     <span
                       className={cn(
-                        "inline-flex items-center justify-center text-[12px] w-6 h-6 rounded-full",
+                        "inline-flex items-center justify-center text-[13px] w-6 h-6 rounded-full",
                         !inMonth && "text-neutral-300",
                         inMonth && "text-neutral-600",
                         today && "bg-neutral-800 text-white font-bold",
@@ -301,7 +301,7 @@ export function TaskCalendar({
                           {(e.type === "start" || e.type === "single") && (
                             <span
                               className={cn(
-                                "text-[8px] font-semibold truncate px-0.5",
+                                "text-[9px] font-semibold truncate px-0.5",
                                 e.bar.isDone && "line-through",
                               )}
                               style={{ color }}
@@ -324,7 +324,7 @@ export function TaskCalendar({
                               return next;
                             });
                           }}
-                          className="text-[8px] text-muted-foreground px-1.5 hover:text-foreground"
+                          className="text-[9px] text-muted-foreground px-1.5 hover:text-foreground"
                         >
                           접기
                         </button>
@@ -338,7 +338,7 @@ export function TaskCalendar({
                               return next;
                             });
                           }}
-                          className="text-[8px] text-muted-foreground px-1.5 hover:text-foreground"
+                          className="text-[9px] text-muted-foreground px-1.5 hover:text-foreground"
                         >
                           +{events.length - 4} 더보기
                         </button>
@@ -357,7 +357,7 @@ export function TaskCalendar({
               {format(selectedDate, "M월 d일 (EEEE)", { locale: ko })}
             </span>
             {isToday(selectedDate) && (
-              <span className="ml-2 text-[10px] font-medium text-neutral-500 bg-neutral-100 px-1.5 py-0.5 rounded">
+              <span className="ml-2 text-[11px] font-medium text-neutral-500 bg-neutral-100 px-1.5 py-0.5 rounded">
                 오늘
               </span>
             )}
@@ -365,7 +365,7 @@ export function TaskCalendar({
 
           <div className="p-3 overflow-y-auto max-h-[500px]">
             {selectedEvents.length === 0 ? (
-              <p className="text-[12px] text-muted-foreground text-center py-8">
+              <p className="text-[13px] text-muted-foreground text-center py-8">
                 이 날에는 일정이 없습니다
               </p>
             ) : (
@@ -407,7 +407,7 @@ export function TaskCalendar({
                       {/* 프로젝트명 */}
                       <div
                         className={cn(
-                          "text-[11px] truncate mb-1",
+                          "text-[12px] truncate mb-1",
                           event.bar.isDone
                             ? "text-neutral-400 line-through"
                             : "text-muted-foreground",
@@ -424,7 +424,7 @@ export function TaskCalendar({
                         />
                         <span
                           className={cn(
-                            "text-[12px] font-semibold",
+                            "text-[13px] font-semibold",
                             event.bar.isDone && "line-through",
                           )}
                           style={{ color }}
@@ -434,7 +434,7 @@ export function TaskCalendar({
                         </span>
                         <span
                           className={cn(
-                            "ml-auto text-[10px] font-medium px-1.5 py-0.5 rounded",
+                            "ml-auto text-[11px] font-medium px-1.5 py-0.5 rounded",
                             event.bar.isDone
                               ? "bg-neutral-100 text-neutral-400"
                               : event.bar.isOverdue
@@ -465,7 +465,7 @@ export function TaskCalendar({
                         {event.bar.task.startDate && event.bar.task.endDate && (
                           <span
                             className={cn(
-                              "text-[10px] flex items-center gap-0.5",
+                              "text-[11px] flex items-center gap-0.5",
                               event.bar.isDone
                                 ? "text-neutral-400"
                                 : "text-muted-foreground",
@@ -481,7 +481,7 @@ export function TaskCalendar({
                         )}
                         <span
                           className={cn(
-                            "text-[10px] ml-auto",
+                            "text-[11px] ml-auto",
                             event.bar.task.status === "완료"
                               ? "text-neutral-400"
                               : event.bar.task.status === "진행"
@@ -503,7 +503,7 @@ export function TaskCalendar({
                         return (
                           <div
                             className={cn(
-                              "text-[10px] mt-1",
+                              "text-[11px] mt-1",
                               event.bar.isDone
                                 ? "text-neutral-400"
                                 : "text-muted-foreground",

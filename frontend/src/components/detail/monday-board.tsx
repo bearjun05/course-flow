@@ -130,7 +130,7 @@ function StageChip({
         onToggle();
       }}
       className={cn(
-        "group/chip relative flex items-center justify-center h-8 rounded-lg text-[11px] font-medium transition-all min-w-[52px] px-2",
+        "group/chip relative flex items-center justify-center h-8 rounded-lg text-[12px] font-medium transition-all min-w-[52px] px-2",
         isComplete && "text-white shadow-sm",
         isActive && "ring-2 ring-offset-1 text-white shadow-md",
         isReview &&
@@ -179,7 +179,7 @@ function ProgressBar({
           style={{ width: `${pct}%`, backgroundColor: color }}
         />
       </div>
-      <span className="text-[11px] text-muted-foreground tabular-nums w-8">
+      <span className="text-[12px] text-muted-foreground tabular-nums w-8">
         {pct}%
       </span>
     </div>
@@ -477,7 +477,7 @@ function MiniGantt({
                     <div
                       key={i}
                       className={cn(
-                        "text-center text-[11px] py-1 border-l border-neutral-100/50 relative",
+                        "text-center text-[12px] py-1 border-l border-neutral-100/50 relative",
                         isTodayCol && "bg-[#6B8DE3]/[0.06]",
                         isFirstOfMonth && !isTodayCol && "border-l-neutral-300",
                       )}
@@ -485,7 +485,7 @@ function MiniGantt({
                     >
                       {isTodayCol && (
                         <span
-                          className="absolute -top-0.5 left-1/2 -translate-x-1/2 text-[7px] font-bold tracking-wider uppercase"
+                          className="absolute -top-0.5 left-1/2 -translate-x-1/2 text-[8px] font-bold tracking-wider uppercase"
                           style={{ color: TODAY_COLOR }}
                         >
                           today
@@ -494,7 +494,7 @@ function MiniGantt({
                       <div className={cn("mt-1")}>
                         {isTodayCol ? (
                           <span
-                            className="inline-flex items-center justify-center h-5 w-5 rounded-full text-white text-[11px] font-bold"
+                            className="inline-flex items-center justify-center h-5 w-5 rounded-full text-white text-[12px] font-bold"
                             style={{ backgroundColor: TODAY_COLOR }}
                           >
                             {format(d, "d", { locale: ko })}
@@ -509,7 +509,7 @@ function MiniGantt({
                       </div>
                       <div
                         className={cn(
-                          "text-[10px]",
+                          "text-[11px]",
                           isTodayCol ? "font-semibold" : "text-neutral-400",
                         )}
                         style={isTodayCol ? { color: TODAY_COLOR } : {}}
@@ -560,7 +560,7 @@ function MiniGantt({
                       />
                       <div
                         className={cn(
-                          "absolute top-1.5 h-7 rounded-md flex items-center justify-center text-[11px] font-medium transition-shadow group/bar",
+                          "absolute top-1.5 h-7 rounded-md flex items-center justify-center text-[12px] font-medium transition-shadow group/bar",
                           isOverdue
                             ? "bg-red-400/80 text-white"
                             : isReview
@@ -621,7 +621,7 @@ function MiniGantt({
                         />
                         {onTaskDateClear && !readOnly && (
                           <button
-                            className="absolute -top-1.5 -right-1.5 h-4 w-4 rounded-full bg-white border border-neutral-300 text-neutral-400 text-[10px] leading-none flex items-center justify-center opacity-0 group-hover/bar:opacity-100 transition-opacity hover:bg-red-50 hover:border-red-300 hover:text-red-500 z-20"
+                            className="absolute -top-1.5 -right-1.5 h-4 w-4 rounded-full bg-white border border-neutral-300 text-neutral-400 text-[11px] leading-none flex items-center justify-center opacity-0 group-hover/bar:opacity-100 transition-opacity hover:bg-red-50 hover:border-red-300 hover:text-red-500 z-20"
                             onClick={(e) => {
                               e.stopPropagation();
                               onTaskDateClear(task.id);
@@ -690,7 +690,7 @@ function MiniGantt({
                         );
                       }}
                     >
-                      <span className="text-[10px] text-neutral-400 group-hover/unsch:text-neutral-500 whitespace-nowrap pointer-events-none">
+                      <span className="text-[11px] text-neutral-400 group-hover/unsch:text-neutral-500 whitespace-nowrap pointer-events-none">
                         일정 배정
                       </span>
                     </div>
@@ -894,7 +894,7 @@ export default function MondayBoard({
                 {chapterStatus.label && (
                   <span
                     className={cn(
-                      "text-[10px] font-medium px-2 py-0.5 rounded-md whitespace-nowrap",
+                      "text-[11px] font-medium px-2 py-0.5 rounded-md whitespace-nowrap",
                       chapterStatus.type === "done" &&
                         "bg-neutral-100 text-neutral-400",
                       chapterStatus.type === "active" &&
@@ -936,7 +936,7 @@ export default function MondayBoard({
                         e.stopPropagation();
                         onDeleteChapter(group.chapter);
                       }}
-                      className="text-[11px] text-neutral-400 hover:text-red-500 transition-colors px-2 py-1 rounded-md hover:bg-red-50"
+                      className="text-[12px] text-neutral-400 hover:text-red-500 transition-colors px-2 py-1 rounded-md hover:bg-red-50"
                     >
                       {group.label} 삭제
                     </button>

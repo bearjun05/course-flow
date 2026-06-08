@@ -75,7 +75,7 @@ export default function EduworksPage() {
             <div className="flex items-center gap-2">
               <label
                 htmlFor="mock-user-select"
-                className="text-[11px] text-muted-foreground/70 whitespace-nowrap"
+                className="text-[12px] text-muted-foreground/70 whitespace-nowrap"
               >
                 (디버그) 사용자 전환
               </label>

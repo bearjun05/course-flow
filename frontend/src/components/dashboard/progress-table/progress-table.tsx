@@ -34,7 +34,7 @@ export function ProgressTable({
     <div>
       <div className="mb-4 flex items-center gap-2">
         <h2 className="text-sm font-semibold text-foreground">{title}</h2>
-        <Badge variant="secondary" className="text-[10px] font-normal">
+        <Badge variant="secondary" className="text-[11px] font-normal">
           {activeProjects.length}
         </Badge>
       </div>

@@ -127,7 +127,7 @@ function CourseSearchField({
           <p className="text-sm font-medium text-foreground truncate">
             {selectedTitle}
           </p>
-          <p className="text-[11px] text-muted-foreground">
+          <p className="text-[12px] text-muted-foreground">
             다음 버전: v{nextVersion}
           </p>
         </div>
@@ -173,7 +173,7 @@ function CourseSearchField({
                 <span className="text-sm text-foreground truncate">
                   {c.title}
                 </span>
-                <span className="text-[11px] text-muted-foreground shrink-0">
+                <span className="text-[12px] text-muted-foreground shrink-0">
                   최신 v{c.latestVersion.toFixed(1)} → v{next}
                 </span>
               </button>
@@ -205,7 +205,7 @@ function QuestionCard({
   return (
     <div className="rounded-xl border border-neutral-200 bg-white p-5 shadow-sm">
       <div className="mb-4">
-        <h3 className="text-[15px] font-medium text-foreground">
+        <h3 className="text-[16px] font-medium text-foreground">
           {question}
           {required && <span className="ml-0.5 text-red-500">*</span>}
         </h3>
@@ -481,7 +481,7 @@ export function ProjectRequestForm() {
                 <Label className="text-xs font-medium">
                   기존 강의 검색 <span className="text-red-500">*</span>
                 </Label>
-                <p className="text-[11px] text-muted-foreground">
+                <p className="text-[12px] text-muted-foreground">
                   리뉴얼할 기존 강의를 선택하세요. 버전은 자동 지정됩니다.
                 </p>
                 <CourseSearchField

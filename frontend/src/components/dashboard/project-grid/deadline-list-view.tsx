@@ -33,13 +33,13 @@ function ProjectRow({ project }: { project: Project }) {
       <Video className="w-3.5 h-3.5 text-neutral-300 shrink-0" />
 
       <div className="flex items-baseline gap-1.5 flex-1 min-w-0">
-        <span className="text-[13px] font-medium text-foreground truncate">
+        <span className="text-[14px] font-medium text-foreground truncate">
           {project.title}
         </span>
         {project.version && (
           <span
             className={cn(
-              "text-[10px] font-medium px-1.5 py-0.5 rounded-md shrink-0",
+              "text-[11px] font-medium px-1.5 py-0.5 rounded-md shrink-0",
               theme.versionBadge,
             )}
           >
@@ -51,7 +51,7 @@ function ProjectRow({ project }: { project: Project }) {
       <div className="flex items-center gap-1 shrink-0">
         <span
           className={cn(
-            "text-[10px] font-medium px-1.5 py-0.5 rounded-md",
+            "text-[11px] font-medium px-1.5 py-0.5 rounded-md",
             theme.listUnitBadge,
           )}
         >
@@ -61,7 +61,7 @@ function ProjectRow({ project }: { project: Project }) {
         </span>
         <span
           className={cn(
-            "text-[10px] font-medium px-1.5 py-0.5 rounded-md",
+            "text-[11px] font-medium px-1.5 py-0.5 rounded-md",
             STATUS_NEUTRAL,
           )}
         >
@@ -70,18 +70,18 @@ function ProjectRow({ project }: { project: Project }) {
       </div>
 
       {isCompleted ? (
-        <span className="text-[11px] text-muted-foreground shrink-0 w-32 text-right">
+        <span className="text-[12px] text-muted-foreground shrink-0 w-32 text-right">
           {project.rolloutDate.slice(5).replace("-", "/")} 출시
         </span>
       ) : (
         <span
           className={cn(
-            "text-[12px] font-medium shrink-0 w-32 text-right",
+            "text-[13px] font-medium shrink-0 w-32 text-right",
             getDdayColor(dday),
           )}
         >
           {formatDday(dday)}
-          <span className="ml-1.5 text-[11px] text-muted-foreground font-normal">
+          <span className="ml-1.5 text-[12px] text-muted-foreground font-normal">
             ({project.rolloutDate.slice(5).replace("-", "/")})
           </span>
         </span>
@@ -109,7 +109,7 @@ export function DeadlineListView({
           <span className="text-xs font-semibold text-muted-foreground">
             전체
           </span>
-          <span className="text-[11px] text-muted-foreground/50">
+          <span className="text-[12px] text-muted-foreground/50">
             {sorted.length}
           </span>
           <div className="flex-1 h-px bg-border" />
@@ -117,7 +117,7 @@ export function DeadlineListView({
             <button
               onClick={() => setSortBy("deadline")}
               className={cn(
-                "rounded px-2 py-0.5 text-[11px] transition-colors",
+                "rounded px-2 py-0.5 text-[12px] transition-colors",
                 sortBy === "deadline"
                   ? "bg-background shadow-sm text-foreground font-medium"
                   : "text-muted-foreground hover:text-foreground",
@@ -128,7 +128,7 @@ export function DeadlineListView({
             <button
               onClick={() => setSortBy("name")}
               className={cn(
-                "rounded px-2 py-0.5 text-[11px] transition-colors",
+                "rounded px-2 py-0.5 text-[12px] transition-colors",
                 sortBy === "name"
                   ? "bg-background shadow-sm text-foreground font-medium"
                   : "text-muted-foreground hover:text-foreground",
@@ -166,7 +166,7 @@ export function DeadlineListView({
             <span className="text-xs font-semibold text-muted-foreground">
               {section.label}
             </span>
-            <span className="text-[11px] text-muted-foreground/50">
+            <span className="text-[12px] text-muted-foreground/50">
               {section.projects.length}
             </span>
           </div>

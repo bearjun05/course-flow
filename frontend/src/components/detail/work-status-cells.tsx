@@ -74,7 +74,7 @@ export function DeliverableCell({
               }
             }}
             placeholder="링크"
-            className="w-16 h-6 text-[10px] px-1 rounded border border-neutral-300 focus:outline-none focus:ring-1 focus:ring-primary"
+            className="w-16 h-6 text-[11px] px-1 rounded border border-neutral-300 focus:outline-none focus:ring-1 focus:ring-primary"
           />
           <button
             onClick={() => {
@@ -138,7 +138,7 @@ export function DeliverableCell({
       <div className="flex items-center justify-center">
         <button
           onClick={() => setShowInput(true)}
-          className="inline-flex items-center gap-0.5 h-7 px-1.5 rounded-lg border-2 border-dashed text-[10px] font-medium transition-all hover:scale-105 hover:border-solid"
+          className="inline-flex items-center gap-0.5 h-7 px-1.5 rounded-lg border-2 border-dashed text-[11px] font-medium transition-all hover:scale-105 hover:border-solid"
           style={{ borderColor: `${color}60`, color }}
           title="교안 링크 등록"
         >
@@ -272,7 +272,7 @@ export function ChapterProgress({
           style={{ width: `${pct}%`, backgroundColor: color }}
         />
       </div>
-      <span className="text-[10px] text-muted-foreground tabular-nums w-7">
+      <span className="text-[11px] text-muted-foreground tabular-nums w-7">
         {pct}%
       </span>
     </div>

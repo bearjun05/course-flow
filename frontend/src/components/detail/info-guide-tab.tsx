@@ -128,7 +128,7 @@ function PersonRow({
         {names.map((name) => (
           <span
             key={name}
-            className="inline-flex items-center gap-1 h-6 px-2 rounded-full bg-neutral-50 text-[12px] font-medium text-neutral-700 whitespace-nowrap"
+            className="inline-flex items-center gap-1 h-6 px-2 rounded-full bg-neutral-50 text-[13px] font-medium text-neutral-700 whitespace-nowrap"
           >
             <User className="h-3 w-3 text-neutral-400 shrink-0" />
             {name}
@@ -136,11 +136,11 @@ function PersonRow({
         ))}
       </span>
     ) : readOnly ? (
-      <span className="inline-flex items-center gap-1 h-6 px-2 rounded-full bg-neutral-50 text-[11px] text-neutral-300 whitespace-nowrap">
+      <span className="inline-flex items-center gap-1 h-6 px-2 rounded-full bg-neutral-50 text-[12px] text-neutral-300 whitespace-nowrap">
         담당자 없음
       </span>
     ) : (
-      <span className="inline-flex items-center gap-1 h-6 px-2 rounded-full border border-dashed border-neutral-200 text-[11px] text-neutral-400 hover:border-neutral-300 hover:text-neutral-500 transition-colors whitespace-nowrap">
+      <span className="inline-flex items-center gap-1 h-6 px-2 rounded-full border border-dashed border-neutral-200 text-[12px] text-neutral-400 hover:border-neutral-300 hover:text-neutral-500 transition-colors whitespace-nowrap">
         <UserPlus className="h-3 w-3" />
         배정
       </span>
@@ -225,7 +225,7 @@ function AssigneeModal({
               {selected.map((name) => (
                 <span
                   key={name}
-                  className="inline-flex items-center gap-1 h-6 px-2 rounded-full bg-[#EDF2DC] text-[11px] font-medium text-[#6E8A3A]"
+                  className="inline-flex items-center gap-1 h-6 px-2 rounded-full bg-[#EDF2DC] text-[12px] font-medium text-[#6E8A3A]"
                 >
                   {name}
                   <button
@@ -263,7 +263,7 @@ function AssigneeModal({
             )}
           </div>
 
-          <p className="text-[11px] text-muted-foreground">
+          <p className="text-[12px] text-muted-foreground">
             슬랙 채널 멤버 목록 (추후 실제 채널 연동 시 대체됩니다).
           </p>
 
@@ -459,7 +459,7 @@ function SlackChip({
             </DialogHeader>
             <div className="space-y-3 pt-1">
               <div className="space-y-1">
-                <label className="text-[11px] font-medium text-neutral-400">
+                <label className="text-[12px] font-medium text-neutral-400">
                   Slack 링크 <span className="text-red-400">*</span>
                 </label>
                 <input
@@ -470,7 +470,7 @@ function SlackChip({
                 />
               </div>
               <div className="space-y-1">
-                <label className="text-[11px] font-medium text-neutral-400">
+                <label className="text-[12px] font-medium text-neutral-400">
                   채널 ID
                 </label>
                 <input
@@ -479,7 +479,7 @@ function SlackChip({
                   placeholder="C06XXXXXXX"
                   className="w-full h-9 px-3 text-sm font-mono rounded-lg border border-neutral-200 focus:outline-none focus:ring-1 focus:ring-primary"
                 />
-                <p className="text-[10px] text-neutral-400">
+                <p className="text-[11px] text-neutral-400">
                   Slack 채널 상세 → 하단에서 채널 ID를 확인할 수 있습니다.
                 </p>
               </div>
@@ -520,7 +520,7 @@ function SlackChip({
           <div className="space-y-3 pt-1">
             {/* Slack 링크 */}
             <div className="space-y-1">
-              <span className="text-[11px] font-medium text-neutral-400">
+              <span className="text-[12px] font-medium text-neutral-400">
                 Slack 링크
               </span>
               <div className="flex items-center gap-2">
@@ -548,7 +548,7 @@ function SlackChip({
             {/* 채널 ID */}
             {channelId && (
               <div className="space-y-1">
-                <span className="text-[11px] font-medium text-neutral-400">
+                <span className="text-[12px] font-medium text-neutral-400">
                   채널 ID
                 </span>
                 <div className="flex items-center gap-2">
@@ -669,7 +669,7 @@ export default function InfoGuideTab({
       <div className="flex items-center gap-3 rounded-2xl border border-neutral-100 bg-white px-5 py-3.5 shadow-sm">
         {/* 상태 배지 */}
         {readOnly ? (
-          <span className="h-6 inline-flex items-center rounded-full px-2.5 text-[11px] font-medium bg-[#E8F0FE] text-[#5A8AC0]">
+          <span className="h-6 inline-flex items-center rounded-full px-2.5 text-[12px] font-medium bg-[#E8F0FE] text-[#5A8AC0]">
             {project.status}
           </span>
         ) : (
@@ -679,7 +679,7 @@ export default function InfoGuideTab({
               if (v && onStatusChange) onStatusChange(v as ProjectStatus);
             }}
           >
-            <SelectTrigger className="h-6 w-auto gap-1 rounded-full border-none px-2.5 text-[11px] font-medium shadow-none bg-[#E8F0FE] text-[#5A8AC0] [&_svg]:text-[#7AB4E0]">
+            <SelectTrigger className="h-6 w-auto gap-1 rounded-full border-none px-2.5 text-[12px] font-medium shadow-none bg-[#E8F0FE] text-[#5A8AC0] [&_svg]:text-[#7AB4E0]">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -718,10 +718,10 @@ export default function InfoGuideTab({
               transform="rotate(-90 10 10)"
             />
           </svg>
-          <span className="text-[12px] font-semibold text-neutral-600 tabular-nums">
+          <span className="text-[13px] font-semibold text-neutral-600 tabular-nums">
             {progressPct}%
           </span>
-          <span className="text-[11px] text-neutral-400 tabular-nums">
+          <span className="text-[12px] text-neutral-400 tabular-nums">
             {progressTxt}
           </span>
         </div>
@@ -731,7 +731,7 @@ export default function InfoGuideTab({
 
         {/* 사업부 · 유형 — 버전 배지와 동일 크기 */}
         <div className="flex items-center gap-1.5">
-          <span className="inline-flex items-center h-6 px-2 rounded-md bg-[#F5F0E8] text-[11px] font-medium text-[#8B7E6B] shrink-0">
+          <span className="inline-flex items-center h-6 px-2 rounded-md bg-[#F5F0E8] text-[12px] font-medium text-[#8B7E6B] shrink-0">
             {project.businessUnit}
             {project.trackName && (
               <>
@@ -749,12 +749,12 @@ export default function InfoGuideTab({
           {project.courseCode && (
             <span
               title="강의 고유 코드 (발급은 백엔드)"
-              className="inline-flex items-center h-6 px-2 rounded-md bg-neutral-100 text-[11px] font-medium text-neutral-500 tabular-nums shrink-0"
+              className="inline-flex items-center h-6 px-2 rounded-md bg-neutral-100 text-[12px] font-medium text-neutral-500 tabular-nums shrink-0"
             >
               {project.courseCode}
             </span>
           )}
-          <span className="inline-flex items-center h-6 px-2 rounded-md bg-[#EDF2E4] text-[11px] font-medium text-[#6E8A50] shrink-0">
+          <span className="inline-flex items-center h-6 px-2 rounded-md bg-[#EDF2E4] text-[12px] font-medium text-[#6E8A50] shrink-0">
             {prodTypeLabel}
           </span>
         </div>
@@ -762,7 +762,7 @@ export default function InfoGuideTab({
         <div className="w-px h-4 bg-neutral-100" />
 
         {/* 챕터 */}
-        <span className="flex items-center gap-1 text-[11px] text-neutral-400">
+        <span className="flex items-center gap-1 text-[12px] text-neutral-400">
           <BookOpen className="h-3 w-3" />
           {project.chapterCount}장
         </span>
@@ -784,7 +784,7 @@ export default function InfoGuideTab({
               {formatDday(getDday(project.rolloutDate))}
             </span>
           </div>
-          <div className="mt-2.5 space-y-2 text-[12px]">
+          <div className="mt-2.5 space-y-2 text-[13px]">
             <div className="flex items-center justify-between">
               <span className="text-xs text-neutral-500">롤아웃</span>
               {readOnly ? (
@@ -826,7 +826,7 @@ export default function InfoGuideTab({
                       onChapterDurationsChange?.(draftDurations);
                       setEditingDurations(false);
                     }}
-                    className="inline-flex items-center gap-1 text-[11px] text-[#6E8A50] hover:text-[#5A7340] transition-colors"
+                    className="inline-flex items-center gap-1 text-[12px] text-[#6E8A50] hover:text-[#5A7340] transition-colors"
                   >
                     <Check className="h-3 w-3" />
                     완료
@@ -837,7 +837,7 @@ export default function InfoGuideTab({
                       setDraftDurations([...project.chapterDurations]);
                       setEditingDurations(true);
                     }}
-                    className="inline-flex items-center gap-1 text-[11px] text-neutral-400 hover:text-neutral-600 transition-colors"
+                    className="inline-flex items-center gap-1 text-[12px] text-neutral-400 hover:text-neutral-600 transition-colors"
                   >
                     <Pencil className="h-3 w-3" />
                   </button>
@@ -852,7 +852,7 @@ export default function InfoGuideTab({
                   key={i}
                   className="flex flex-col items-center justify-center rounded-lg bg-neutral-50 py-2 px-1.5 gap-0.5"
                 >
-                  <span className="text-[10px] text-neutral-400 font-medium">
+                  <span className="text-[11px] text-neutral-400 font-medium">
                     {i + 1}장
                   </span>
                   {editingDurations ? (
@@ -869,14 +869,14 @@ export default function InfoGuideTab({
                         }}
                         className="w-8 text-sm font-semibold text-neutral-700 tabular-nums text-center bg-white border border-neutral-200 rounded focus:border-neutral-400 focus:outline-none"
                       />
-                      <span className="text-[10px] text-neutral-400 ml-0.5">
+                      <span className="text-[11px] text-neutral-400 ml-0.5">
                         h
                       </span>
                     </div>
                   ) : (
                     <span className="text-sm font-semibold text-neutral-700 tabular-nums">
                       {d}
-                      <span className="text-[10px] text-neutral-400 font-normal ml-0.5">
+                      <span className="text-[11px] text-neutral-400 font-normal ml-0.5">
                         h
                       </span>
                     </span>
@@ -1000,7 +1000,7 @@ export default function InfoGuideTab({
               메모
             </span>
             {readOnly ? (
-              <div className="mt-1.5 min-h-[36px] rounded-lg bg-neutral-50 px-3 py-2 text-[12px] text-neutral-600 leading-relaxed whitespace-pre-wrap">
+              <div className="mt-1.5 min-h-[36px] rounded-lg bg-neutral-50 px-3 py-2 text-[13px] text-neutral-600 leading-relaxed whitespace-pre-wrap">
                 {project.note || (
                   <span className="text-neutral-300">메모가 없습니다</span>
                 )}
@@ -1021,7 +1021,7 @@ export default function InfoGuideTab({
                   onNoteChange?.(draftNote);
                   setEditingNote(false);
                 }}
-                className="mt-1.5 w-full min-h-[60px] rounded-lg bg-neutral-50 border border-neutral-200 px-3 py-2 text-[12px] text-neutral-700 leading-relaxed focus:border-neutral-300 focus:outline-none focus:ring-1 focus:ring-neutral-200 resize-none"
+                className="mt-1.5 w-full min-h-[60px] rounded-lg bg-neutral-50 border border-neutral-200 px-3 py-2 text-[13px] text-neutral-700 leading-relaxed focus:border-neutral-300 focus:outline-none focus:ring-1 focus:ring-neutral-200 resize-none"
                 placeholder="메모를 입력하세요... (Enter 저장, Shift+Enter 줄바꿈)"
               />
             ) : (
@@ -1030,7 +1030,7 @@ export default function InfoGuideTab({
                   setDraftNote(project.note || "");
                   setEditingNote(true);
                 }}
-                className="mt-1.5 min-h-[36px] rounded-lg bg-neutral-50 px-3 py-2 text-[12px] text-neutral-600 leading-relaxed cursor-text hover:bg-neutral-100/70 transition-colors whitespace-pre-wrap"
+                className="mt-1.5 min-h-[36px] rounded-lg bg-neutral-50 px-3 py-2 text-[13px] text-neutral-600 leading-relaxed cursor-text hover:bg-neutral-100/70 transition-colors whitespace-pre-wrap"
               >
                 {project.note || (
                   <span className="text-neutral-300">메모를 입력하세요...</span>

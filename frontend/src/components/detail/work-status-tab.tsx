@@ -164,7 +164,7 @@ export default function WorkStatusTab({
         <span className="text-sm font-semibold text-[#7C8DBC]">기획</span>
         <div className="flex-1" />
         {planningComplete ? (
-          <span className="text-[11px] font-medium px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-600">
+          <span className="text-[12px] font-medium px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-600">
             완료
           </span>
         ) : onPlanningComplete ? (
@@ -200,7 +200,7 @@ export default function WorkStatusTab({
             <div
               key={col.key}
               className={cn(
-                "px-1 py-2 text-center text-[11px] font-medium",
+                "px-1 py-2 text-center text-[12px] font-medium",
                 disabled ? "text-neutral-300" : "text-neutral-400",
               )}
               style={disabled ? DISABLED_STAGE_STYLE : undefined}
@@ -257,7 +257,7 @@ export default function WorkStatusTab({
                 >
                   <div className="px-4 py-2.5 flex items-center gap-2 min-w-0">
                     <span
-                      className="text-[13px] font-bold shrink-0"
+                      className="text-[14px] font-bold shrink-0"
                       style={{ color }}
                     >
                       {chapter.label}
@@ -276,7 +276,7 @@ export default function WorkStatusTab({
                           }
                         }}
                         placeholder="장 이름"
-                        className="text-[12px] font-semibold text-neutral-700 h-6 px-1.5 rounded border border-neutral-300 focus:outline-none focus:ring-1 focus:ring-primary min-w-0 flex-1"
+                        className="text-[13px] font-semibold text-neutral-700 h-6 px-1.5 rounded border border-neutral-300 focus:outline-none focus:ring-1 focus:ring-primary min-w-0 flex-1"
                       />
                     ) : canEditTitle ? (
                       <button
@@ -284,7 +284,7 @@ export default function WorkStatusTab({
                           setEditingChapter(chapter.chapter);
                           setEditTitle(chapter.title ?? "");
                         }}
-                        className="text-[12px] font-semibold text-neutral-700 truncate text-left hover:underline decoration-dotted underline-offset-2"
+                        className="text-[13px] font-semibold text-neutral-700 truncate text-left hover:underline decoration-dotted underline-offset-2"
                         title="클릭해서 장 이름 수정"
                       >
                         {chapter.title || (
@@ -295,7 +295,7 @@ export default function WorkStatusTab({
                       </button>
                     ) : (
                       chapter.title && (
-                        <span className="text-[12px] font-semibold text-neutral-700 truncate">
+                        <span className="text-[13px] font-semibold text-neutral-700 truncate">
                           {chapter.title}
                         </span>
                       )
@@ -305,7 +305,7 @@ export default function WorkStatusTab({
                         href={driveLink}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 h-5 px-1.5 rounded border border-neutral-200 text-[10px] text-neutral-400 hover:text-neutral-600 hover:border-neutral-300 transition-colors shrink-0"
+                        className="inline-flex items-center gap-1 h-5 px-1.5 rounded border border-neutral-200 text-[11px] text-neutral-400 hover:text-neutral-600 hover:border-neutral-300 transition-colors shrink-0"
                         title="구글 드라이브"
                       >
                         <HardDrive className="h-2.5 w-2.5" />
@@ -330,7 +330,7 @@ export default function WorkStatusTab({
                       total={progress.total}
                       color={color}
                     />
-                    <span className="text-[10px] text-neutral-400 shrink-0">
+                    <span className="text-[11px] text-neutral-400 shrink-0">
                       {chapter.lectures.length}강
                     </span>
                   </div>
@@ -374,13 +374,13 @@ export default function WorkStatusTab({
                     >
                       <div className="px-4 pl-7 py-2 flex items-center gap-2 min-w-0">
                         <span
-                          className="text-[12px] font-medium shrink-0"
+                          className="text-[13px] font-medium shrink-0"
                           style={{ color }}
                         >
                           {lecture.label}
                         </span>
                         {lecture.title && (
-                          <span className="text-[11px] text-neutral-500 truncate">
+                          <span className="text-[12px] text-neutral-500 truncate">
                             {lecture.title}
                           </span>
                         )}

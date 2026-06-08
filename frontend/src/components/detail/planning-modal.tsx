@@ -170,7 +170,7 @@ export default function PlanningModal({
               placeholder="https://notion.so/..."
               className="w-full h-9 px-3 text-sm border border-neutral-200 rounded-lg focus:border-[#7C8DBC] focus:outline-none"
             />
-            <p className="text-[11px] text-neutral-400">
+            <p className="text-[12px] text-neutral-400">
               노션 또는 구글 독스 링크. 바로가기 &gt; 커리큘럼에 자동
               등록됩니다.
             </p>
@@ -182,7 +182,7 @@ export default function PlanningModal({
               <label className="text-xs font-semibold text-neutral-700">
                 장 목록 <span className="text-red-500">*</span>
               </label>
-              <span className="text-[11px] text-neutral-400">
+              <span className="text-[12px] text-neutral-400">
                 총 {totalDuration}시간
               </span>
             </div>
@@ -194,7 +194,7 @@ export default function PlanningModal({
                 >
                   {/* 장 제목 + 분량 */}
                   <div className="flex items-center gap-2">
-                    <span className="text-[11px] font-semibold text-neutral-600 w-7 shrink-0">
+                    <span className="text-[12px] font-semibold text-neutral-600 w-7 shrink-0">
                       {i + 1}장
                     </span>
                     <input
@@ -218,7 +218,7 @@ export default function PlanningModal({
                         placeholder="분량"
                         className="w-20 h-8 pl-2.5 pr-6 text-sm bg-white border border-neutral-200 rounded-lg focus:border-[#7C8DBC] focus:outline-none"
                       />
-                      <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-neutral-400">
+                      <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[11px] text-neutral-400">
                         h
                       </span>
                     </div>
@@ -237,7 +237,7 @@ export default function PlanningModal({
                   <div className="pl-9 space-y-1.5">
                     {ch.lectures.map((lec, li) => (
                       <div key={lec.id} className="flex items-center gap-2">
-                        <span className="text-[10px] text-neutral-400 w-8 shrink-0">
+                        <span className="text-[11px] text-neutral-400 w-8 shrink-0">
                           {i + 1}-{li + 1}
                         </span>
                         <input
@@ -245,7 +245,7 @@ export default function PlanningModal({
                           value={lec.title}
                           onChange={(e) => updateLecture(i, li, e.target.value)}
                           placeholder="강 제목"
-                          className="flex-1 h-7 px-2.5 text-[13px] bg-white border border-neutral-200 rounded-md focus:border-[#7C8DBC] focus:outline-none"
+                          className="flex-1 h-7 px-2.5 text-[14px] bg-white border border-neutral-200 rounded-md focus:border-[#7C8DBC] focus:outline-none"
                         />
                         {ch.lectures.length > 1 && (
                           <button
@@ -260,7 +260,7 @@ export default function PlanningModal({
                     ))}
                     <button
                       onClick={() => addLecture(i)}
-                      className="w-full h-7 flex items-center justify-center gap-1 text-[11px] text-neutral-400 border border-dashed border-neutral-200 rounded-md hover:border-[#7C8DBC] hover:text-[#7C8DBC]"
+                      className="w-full h-7 flex items-center justify-center gap-1 text-[12px] text-neutral-400 border border-dashed border-neutral-200 rounded-md hover:border-[#7C8DBC] hover:text-[#7C8DBC]"
                     >
                       <Plus className="h-2.5 w-2.5" />강 추가
                     </button>

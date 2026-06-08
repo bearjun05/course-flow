@@ -123,7 +123,7 @@ export function ChapterPipeline({ project }: ChapterPipelineProps) {
                   />
                 ))}
               </div>
-              <span className="text-[9px] text-neutral-400 leading-none truncate">
+              <span className="text-[10px] text-neutral-400 leading-none truncate">
                 {ch}장 · {stageName}
               </span>
             </div>

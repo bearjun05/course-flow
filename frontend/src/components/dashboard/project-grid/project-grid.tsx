@@ -80,7 +80,7 @@ export function ProjectGrid({ projects }: ProjectGridProps) {
           <h2 className="text-sm font-semibold text-foreground">
             전체 프로젝트
           </h2>
-          <Badge variant="secondary" className="text-[10px] font-normal">
+          <Badge variant="secondary" className="text-[11px] font-normal">
             {displayProjects.length}
           </Badge>
         </div>

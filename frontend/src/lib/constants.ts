@@ -69,7 +69,7 @@ export const CONTENT_BRANCHES = ["강의", "과제", "프로젝트", "숙제"] a
  */
 export const DISABLED_STAGE_STYLE: CSSProperties = {
   backgroundImage:
-    "repeating-linear-gradient(45deg, transparent 0 5px, rgba(120,120,120,0.10) 5px 6px)",
+    "repeating-linear-gradient(45deg, transparent 0 4px, rgba(90,90,90,0.28) 4px 8px)",
 };
 
 /** 비활성 단계 셀 위에 띄울 안내 문구 */

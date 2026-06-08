@@ -208,7 +208,7 @@ export default function WeeklyCalendar({
           <span className="text-sm font-semibold">{weekLabel}</span>
           <button
             onClick={() => onWeekChange(new Date())}
-            className="text-[10px] font-medium px-2 py-0.5 rounded-md bg-neutral-100 text-neutral-500 hover:bg-neutral-200 transition-colors"
+            className="text-[11px] font-medium px-2 py-0.5 rounded-md bg-neutral-100 text-neutral-500 hover:bg-neutral-200 transition-colors"
           >
             이번 주
           </button>
@@ -237,7 +237,7 @@ export default function WeeklyCalendar({
             >
               <div
                 className={cn(
-                  "text-[10px]",
+                  "text-[11px]",
                   todayFlag
                     ? "text-neutral-600 font-semibold"
                     : "text-neutral-400",
@@ -247,7 +247,7 @@ export default function WeeklyCalendar({
               </div>
               <div
                 className={cn(
-                  "text-[15px] font-bold mt-0.5",
+                  "text-[16px] font-bold mt-0.5",
                   todayFlag ? "text-neutral-800" : "text-neutral-500",
                 )}
               >
@@ -328,7 +328,7 @@ export default function WeeklyCalendar({
                 )}
                 {/* 왼쪽: 라벨 · 담당자 */}
                 <span
-                  className="relative z-[1] px-2 text-[12px] font-extrabold truncate"
+                  className="relative z-[1] px-2 text-[13px] font-extrabold truncate"
                   style={{ color: bar.color }}
                 >
                   {bar.label}
@@ -351,7 +351,7 @@ export default function WeeklyCalendar({
                 {/* 오른쪽: 완료강/전체강 */}
                 {bar.totalCount > 0 && (
                   <span
-                    className="relative z-[1] text-[11px] font-medium ml-auto pr-2 shrink-0 tabular-nums"
+                    className="relative z-[1] text-[12px] font-medium ml-auto pr-2 shrink-0 tabular-nums"
                     style={{ color: bar.color }}
                   >
                     {bar.uploadedCount}/{bar.totalCount}
@@ -363,7 +363,7 @@ export default function WeeklyCalendar({
         )}
 
         {bars.length === 0 && (
-          <div className="absolute inset-0 flex items-center justify-center text-[12px] text-neutral-300">
+          <div className="absolute inset-0 flex items-center justify-center text-[13px] text-neutral-300">
             이번 주 일정이 없습니다
           </div>
         )}

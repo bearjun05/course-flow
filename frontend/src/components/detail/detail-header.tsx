@@ -134,7 +134,7 @@ export default function DetailHeader({
           <DropdownMenu>
             <DropdownMenuTrigger
               className={cn(
-                "inline-flex items-center gap-1 h-6 px-2 rounded-md text-[11px] font-medium transition-colors shrink-0",
+                "inline-flex items-center gap-1 h-6 px-2 rounded-md text-[12px] font-medium transition-colors shrink-0",
                 "bg-neutral-100 text-neutral-500 hover:bg-neutral-200",
               )}
             >
@@ -142,7 +142,7 @@ export default function DetailHeader({
               <History className="h-3 w-3" />
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start">
-              <DropdownMenuLabel className="text-[11px] text-muted-foreground font-normal">
+              <DropdownMenuLabel className="text-[12px] text-muted-foreground font-normal">
                 버전 이력
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
@@ -170,7 +170,7 @@ export default function DetailHeader({
             </DropdownMenuContent>
           </DropdownMenu>
         ) : (
-          <span className="inline-flex items-center h-6 px-2 rounded-md bg-neutral-100 text-[11px] font-medium text-neutral-500 shrink-0">
+          <span className="inline-flex items-center h-6 px-2 rounded-md bg-neutral-100 text-[12px] font-medium text-neutral-500 shrink-0">
             {project.version}
           </span>
         )}

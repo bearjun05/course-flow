@@ -42,7 +42,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
           <p className="text-[13.5px] font-semibold text-neutral-800 leading-snug line-clamp-2">
             {project.title}
           </p>
-          <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-md shrink-0 bg-[#F0F0F0] text-[#6B6B6B] mt-0.5">
+          <span className="text-[11px] font-medium px-1.5 py-0.5 rounded-md shrink-0 bg-[#F0F0F0] text-[#6B6B6B] mt-0.5">
             {project.status}
           </span>
         </div>
@@ -61,13 +61,13 @@ export function ProjectCard({ project }: ProjectCardProps) {
         <div className="flex items-center justify-center w-5 h-5 rounded-full bg-neutral-100 shrink-0">
           <User className="w-3 h-3 text-neutral-400" />
         </div>
-        <span className="text-[11px] text-neutral-500 shrink-0">
+        <span className="text-[12px] text-neutral-500 shrink-0">
           {project.tutor ?? "미정"}
         </span>
         <div className="flex items-center gap-1 ml-auto">
           <span
             className={cn(
-              "text-[10px] font-medium px-1.5 py-0.5 rounded-md",
+              "text-[11px] font-medium px-1.5 py-0.5 rounded-md",
               theme.unitBadge,
             )}
           >
@@ -81,7 +81,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
           </span>
           <span
             className={cn(
-              "text-[10px] font-medium px-1.5 py-0.5 rounded-md",
+              "text-[11px] font-medium px-1.5 py-0.5 rounded-md",
               theme.typeBadge,
             )}
           >
@@ -98,7 +98,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
       )}
 
       {/* 하단 메타 */}
-      <div className="flex items-center gap-3 text-[11px] text-neutral-400">
+      <div className="flex items-center gap-3 text-[12px] text-neutral-400">
         <span
           className="inline-block w-2.5 h-2.5 rounded-full shrink-0"
           style={{ backgroundColor: TRAFFIC_LIGHT_HEX[trafficLight] }}

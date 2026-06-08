@@ -4,6 +4,17 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* 폰트 가독성: 이름 지정 폰트(text-xs/sm/base/lg/xl/2xl)를 약 1px씩 키움
+   (픽셀 지정 text-[Npx]는 각 클래스에서 +1 적용. line-height는 기본값 유지) */
+@theme {
+  --text-xs: 0.81rem;
+  --text-sm: 0.935rem;
+  --text-base: 1.06rem;
+  --text-lg: 1.185rem;
+  --text-xl: 1.31rem;
+  --text-2xl: 1.56rem;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);

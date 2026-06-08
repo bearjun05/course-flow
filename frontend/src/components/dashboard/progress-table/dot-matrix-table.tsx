@@ -198,10 +198,10 @@ function ProjectRow({
       <td className="px-4 py-3">
         <div className="flex items-center gap-2">
           <CircleProgress percent={progressPct} color={PROGRESS_COLOR} />
-          <span className="text-[13px] font-medium text-foreground leading-snug">
+          <span className="text-[14px] font-medium text-foreground leading-snug">
             {project.title}
           </span>
-          <span className="inline-flex items-center gap-[3px] text-[10px] text-muted-foreground/60 shrink-0">
+          <span className="inline-flex items-center gap-[3px] text-[11px] text-muted-foreground/60 shrink-0">
             <BookOpen className="w-3 h-3" />
             {project.chapterCount}장
           </span>
@@ -257,7 +257,7 @@ function ProjectRow({
               style={{ left: `${(0.5 / DETAIL_COLUMNS.length) * 100}%` }}
             >
               <span
-                className="inline-flex items-center justify-center rounded-full text-[8px] font-bold text-white shadow-sm"
+                className="inline-flex items-center justify-center rounded-full text-[9px] font-bold text-white shadow-sm"
                 style={{ width: 22, height: 22, backgroundColor: DOT_COLOR }}
               >
                 기획
@@ -287,7 +287,7 @@ function ProjectRow({
                       return (
                         <span
                           key={`g-${item.from}`}
-                          className="inline-flex items-center justify-center rounded-full text-[7px] font-bold text-white shadow-sm leading-none"
+                          className="inline-flex items-center justify-center rounded-full text-[8px] font-bold text-white shadow-sm leading-none"
                           style={{
                             width: groupSize,
                             height: groupSize,
@@ -304,7 +304,7 @@ function ProjectRow({
                     return (
                       <span
                         key={item.ch}
-                        className="inline-flex items-center justify-center rounded-full text-[9px] font-extrabold text-white shadow-sm"
+                        className="inline-flex items-center justify-center rounded-full text-[10px] font-extrabold text-white shadow-sm"
                         style={{
                           width: 20,
                           height: 20,
@@ -324,7 +324,7 @@ function ProjectRow({
       <td className="px-3 py-3 text-right">
         <span
           className={cn(
-            "text-[12px] font-medium whitespace-nowrap",
+            "text-[13px] font-medium whitespace-nowrap",
             getDdayColor(dday),
           )}
         >
@@ -357,7 +357,7 @@ export function DotMatrixTable({
           </colgroup>
           <thead>
             <tr className="border-b border-[#E5E7EB] bg-[#F8F9FA]">
-              <th className="px-4 py-2.5 text-left text-[11px] font-semibold text-[#9CA3AF]">
+              <th className="px-4 py-2.5 text-left text-[12px] font-semibold text-[#9CA3AF]">
                 강의명
               </th>
               {DETAIL_COLUMNS.map((col) => {
@@ -366,7 +366,7 @@ export function DotMatrixTable({
                   <th
                     key={col}
                     className={cn(
-                      "px-1 py-2.5 text-center text-[11px] font-semibold",
+                      "px-1 py-2.5 text-center text-[12px] font-semibold",
                       isHighlighted
                         ? "text-[#6E8A3A] bg-[#EDF2DC]"
                         : "text-[#9CA3AF]",
@@ -376,7 +376,7 @@ export function DotMatrixTable({
                   </th>
                 );
               })}
-              <th className="px-3 py-2.5 text-right text-[11px] font-semibold text-[#9CA3AF]">
+              <th className="px-3 py-2.5 text-right text-[12px] font-semibold text-[#9CA3AF]">
                 D-Day
               </th>
             </tr>
