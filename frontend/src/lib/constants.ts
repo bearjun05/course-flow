@@ -68,8 +68,10 @@ export const CONTENT_BRANCHES = ["강의", "과제", "프로젝트", "숙제"] a
  * AI 캠퍼스의 촬영·편집·자막 칸처럼 "이 단계는 없음"을 칸 정렬을 유지한 채 표시.
  */
 export const DISABLED_STAGE_STYLE: CSSProperties = {
+  // 얇은 사선 핀스트라이프 + 아주 옅은 슬레이트 톤 — 보이되 세련되게 "해당 없음" 표시
+  backgroundColor: "rgba(148,163,184,0.06)",
   backgroundImage:
-    "repeating-linear-gradient(45deg, transparent 0 4px, rgba(90,90,90,0.28) 4px 8px)",
+    "repeating-linear-gradient(45deg, rgba(100,116,139,0.20) 0 1px, transparent 1px 5px)",
 };
 
 /** 비활성 단계 셀 위에 띄울 안내 문구 */
