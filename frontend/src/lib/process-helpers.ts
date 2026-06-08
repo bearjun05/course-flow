@@ -1,5 +1,26 @@
-import type { BusinessUnit, Project, TaskType, KanbanColumn } from "./types";
+import type {
+  BusinessUnit,
+  Project,
+  TaskType,
+  KanbanColumn,
+  Lecture,
+} from "./types";
 import { STATUS_TO_KANBAN } from "./constants";
+
+/**
+ * 강(講) 결과물 링크 필드 업데이트.
+ * 값이 있으면 등록/교체, 빈 문자열이면 삭제. 교안 링크 교체/삭제(D5)에 사용.
+ */
+export function setLectureField(
+  lectures: Lecture[],
+  lectureId: string,
+  field: string,
+  value: string,
+): Lecture[] {
+  return lectures.map((l) =>
+    l.id === lectureId ? { ...l, [field]: value } : l,
+  );
+}
 
 /* ── 사업부별 단계 분기 (단일 기준) ──
  * AI 캠퍼스 강의는 영상이 없어 촬영·편집·자막 공정이 없다.

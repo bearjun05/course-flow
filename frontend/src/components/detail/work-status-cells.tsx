@@ -8,6 +8,8 @@ import {
   Check,
   ThumbsUp,
   Search,
+  Pencil,
+  Trash2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Lecture, TaskStatus } from "@/lib/types";
@@ -46,47 +48,92 @@ export function DeliverableCell({
   const [showInput, setShowInput] = useState(false);
   const [inputValue, setInputValue] = useState("");
   const url = getLectureDeliverableUrl(lecture, taskKey);
+  // 교안 링크는 대시보드 안에서 누구나 등록/교체/삭제 가능 (onUploadUrl이 있으면 = 편집 가능)
+  const editable = taskKey === "교안제작" && !!onUploadUrl;
 
-  // 교안 링크 업로드
-  if (taskKey === "교안제작" && !url && onUploadUrl) {
-    if (showInput) {
-      return (
-        <div className="flex items-center justify-center">
-          <div className="flex items-center gap-0.5">
-            <input
-              autoFocus
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && inputValue.trim()) {
-                  onUploadUrl(lecture.id, "lessonPlanUrl", inputValue.trim());
-                  setShowInput(false);
-                  setInputValue("");
-                }
-                if (e.key === "Escape") {
-                  setShowInput(false);
-                  setInputValue("");
-                }
-              }}
-              placeholder="링크"
-              className="w-16 h-6 text-[10px] px-1 rounded border border-neutral-300 focus:outline-none focus:ring-1 focus:ring-primary"
-            />
-            <button
-              onClick={() => {
-                if (inputValue.trim()) {
-                  onUploadUrl(lecture.id, "lessonPlanUrl", inputValue.trim());
-                }
+  const commit = (value: string) => {
+    onUploadUrl?.(lecture.id, "lessonPlanUrl", value.trim());
+    setShowInput(false);
+    setInputValue("");
+  };
+
+  // 교안 링크 입력/교체 모드
+  if (editable && showInput) {
+    return (
+      <div className="flex items-center justify-center">
+        <div className="flex items-center gap-0.5">
+          <input
+            autoFocus
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && inputValue.trim()) commit(inputValue);
+              if (e.key === "Escape") {
                 setShowInput(false);
                 setInputValue("");
-              }}
-              className="h-6 w-6 flex items-center justify-center rounded border border-neutral-200 hover:bg-neutral-50"
-            >
-              <Check className="h-3 w-3 text-neutral-500" />
-            </button>
-          </div>
+              }
+            }}
+            placeholder="링크"
+            className="w-16 h-6 text-[10px] px-1 rounded border border-neutral-300 focus:outline-none focus:ring-1 focus:ring-primary"
+          />
+          <button
+            onClick={() => {
+              if (inputValue.trim()) commit(inputValue);
+              else {
+                setShowInput(false);
+                setInputValue("");
+              }
+            }}
+            className="h-6 w-6 flex items-center justify-center rounded border border-neutral-200 hover:bg-neutral-50"
+          >
+            <Check className="h-3 w-3 text-neutral-500" />
+          </button>
         </div>
-      );
-    }
+      </div>
+    );
+  }
+
+  // 교안 링크 있음 → 열기 + 교체 + 삭제
+  if (editable && url) {
+    return (
+      <div className="flex items-center justify-center gap-0.5">
+        <a
+          href={url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center justify-center h-7 w-7 rounded-lg border transition-all hover:scale-110"
+          style={{
+            backgroundColor: `${color}15`,
+            borderColor: `${color}50`,
+            color,
+          }}
+          title="교안 보기"
+        >
+          <ExternalLink className="h-3.5 w-3.5" />
+        </a>
+        <button
+          onClick={() => {
+            setInputValue(url);
+            setShowInput(true);
+          }}
+          className="h-6 w-6 flex items-center justify-center rounded-md text-neutral-400 hover:text-neutral-600 hover:bg-neutral-100"
+          title="교안 링크 교체"
+        >
+          <Pencil className="h-3 w-3" />
+        </button>
+        <button
+          onClick={() => onUploadUrl?.(lecture.id, "lessonPlanUrl", "")}
+          className="h-6 w-6 flex items-center justify-center rounded-md text-neutral-400 hover:text-red-500 hover:bg-red-50"
+          title="교안 링크 삭제"
+        >
+          <Trash2 className="h-3 w-3" />
+        </button>
+      </div>
+    );
+  }
+
+  // 교안 링크 없음 → 등록 버튼
+  if (editable && !url) {
     return (
       <div className="flex items-center justify-center">
         <button
@@ -101,6 +148,7 @@ export function DeliverableCell({
     );
   }
 
+  // 그 외 결과물(촬영·편집·검수): 읽기 전용 링크
   if (url) {
     return (
       <div className="flex items-center justify-center">

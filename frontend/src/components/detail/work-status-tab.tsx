@@ -45,7 +45,10 @@ interface WorkStatusTabProps {
   chapterTitles?: string[];
   chapterDriveLinks?: string[];
   planningComplete?: boolean;
+  /** 외부(에듀웍스) 읽기 전용 뷰 — 장 이름 편집 비활성 */
+  readOnly?: boolean;
   onPlanningComplete?: (data: PlanningSubmitData) => void;
+  onChapterTitleChange?: (chapterIndex: number, title: string) => void;
   onAddChapter?: () => void;
   onReviewToggle?: (lectureId: string, reviewed: boolean) => void;
   onApprovalToggle?: (lectureId: string, approved: boolean) => void;
@@ -93,13 +96,24 @@ export default function WorkStatusTab({
   chapterTitles,
   chapterDriveLinks,
   planningComplete,
+  readOnly,
   onPlanningComplete,
+  onChapterTitleChange,
   onAddChapter,
   onReviewToggle,
   onApprovalToggle,
   onLectureUrlChange,
 }: WorkStatusTabProps) {
   const [showPlanningModal, setShowPlanningModal] = useState(false);
+  // 장 이름 인라인 편집 (에듀옵스 내부만, 외부 readOnly에선 비활성 — D4)
+  const [editingChapter, setEditingChapter] = useState<number | null>(null);
+  const [editTitle, setEditTitle] = useState("");
+  const canEditTitle = !readOnly && !!onChapterTitleChange;
+  const commitTitle = (chapter: number) => {
+    onChapterTitleChange?.(chapter - 1, editTitle.trim());
+    setEditingChapter(null);
+    setEditTitle("");
+  };
   // AI 캠퍼스 등에서 비활성(촬영·편집·자막) 단계 판정 — 빗금 + 진행률 분모 제외
   const colDisabled = (key: string) =>
     businessUnit ? isStageDisabled(businessUnit, key) : false;
@@ -248,10 +262,43 @@ export default function WorkStatusTab({
                     >
                       {chapter.label}
                     </span>
-                    {chapter.title && (
-                      <span className="text-[12px] font-semibold text-neutral-700 truncate">
-                        {chapter.title}
-                      </span>
+                    {editingChapter === chapter.chapter ? (
+                      <input
+                        autoFocus
+                        value={editTitle}
+                        onChange={(e) => setEditTitle(e.target.value)}
+                        onBlur={() => commitTitle(chapter.chapter)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") commitTitle(chapter.chapter);
+                          if (e.key === "Escape") {
+                            setEditingChapter(null);
+                            setEditTitle("");
+                          }
+                        }}
+                        placeholder="장 이름"
+                        className="text-[12px] font-semibold text-neutral-700 h-6 px-1.5 rounded border border-neutral-300 focus:outline-none focus:ring-1 focus:ring-primary min-w-0 flex-1"
+                      />
+                    ) : canEditTitle ? (
+                      <button
+                        onClick={() => {
+                          setEditingChapter(chapter.chapter);
+                          setEditTitle(chapter.title ?? "");
+                        }}
+                        className="text-[12px] font-semibold text-neutral-700 truncate text-left hover:underline decoration-dotted underline-offset-2"
+                        title="클릭해서 장 이름 수정"
+                      >
+                        {chapter.title || (
+                          <span className="font-normal text-neutral-400">
+                            + 장 이름
+                          </span>
+                        )}
+                      </button>
+                    ) : (
+                      chapter.title && (
+                        <span className="text-[12px] font-semibold text-neutral-700 truncate">
+                          {chapter.title}
+                        </span>
+                      )
                     )}
                     {driveLink && (
                       <a

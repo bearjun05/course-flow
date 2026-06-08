@@ -13,7 +13,7 @@ import type {
   Lecture,
   Project,
 } from "@/lib/types";
-import { getDisabledTaskTypes } from "@/lib/process-helpers";
+import { getDisabledTaskTypes, setLectureField } from "@/lib/process-helpers";
 import DetailHeader from "@/components/detail/detail-header";
 import InfoGuideTab from "@/components/detail/info-guide-tab";
 import MondayBoard from "@/components/detail/monday-board";
@@ -158,12 +158,27 @@ export default function ProjectDetailPage() {
 
   const handleLectureUrlChange = useCallback(
     (lectureId: string, field: string, url: string) => {
+      // url === "" 이면 삭제, 값이 있으면 등록/교체
       setDraft((d) => ({
         ...d,
-        projectLectures: d.projectLectures.map((l) =>
-          l.id === lectureId ? { ...l, [field]: url } : l,
+        projectLectures: setLectureField(
+          d.projectLectures,
+          lectureId,
+          field,
+          url,
         ),
       }));
+    },
+    [],
+  );
+
+  const handleChapterTitleChange = useCallback(
+    (chapterIndex: number, title: string) => {
+      setDraft((d) => {
+        const next = [...d.chapterTitles];
+        next[chapterIndex] = title;
+        return { ...d, chapterTitles: next };
+      });
     },
     [],
   );
@@ -348,6 +363,7 @@ export default function ProjectDetailPage() {
                 chapterDriveLinks={project.chapterDriveLinks}
                 planningComplete={draft.planningComplete}
                 onPlanningComplete={handlePlanningComplete}
+                onChapterTitleChange={handleChapterTitleChange}
                 onAddChapter={handleAddChapter}
                 onReviewToggle={(lectureId, reviewed) =>
                   setDraft((d) => ({
