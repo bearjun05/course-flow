@@ -6,9 +6,12 @@ export type ProjectStatus =
   | "완료"
   | "중단";
 
-export type BusinessUnit = "KDT" | "KDC" | "기타";
+export type BusinessUnit = "KDT" | "KDC" | "AI 캠퍼스" | "기타";
 
 export type ProductionType = "신규" | "리뉴얼";
+
+/** 콘텐츠 갈래 (분류 태그 — 폼 흐름에는 영향 없음) */
+export type ContentBranch = "강의" | "과제" | "프로젝트" | "숙제";
 
 export type TrafficLight = "green" | "yellow" | "red";
 
@@ -42,6 +45,10 @@ export interface Project {
   status: ProjectStatus;
   businessUnit: BusinessUnit;
   trackName?: string;
+  /** 콘텐츠 갈래 (강의/과제/프로젝트/숙제) — 분류용 */
+  contentBranch?: ContentBranch;
+  /** 강의 고유 8자리 코드 — 화면 표시·입력만, 발급/외부매핑은 백엔드 */
+  courseCode?: string;
   productionType: ProductionType;
   rolloutDate: string;
   paymentDate: string;

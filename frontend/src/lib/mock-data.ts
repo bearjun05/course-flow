@@ -1,10 +1,12 @@
 import type {
+  BusinessUnit,
   Project,
   ChapterTask,
   TaskType,
   TaskStatus,
   Lecture,
 } from "./types";
+import { getDisabledTaskTypes } from "./process-helpers";
 
 const TASK_TYPES_PER_CHAPTER: TaskType[] = [
   "교안제작",
@@ -24,8 +26,14 @@ function createChapterTasks(
     chapter: number,
     taskType: TaskType,
   ) => { start?: string; end?: string },
+  businessUnit?: BusinessUnit,
 ): ChapterTask[] {
   const tasks: ChapterTask[] = [];
+  // 사업부별 제외 공정(AI 캠퍼스=촬영·편집·자막) 필터 — 진척 분모와 정합을 위해 태스크 자체를 만들지 않는다
+  const disabled = businessUnit ? getDisabledTaskTypes(businessUnit) : [];
+  const chapterTaskTypes = TASK_TYPES_PER_CHAPTER.filter(
+    (t) => !disabled.includes(t),
+  );
 
   // Common tasks (chapter 0) — 커리큘럼 기획만 남김 ("롤아웃" 태스크 제거)
   const ctStatus = statusFn(0, "커리큘럼 기획");
@@ -43,7 +51,7 @@ function createChapterTasks(
 
   // Per-chapter tasks
   for (let ch = 1; ch <= chapterCount; ch++) {
-    for (const taskType of TASK_TYPES_PER_CHAPTER) {
+    for (const taskType of chapterTaskTypes) {
       const status = statusFn(ch, taskType);
       const dates = dateFn?.(ch, taskType);
       tasks.push({
@@ -177,8 +185,40 @@ const project4Tasks = createChapterTasks(
   },
 );
 
+// Project AI-1: AI 캠퍼스, 3 chapters, 교안 단계 (촬영·편집·자막 공정 없음)
+const projectAi1Tasks = createChapterTasks(
+  "proj-ai-1",
+  3,
+  (ch, type) => {
+    if (ch === 0) return type === "커리큘럼 기획" ? "완료" : "대기";
+    if (ch === 1)
+      return type === "교안제작" ? "완료" : type === "검수" ? "진행" : "대기";
+    if (ch === 2) return type === "교안제작" ? "완료" : "대기";
+    return type === "교안제작" ? "진행" : "대기";
+  },
+  (ch, type) => {
+    if (ch === 0) return type === "커리큘럼 기획" ? "정세나" : undefined;
+    return type === "검수" ? "유재성" : type === "승인" ? "정세나" : "한도윤";
+  },
+  (ch, type) => {
+    if (ch === 0)
+      return type === "커리큘럼 기획"
+        ? { start: "2026-05-04", end: "2026-05-06" }
+        : {};
+    if (type === "교안제작") return { start: "2026-05-11", end: "2026-05-22" };
+    if (type === "검수") return { start: "2026-05-25", end: "2026-05-29" };
+    return {};
+  },
+  "AI 캠퍼스",
+);
+
 /** 강별 샘플 제목 */
 const SAMPLE_LECTURE_TITLES: Record<string, string[][]> = {
+  "proj-ai-1": [
+    ["LLM 파인튜닝 개요", "데이터셋 준비"],
+    ["LoRA 실습", "평가 지표"],
+    ["배포와 서빙"],
+  ],
   "proj-1": [
     ["객체 지향 개요", "클래스와 인스턴스"],
     ["상속과 다형성", "인터페이스 활용"],
@@ -204,9 +244,14 @@ function createLectures(
   chapterDurations: number[],
   /** 완료 챕터 수 (이 장까지 결과물 링크 생성) */
   completedChapters = 0,
+  businessUnit?: BusinessUnit,
 ): Lecture[] {
   const lectures: Lecture[] = [];
   const titles = SAMPLE_LECTURE_TITLES[projectId];
+  // AI 캠퍼스는 영상이 없어 촬영 공정이 없음 → 영상/자막 결과물도 생성하지 않음
+  const noVideo = businessUnit
+    ? getDisabledTaskTypes(businessUnit).includes("촬영")
+    : false;
   chapterDurations.forEach((dur, idx) => {
     const ch = idx + 1;
     const count = Math.max(1, Math.round(dur));
@@ -221,17 +266,22 @@ function createLectures(
         label: `${ch}-${l}`,
         title: chTitles?.[l - 1],
         videoUrls:
-          l <= 1
+          !noVideo && l <= 1
             ? [`https://videos.example.com/${projectId}/${ch}-${l}.mp4`]
             : [],
         ...(hasDeliverables
-          ? {
-              lessonPlanUrl: `https://notion.so/${projectId}-ch${ch}-${l}`,
-              rawVideoUrl: `https://drive.google.com/file/d/${projectId}-raw-${ch}-${l}`,
-              editedVideoUrl: `https://drive.google.com/file/d/${projectId}-edit-${ch}-${l}`,
-              subtitleUrl: `https://drive.google.com/file/d/${projectId}-sub-${ch}-${l}.srt`,
-              reviewUrl: `https://backoffice.example.com/${projectId}/review/${ch}-${l}`,
-            }
+          ? noVideo
+            ? {
+                lessonPlanUrl: `https://notion.so/${projectId}-ch${ch}-${l}`,
+                reviewUrl: `https://backoffice.example.com/${projectId}/review/${ch}-${l}`,
+              }
+            : {
+                lessonPlanUrl: `https://notion.so/${projectId}-ch${ch}-${l}`,
+                rawVideoUrl: `https://drive.google.com/file/d/${projectId}-raw-${ch}-${l}`,
+                editedVideoUrl: `https://drive.google.com/file/d/${projectId}-edit-${ch}-${l}`,
+                subtitleUrl: `https://drive.google.com/file/d/${projectId}-sub-${ch}-${l}.srt`,
+                reviewUrl: `https://backoffice.example.com/${projectId}/review/${ch}-${l}`,
+              }
           : {}),
       });
     }
@@ -256,6 +306,34 @@ proj2Lectures
   });
 
 export const mockProjects: Project[] = [
+  {
+    id: "proj-ai-1",
+    title: "Private LLM 파인튜닝 실전",
+    version: "v1.0",
+    status: "교안",
+    businessUnit: "AI 캠퍼스",
+    trackName: "Private LLM",
+    contentBranch: "프로젝트",
+    courseCode: "AX250601",
+    productionType: "신규",
+    rolloutDate: "2026-07-10",
+    paymentDate: "2026-07-10",
+    chapterCount: 3,
+    chapterDurations: [1.5, 2.0, 1.5],
+    chapterTitles: ["LLM 파인튜닝 기초", "LoRA와 평가", "배포와 서빙"],
+    pm: "이하늘",
+    tutor: "한도윤",
+    curriculumManager: "정세나",
+    reviewer: "유재성",
+    driveLink: "https://drive.google.com/drive/folders/proj-ai-1",
+    lessonPlanLink: "https://docs.google.com/document/d/proj-ai-1-lesson",
+    backofficeLink: "https://backoffice.example.com/proj-ai-1",
+    trafficLight: "green",
+    tasks: projectAi1Tasks,
+    lectures: createLectures("proj-ai-1", [1.5, 2.0, 1.5], 2, "AI 캠퍼스"),
+    note: "AI 캠퍼스 — 교안 중심(영상 없음)",
+    createdAt: "2026-05-01T09:00:00Z",
+  },
   {
     id: "proj-1",
     title: "웹개발이 처음이어도 쉽게 배우는 GPT 웹개발",

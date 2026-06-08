@@ -1,5 +1,23 @@
-import type { Project, TaskType, KanbanColumn } from "./types";
+import type { BusinessUnit, Project, TaskType, KanbanColumn } from "./types";
 import { STATUS_TO_KANBAN } from "./constants";
+
+/* ── 사업부별 단계 분기 (단일 기준) ──
+ * AI 캠퍼스 강의는 영상이 없어 촬영·편집·자막 공정이 없다.
+ * 태스크 생성기·진척 계산·표시(빗금)가 모두 이 함수 하나를 기준으로 분기한다. */
+
+/** 사업부에서 제외되는 공정(TaskType) 목록. AI 캠퍼스 = 촬영·편집·자막 없음. */
+export function getDisabledTaskTypes(bu: BusinessUnit): TaskType[] {
+  if (bu === "AI 캠퍼스") return ["촬영", "편집", "자막"];
+  return [];
+}
+
+/** 해당 공정이 사업부에서 비활성(제외)인지. 빗금/스킵 판정용. */
+export function isTaskTypeDisabled(
+  bu: BusinessUnit,
+  taskType: TaskType,
+): boolean {
+  return getDisabledTaskTypes(bu).includes(taskType);
+}
 
 /**
  * 칸반 배치 열을 결정한다.

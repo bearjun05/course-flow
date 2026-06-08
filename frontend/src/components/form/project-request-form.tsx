@@ -22,8 +22,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import type { BusinessUnit, ProductionType } from "@/lib/types";
-import { KDT_TRACKS } from "@/lib/constants";
+import type { BusinessUnit, ContentBranch, ProductionType } from "@/lib/types";
+import { BUSINESS_UNITS, tracksFor, CONTENT_BRANCHES } from "@/lib/constants";
 import { mockProjects } from "@/lib/mock-data";
 
 interface FormData {
@@ -33,6 +33,7 @@ interface FormData {
   businessUnit: BusinessUnit | "";
   trackName: string;
   businessUnitOther: string;
+  contentBranch: ContentBranch | "";
   productionType: ProductionType | "";
   renewalType: "부분" | "전체" | "";
   /** 리뉴얼 시 선택된 기존 강의 ID (외부 API 검색 결과) */
@@ -62,6 +63,7 @@ const DEFAULT_FORM: FormData = {
   businessUnit: "",
   trackName: "",
   businessUnitOther: "",
+  contentBranch: "",
   productionType: "",
   renewalType: "",
   previousCourseId: "",
@@ -260,8 +262,9 @@ export function ProjectRequestForm() {
     form.title &&
     form.tutorAssigned &&
     form.businessUnit &&
-    (form.businessUnit !== "KDT" || form.trackName) &&
+    (!tracksFor(form.businessUnit).length || form.trackName) &&
     (form.businessUnit !== "기타" || form.businessUnitOther) &&
+    form.contentBranch &&
     form.productionType &&
     (form.productionType !== "리뉴얼" ||
       (form.renewalType && form.previousCourseId)) &&
@@ -369,32 +372,26 @@ export function ProjectRequestForm() {
             value={form.businessUnit || undefined}
             onValueChange={(v) => {
               update("businessUnit", v as BusinessUnit);
-              if (v !== "KDT") update("trackName", "");
+              // 새 사업부에 트랙이 없으면 트랙 초기화 (KDT·AI 캠퍼스만 트랙 있음)
+              if (!tracksFor(v).length) update("trackName", "");
               if (v !== "기타") update("businessUnitOther", "");
             }}
-            className="flex gap-6"
+            className="flex flex-wrap gap-x-6 gap-y-2"
           >
-            <div className="flex items-center gap-2">
-              <RadioGroupItem value="KDT" id="bu-kdt" />
-              <Label htmlFor="bu-kdt" className="text-sm font-normal">
-                KDT
-              </Label>
-            </div>
-            <div className="flex items-center gap-2">
-              <RadioGroupItem value="KDC" id="bu-kdc" />
-              <Label htmlFor="bu-kdc" className="text-sm font-normal">
-                KDC
-              </Label>
-            </div>
-            <div className="flex items-center gap-2">
-              <RadioGroupItem value="기타" id="bu-etc" />
-              <Label htmlFor="bu-etc" className="text-sm font-normal">
-                기타
-              </Label>
-            </div>
+            {BUSINESS_UNITS.map((bu) => {
+              const id = `bu-${bu.replace(/\s+/g, "-")}`;
+              return (
+                <div key={bu} className="flex items-center gap-2">
+                  <RadioGroupItem value={bu} id={id} />
+                  <Label htmlFor={id} className="text-sm font-normal">
+                    {bu}
+                  </Label>
+                </div>
+              );
+            })}
           </RadioGroup>
 
-          {form.businessUnit === "KDT" && (
+          {tracksFor(form.businessUnit).length > 0 && (
             <Select
               value={form.trackName}
               onValueChange={(v) => update("trackName", v ?? "")}
@@ -403,7 +400,7 @@ export function ProjectRequestForm() {
                 <SelectValue placeholder="트랙을 선택해 주세요" />
               </SelectTrigger>
               <SelectContent>
-                {KDT_TRACKS.map((track) => (
+                {tracksFor(form.businessUnit).map((track) => (
                   <SelectItem key={track} value={track}>
                     {track}
                   </SelectItem>
@@ -418,6 +415,26 @@ export function ProjectRequestForm() {
               onChange={(e) => update("businessUnitOther", e.target.value)}
               placeholder="어디에서 사용되는지 입력해 주세요"
             />
+          )}
+
+          {form.businessUnit && (
+            <Select
+              value={form.contentBranch || undefined}
+              onValueChange={(v) =>
+                update("contentBranch", (v ?? "") as ContentBranch | "")
+              }
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="이 강의의 형태를 선택해 주세요 (강의/과제/프로젝트/숙제)" />
+              </SelectTrigger>
+              <SelectContent>
+                {CONTENT_BRANCHES.map((branch) => (
+                  <SelectItem key={branch} value={branch}>
+                    {branch}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           )}
         </div>
       </QuestionCard>

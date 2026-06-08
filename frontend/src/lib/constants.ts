@@ -20,7 +20,7 @@ export const STATUS_TO_KANBAN: Partial<Record<ProjectStatus, KanbanColumn>> = {
   "편집·검수": "편집·검수",
 };
 
-export const BUSINESS_UNITS = ["KDT", "KDC", "기타"] as const;
+export const BUSINESS_UNITS = ["KDT", "KDC", "AI 캠퍼스", "기타"] as const;
 
 export const PRODUCTION_TYPES = [
   { value: "신규", label: "신규 제작" },
@@ -42,6 +42,25 @@ export const KDT_TRACKS = [
   "Unreal",
   "단기심화 Spring",
 ] as const;
+
+export const AI_CAMPUS_TRACKS = [
+  "Private LLM",
+  "Fullstack AX",
+  "Data Science",
+  "On-Device",
+  "Physical",
+  "UXUI",
+] as const;
+
+/** 사업부별 트랙 목록. KDT·AI 캠퍼스는 트랙이 있고, KDC·기타는 없음. */
+export function tracksFor(bu: string): readonly string[] {
+  if (bu === "KDT") return KDT_TRACKS;
+  if (bu === "AI 캠퍼스") return AI_CAMPUS_TRACKS;
+  return [];
+}
+
+/** 콘텐츠 갈래 선택지 (강의/과제/프로젝트/숙제) */
+export const CONTENT_BRANCHES = ["강의", "과제", "프로젝트", "숙제"] as const;
 
 export const DDAY_GROUPS: DdayGroup[] = [
   { label: "마감 초과", min: -Infinity, max: -1 },

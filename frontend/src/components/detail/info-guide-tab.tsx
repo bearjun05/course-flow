@@ -739,7 +739,21 @@ export default function InfoGuideTab({
                 {project.trackName}
               </>
             )}
+            {project.contentBranch && (
+              <>
+                <span className="mx-0.5 opacity-50">·</span>
+                {project.contentBranch}
+              </>
+            )}
           </span>
+          {project.courseCode && (
+            <span
+              title="강의 고유 코드 (발급은 백엔드)"
+              className="inline-flex items-center h-6 px-2 rounded-md bg-neutral-100 text-[11px] font-medium text-neutral-500 tabular-nums shrink-0"
+            >
+              {project.courseCode}
+            </span>
+          )}
           <span className="inline-flex items-center h-6 px-2 rounded-md bg-[#EDF2E4] text-[11px] font-medium text-[#6E8A50] shrink-0">
             {prodTypeLabel}
           </span>
