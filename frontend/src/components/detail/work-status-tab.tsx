@@ -14,7 +14,14 @@ import {
   ClipboardCheck,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { ChapterTask, Lecture, TaskStatus } from "@/lib/types";
+import type {
+  BusinessUnit,
+  ChapterTask,
+  Lecture,
+  TaskStatus,
+} from "@/lib/types";
+import { isStageDisabled, getChapterFileProgress } from "@/lib/process-helpers";
+import { DISABLED_STAGE_STYLE, DISABLED_STAGE_TOOLTIP } from "@/lib/constants";
 import PlanningModal, { type PlanningSubmitData } from "./planning-modal";
 import {
   DeliverableCell,
@@ -34,6 +41,7 @@ interface WorkStatusTabProps {
   tasks: ChapterTask[];
   lectures: Lecture[];
   chapterCount: number;
+  businessUnit?: BusinessUnit;
   chapterTitles?: string[];
   chapterDriveLinks?: string[];
   planningComplete?: boolean;
@@ -81,6 +89,7 @@ export default function WorkStatusTab({
   tasks,
   lectures,
   chapterCount,
+  businessUnit,
   chapterTitles,
   chapterDriveLinks,
   planningComplete,
@@ -91,6 +100,9 @@ export default function WorkStatusTab({
   onLectureUrlChange,
 }: WorkStatusTabProps) {
   const [showPlanningModal, setShowPlanningModal] = useState(false);
+  // AI 캠퍼스 등에서 비활성(촬영·편집·자막) 단계 판정 — 빗금 + 진행률 분모 제외
+  const colDisabled = (key: string) =>
+    businessUnit ? isStageDisabled(businessUnit, key) : false;
 
   const chapters: ChapterRow[] = useMemo(() => {
     const rows: ChapterRow[] = [];
@@ -168,17 +180,25 @@ export default function WorkStatusTab({
         )}
       >
         <div className="px-4 py-2" />
-        {FILE_COLUMNS.map((col) => (
-          <div
-            key={col.key}
-            className="px-1 py-2 text-center text-[11px] font-medium text-neutral-400"
-          >
-            <div className="flex flex-col items-center gap-0.5">
-              <col.icon className="h-3.5 w-3.5" />
-              <span>{col.label}</span>
+        {FILE_COLUMNS.map((col) => {
+          const disabled = colDisabled(col.key);
+          return (
+            <div
+              key={col.key}
+              className={cn(
+                "px-1 py-2 text-center text-[11px] font-medium",
+                disabled ? "text-neutral-300" : "text-neutral-400",
+              )}
+              style={disabled ? DISABLED_STAGE_STYLE : undefined}
+              title={disabled ? DISABLED_STAGE_TOOLTIP : undefined}
+            >
+              <div className="flex flex-col items-center gap-0.5">
+                <col.icon className="h-3.5 w-3.5" />
+                <span>{col.label}</span>
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
         <div className="px-1 py-2" />
       </div>
 
@@ -200,9 +220,11 @@ export default function WorkStatusTab({
         >
           {chapters.map((chapter) => {
             const color = GROUP_COLORS[chapter.chapter % GROUP_COLORS.length];
-            const completedCount = FILE_COLUMNS.filter(
-              (col) => chapter.taskStatuses[col.key] === "완료",
-            ).length;
+            // 진행률 분모는 사업부 적용 단계만 (AI 캠퍼스는 촬영·편집 제외 → 분모 축소)
+            const progress = getChapterFileProgress(
+              chapter.taskStatuses,
+              businessUnit ?? "기타",
+            );
             // 드라이브 링크: 명시된 링크 우선, 없으면 장번호 기반 placeholder
             const driveLink =
               chapterDriveLinks?.[chapter.chapter - 1] ||
@@ -244,18 +266,21 @@ export default function WorkStatusTab({
                       </a>
                     )}
                   </div>
-                  {/* 6개 빈 칸 */}
-                  <div />
-                  <div />
-                  <div />
-                  <div />
-                  <div />
-                  <div />
+                  {/* 6개 빈 칸 (비활성 단계는 빗금) */}
+                  {FILE_COLUMNS.map((col) => (
+                    <div
+                      key={col.key}
+                      className="self-stretch"
+                      style={
+                        colDisabled(col.key) ? DISABLED_STAGE_STYLE : undefined
+                      }
+                    />
+                  ))}
                   {/* 진행률 */}
                   <div className="px-2 py-2.5 flex items-center justify-end gap-2">
                     <ChapterProgress
-                      completed={completedCount}
-                      total={FILE_COLUMNS.length}
+                      completed={progress.completed}
+                      total={progress.total}
                       color={color}
                     />
                     <span className="text-[10px] text-neutral-400 shrink-0">
@@ -315,6 +340,17 @@ export default function WorkStatusTab({
                       </div>
                       {FILE_COLUMNS.map((col) => {
                         const isCurrentStage = col.key === currentStageKey;
+                        // AI 캠퍼스 등에서 없는 단계(촬영·편집·자막)는 빗금 빈 칸
+                        if (colDisabled(col.key)) {
+                          return (
+                            <div
+                              key={col.key}
+                              className="self-stretch rounded-sm"
+                              style={DISABLED_STAGE_STYLE}
+                              title={DISABLED_STAGE_TOOLTIP}
+                            />
+                          );
+                        }
                         return (
                           <div
                             key={col.key}

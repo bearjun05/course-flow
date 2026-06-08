@@ -1,19 +1,22 @@
 "use client";
 
-import type { Project, TaskType } from "@/lib/types";
+import type { BusinessUnit, Project, TaskType } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import { isStageDisabled } from "@/lib/process-helpers";
 
-const PIPELINE_STAGE_NAMES = ["교안", "촬영", "편집·자막", "검수"] as const;
-type PipelineStageName = (typeof PIPELINE_STAGE_NAMES)[number];
+// 파이프라인 단계: 표시명 + 해당 공정. 사업부에서 비활성인 단계(AI 캠퍼스=촬영·편집·자막)는 슬롯 자체를 뺀다.
+const PIPELINE_STAGES = [
+  { name: "교안", taskTypes: ["교안제작"] },
+  { name: "촬영", taskTypes: ["촬영"] },
+  { name: "편집·자막", taskTypes: ["편집", "자막"] },
+  { name: "검수", taskTypes: ["검수", "승인"] },
+] as const satisfies readonly { name: string; taskTypes: TaskType[] }[];
+type PipelineStageName = (typeof PIPELINE_STAGES)[number]["name"];
 
-const PIPELINE_TASK_TYPES: TaskType[] = [
-  "교안제작",
-  "촬영",
-  "편집",
-  "자막",
-  "검수",
-  "승인",
-];
+/** 사업부에 적용되는 파이프라인 단계만 (AI 캠퍼스는 교안·검수만) */
+function applicableStages(bu: BusinessUnit) {
+  return PIPELINE_STAGES.filter((s) => !isStageDisabled(bu, s.name));
+}
 
 const SLOT_FILLED_COLORS = [
   "bg-[#DDE8C0]",
@@ -26,30 +29,26 @@ function getChapterProgress(
   project: Project,
   chapter: number,
 ): { filledCount: number; stageName: PipelineStageName } {
+  const stages = applicableStages(project.businessUnit);
   const tasks = project.tasks.filter((t) => t.chapter === chapter);
-  if (tasks.length === 0) return { filledCount: 0, stageName: "교안" };
+  if (tasks.length === 0) return { filledCount: 0, stageName: stages[0].name };
 
-  // 4단계 매핑: 교안(0) → 촬영(1) → 편집·자막(2) → 검수(3)
-  // 승인/검수 완료 → 검수 4칸 채움
-  for (let i = PIPELINE_TASK_TYPES.length - 1; i >= 0; i--) {
-    const taskType = PIPELINE_TASK_TYPES[i];
-    const task = tasks.find((t) => t.taskType === taskType);
-    if (
-      task &&
-      (task.status === "완료" ||
-        task.status === "진행" ||
-        task.status === "리뷰")
-    ) {
-      if (taskType === "승인" || taskType === "검수")
-        return { filledCount: 4, stageName: "검수" };
-      if (taskType === "자막" || taskType === "편집")
-        return { filledCount: 3, stageName: "편집·자막" };
-      if (taskType === "촬영") return { filledCount: 2, stageName: "촬영" };
-      return { filledCount: 1, stageName: "교안" };
-    }
+  // 가장 진행된 적용 단계 찾기 (뒤에서부터)
+  for (let i = stages.length - 1; i >= 0; i--) {
+    const stage = stages[i];
+    const reached = stage.taskTypes.some((tt) => {
+      const task = tasks.find((t) => t.taskType === tt);
+      return (
+        task &&
+        (task.status === "완료" ||
+          task.status === "진행" ||
+          task.status === "리뷰")
+      );
+    });
+    if (reached) return { filledCount: i + 1, stageName: stage.name };
   }
 
-  return { filledCount: 0, stageName: "교안" };
+  return { filledCount: 0, stageName: stages[0].name };
 }
 
 interface ChapterPipelineProps {
@@ -90,6 +89,8 @@ function summarizeChapters(chapterData: ChapterData[]): StageGroup[] {
 export function ChapterPipeline({ project }: ChapterPipelineProps) {
   if (project.chapterCount === 0) return null;
 
+  // 사업부별 슬롯 수 (AI 캠퍼스는 교안·검수 2칸)
+  const slotTotal = applicableStages(project.businessUnit).length;
   const chapters = Array.from(
     { length: project.chapterCount },
     (_, i) => i + 1,
@@ -112,7 +113,7 @@ export function ChapterPipeline({ project }: ChapterPipelineProps) {
           {row.map(({ ch, filledCount, stageName }) => (
             <div key={ch} className="flex-1 flex flex-col gap-1">
               <div className="flex gap-[2px]">
-                {Array.from({ length: 4 }, (_, i) => (
+                {Array.from({ length: slotTotal }, (_, i) => (
                   <div
                     key={i}
                     className={cn(

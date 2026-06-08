@@ -5,7 +5,11 @@ import { BookOpen } from "lucide-react";
 import { parseISO, isBefore, startOfDay } from "date-fns";
 import type { Project } from "@/lib/types";
 import { getDday, formatDday, getDdayColor, cn } from "@/lib/utils";
-import { getChapterDetailedStage } from "@/lib/process-helpers";
+import {
+  getChapterDetailedStage,
+  isStageDisabled,
+} from "@/lib/process-helpers";
+import { DISABLED_STAGE_STYLE, DISABLED_STAGE_TOOLTIP } from "@/lib/constants";
 
 interface DotMatrixTableProps {
   projects: Project[];
@@ -206,6 +210,22 @@ function ProjectRow({
 
       <td colSpan={DETAIL_COLUMNS.length} className="px-2 py-3">
         <div className="relative h-[28px] flex items-center">
+          {/* 비활성 단계 빗금 (AI 캠퍼스의 촬영·편집·자막) */}
+          {DETAIL_COLUMNS.map((col, idx) => {
+            if (!isStageDisabled(project.businessUnit, col)) return null;
+            return (
+              <div
+                key={`hatch-${col}`}
+                className="absolute top-0 bottom-0 rounded-md"
+                style={{
+                  left: `${(idx / DETAIL_COLUMNS.length) * 100}%`,
+                  width: `${100 / DETAIL_COLUMNS.length}%`,
+                  ...DISABLED_STAGE_STYLE,
+                }}
+                title={DISABLED_STAGE_TOOLTIP}
+              />
+            );
+          })}
           {/* 담당 단계 강조 배경 */}
           {highlightedStage &&
             (() => {

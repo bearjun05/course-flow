@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import type {
   KanbanColumn,
   ProjectStatus,
@@ -61,6 +62,18 @@ export function tracksFor(bu: string): readonly string[] {
 
 /** 콘텐츠 갈래 선택지 (강의/과제/프로젝트/숙제) */
 export const CONTENT_BRANCHES = ["강의", "과제", "프로젝트", "숙제"] as const;
+
+/**
+ * 비활성(해당 없음) 단계 셀에 입히는 옅은 회색 대각선 빗금.
+ * AI 캠퍼스의 촬영·편집·자막 칸처럼 "이 단계는 없음"을 칸 정렬을 유지한 채 표시.
+ */
+export const DISABLED_STAGE_STYLE: CSSProperties = {
+  backgroundImage:
+    "repeating-linear-gradient(45deg, transparent 0 5px, rgba(120,120,120,0.10) 5px 6px)",
+};
+
+/** 비활성 단계 셀 위에 띄울 안내 문구 */
+export const DISABLED_STAGE_TOOLTIP = "AI 캠퍼스는 이 단계가 없어요";
 
 export const DDAY_GROUPS: DdayGroup[] = [
   { label: "마감 초과", min: -Infinity, max: -1 },

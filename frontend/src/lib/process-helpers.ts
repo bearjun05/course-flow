@@ -20,6 +20,42 @@ export function isTaskTypeDisabled(
 }
 
 /**
+ * 표시 컬럼 키가 사업부에서 비활성인지 (빗금 판정).
+ * 공정 키("촬영"/"편집"/"자막")뿐 아니라 표시용 합본 키 "편집·자막"도 처리한다.
+ */
+export function isStageDisabled(bu: BusinessUnit, key: string): boolean {
+  const disabled = getDisabledTaskTypes(bu);
+  if (disabled.length === 0) return false;
+  if (key === "편집·자막")
+    return disabled.includes("편집") || disabled.includes("자막");
+  return (disabled as string[]).includes(key);
+}
+
+/** 작업현황 표의 단계 컬럼 키 (완료 컬럼 포함) */
+const FILE_COLUMN_KEYS = [
+  "교안제작",
+  "촬영",
+  "편집",
+  "검수",
+  "승인",
+  "완료",
+] as const;
+
+/**
+ * 장(章) 단위 진행률 (작업현황 표).
+ * 사업부에서 비활성인 단계(AI 캠퍼스=촬영·편집)는 분모에서 제외해,
+ * 누락 단계 때문에 진행률이 영영 못 차는 문제(R2)를 막는다.
+ */
+export function getChapterFileProgress(
+  taskStatuses: Record<string, string | undefined>,
+  bu: BusinessUnit,
+): { completed: number; total: number } {
+  const applicable = FILE_COLUMN_KEYS.filter((k) => !isStageDisabled(bu, k));
+  const completed = applicable.filter((k) => taskStatuses[k] === "완료").length;
+  return { completed, total: applicable.length };
+}
+
+/**
  * 칸반 배치 열을 결정한다.
  * [ST-007] 프로젝트 상태가 "촬영"이더라도 어느 챕터든 편집 태스크가
  * 대기 외 상태(진행/리뷰/완료)이면 "편집·검수" 열에 배치한다.

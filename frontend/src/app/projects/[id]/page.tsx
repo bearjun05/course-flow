@@ -13,6 +13,7 @@ import type {
   Lecture,
   Project,
 } from "@/lib/types";
+import { getDisabledTaskTypes } from "@/lib/process-helpers";
 import DetailHeader from "@/components/detail/detail-header";
 import InfoGuideTab from "@/components/detail/info-guide-tab";
 import MondayBoard from "@/components/detail/monday-board";
@@ -96,6 +97,15 @@ export default function ProjectDetailPage() {
     [projectId],
   );
 
+  // 장 추가/기획 완료 시 생성할 공정 목록 — 사업부별 제외(AI 캠퍼스=촬영·편집·자막) 반영.
+  // 진척 분모와 정합을 위해 비활성 공정은 태스크 자체를 만들지 않는다.
+  const chapterTaskTypes = useMemo(() => {
+    const disabled = baseProject
+      ? getDisabledTaskTypes(baseProject.businessUnit)
+      : [];
+    return TASK_TYPES_ON_PLANNING.filter((t) => !disabled.includes(t));
+  }, [baseProject]);
+
   const [draft, setDraft] = useState<ProjectDraft>(() =>
     initFromBase(baseProject),
   );
@@ -165,22 +175,20 @@ export default function ProjectDetailPage() {
         0,
       );
       const newCh = maxChapter + 1;
-      const newTasks: ChapterTask[] = TASK_TYPES_ON_PLANNING.map(
-        (taskType) => ({
-          id: `${projectId}-c${newCh}-${taskType}`,
-          projectId: projectId!,
-          chapter: newCh,
-          taskType,
-          status: "대기" as const,
-        }),
-      );
+      const newTasks: ChapterTask[] = chapterTaskTypes.map((taskType) => ({
+        id: `${projectId}-c${newCh}-${taskType}`,
+        projectId: projectId!,
+        chapter: newCh,
+        taskType,
+        status: "대기" as const,
+      }));
       return {
         ...d,
         tasks: [...d.tasks, ...newTasks],
         chapterDurations: [...d.chapterDurations, 0],
       };
     });
-  }, [projectId]);
+  }, [projectId, chapterTaskTypes]);
 
   const handleDeleteChapter = useCallback((chapter: number) => {
     setDraft((d) => {
@@ -207,7 +215,7 @@ export default function ProjectDetailPage() {
       const newLectures: Lecture[] = [];
       data.chapters.forEach((chData, idx) => {
         const ch = idx + 1;
-        TASK_TYPES_ON_PLANNING.forEach((taskType) => {
+        chapterTaskTypes.forEach((taskType) => {
           newTasks.push({
             id: `${projectId}-c${ch}-${taskType}`,
             projectId: projectId!,
@@ -244,7 +252,7 @@ export default function ProjectDetailPage() {
         planningComplete: true,
       });
     },
-    [projectId, patch],
+    [projectId, patch, chapterTaskTypes],
   );
 
   if (!project) {
@@ -335,6 +343,7 @@ export default function ProjectDetailPage() {
                 tasks={draft.tasks}
                 lectures={draft.projectLectures}
                 chapterCount={project.chapterCount}
+                businessUnit={project.businessUnit}
                 chapterTitles={project.chapterTitles}
                 chapterDriveLinks={project.chapterDriveLinks}
                 planningComplete={draft.planningComplete}
